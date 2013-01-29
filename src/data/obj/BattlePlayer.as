@@ -20,6 +20,7 @@ package data.obj
 		public var action:int;
 		
 		public var curBulletIds:Vector.<int> = new Vector.<int>;
+		public var group:int;
 		
 		public function BattlePlayer()
 		{

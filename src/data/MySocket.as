@@ -1,9 +1,14 @@
 package data
 {
+	import flash.utils.Dictionary;
+	
 	import data.obj.BattleBeginAck;
 	import data.obj.BattleBeginReq;
+	import data.obj.BattleFinishAck;
 	import data.obj.BattlePlayer;
 	import data.obj.EnumDirection;
+	import data.obj.PlayerFallAck;
+	import data.obj.PlayerFallReq;
 	import data.obj.PlayerHurtAck;
 	import data.obj.PlayerHurtReq;
 	import data.obj.PlayerRoundAck;
@@ -18,6 +23,8 @@ package data
 		{
 			MySignals.Socket_Send.add(onSend);
 		}
+		
+		private var _groupDic:Dictionary = new Dictionary;
 		
 		private function onSend(mes:Object):void
 		{
@@ -43,6 +50,8 @@ package data
 				player.x = 600;
 				player.y = 0;
 				player.direction = EnumDirection.RIGHT;
+				player.group = 1;
+				_groupDic[1] = 1;
 				
 				player.curBulletIds = new <int>[1];
 				bba.players.push(player);
@@ -61,6 +70,8 @@ package data
 				player.x = 800;
 				player.y = 0;
 				player.direction = EnumDirection.LEFT;
+				player.group = 2;
+				_groupDic[2] = 1;
 				
 				player.curBulletIds = new <int>[1];
 				bba.players.push(player);
@@ -74,7 +85,7 @@ package data
 				MySignals.onBattleBeginAck.dispatch(bba);
 				_bba = bba;
 			}
-			else if(mes is PlayerRoundReq)
+			else if(mes is PlayerRoundReq && !_isFinish)
 			{
 				_whichPlayer = (_whichPlayer + 1) % 2;
 				var pra:PlayerRoundAck = new PlayerRoundAck;
@@ -92,9 +103,37 @@ package data
 				for(var i:int = 0; i < phr.pids.length; i++)
 				{
 					pha.pids.push(phr.pids[i]);
-					pha.hurts.push(300 - Math.abs(phr.distances[i]));
+					pha.hurts.push(200 - Math.abs(phr.distances[i]));
 				}
+				
 				MySignals.onPlayerHurtAck.dispatch(pha);
+				checkIfBattleFinish();
+			}
+			else if(mes is PlayerFallReq)
+			{
+				var pfa:PlayerFallAck = new PlayerFallAck;
+				MySignals.onPlayerFallAck.dispatch(pfa);
+				checkIfBattleFinish();
+			}
+		}
+		
+		private var _isFinish:Boolean = false;
+		private function checkIfBattleFinish():void
+		{
+			for(var i:int = 0; i < _bba.players.length; i++)
+			{
+				if(_bba.players[i].curBlood <= 0)
+				{
+					_groupDic[_bba.players[i].group]--;
+					if(_groupDic[_bba.players[i].group] <= 0)
+					{
+						_isFinish = true;
+						var bfa:BattleFinishAck = new BattleFinishAck;
+						bfa.winGroup = _bba.players[i].group == 1?2:1;
+						MySignals.onBattleFinishAck.dispatch(bfa);
+						break;
+					}
+				}
 			}
 		}
 	}

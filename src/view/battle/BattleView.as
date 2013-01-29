@@ -18,16 +18,21 @@ package view.battle
 	import data.MySignals;
 	import data.StaticTable;
 	import data.obj.BattleBeginAck;
+	import data.obj.BattleFinishAck;
 	import data.obj.BattlePlayer;
 	import data.obj.BulletDesc;
 	import data.obj.EnumDirection;
+	import data.obj.PlayerFallAck;
+	import data.obj.PlayerFallReq;
 	import data.obj.PlayerHurtAck;
 	import data.obj.PlayerHurtReq;
 	import data.obj.PlayerRoundAck;
 	import data.obj.PlayerRoundReq;
 	import data.obj.RoleDesc;
 	
+	import lsg.battle.LoseUI;
 	import lsg.battle.RoundBeginUI;
+	import lsg.battle.WinUI;
 	
 	import nape.callbacks.CbEvent;
 	import nape.callbacks.CbType;
@@ -77,7 +82,7 @@ package view.battle
 			addEventListener(Event.ENTER_FRAME, onFrameIn);
 			addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
 			
-			Test2.Delay(500, onPlayerRoundBegin, [_bba.firstRound, true]);
+			Test2.Delay(1500, onPlayerRoundBegin, [_bba.firstRound, true]);
 		}
 		
 		private var _isDrag:Boolean = false;
@@ -90,7 +95,6 @@ package view.battle
 			{
 				if(!_dragRect)_dragRect = new Rectangle(StaticTable.STAGE_WIDTH - _release.width, StaticTable.STAGE_HEIGHT - _release.height, _release.width - StaticTable.STAGE_WIDTH, _release.height - StaticTable.STAGE_HEIGHT);
 				_release.startDrag(false, _dragRect);
-				mouseEnabled = mouseChildren = false;
 			}
 			_isDrag = true;
 		}
@@ -101,7 +105,6 @@ package view.battle
 			if(!isDebug)
 			{
 				_release.stopDrag();
-				mouseEnabled = mouseChildren = true;
 			}
 			_isDrag = false;
 		}
@@ -218,17 +221,21 @@ package view.battle
 		
 		private function createNapeListeners():void
 		{
-			var landDetect:InteractionListener =  new InteractionListener(CbEvent.BEGIN, InteractionType.COLLISION, ROLES, _terrain.GRAND, onRole2GrandBegin);
-			//_space.listeners.add(landDetect);
-			
-			var landDetect2:InteractionListener =  new InteractionListener(CbEvent.END, InteractionType.COLLISION, ROLES, _terrain.GRAND, onRole2GrandEnd);
-			//_space.listeners.add(landDetect2);
-			
 			var landDetect4:InteractionListener =  new InteractionListener(CbEvent.BEGIN, InteractionType.COLLISION, BULLETS, _terrain.GRAND, onBullets2GrandBegin);
 			_space.listeners.add(landDetect4);
 			
 			landDetect4 =  new InteractionListener(CbEvent.BEGIN, InteractionType.COLLISION, BULLETS, BORDER, onBullets2Border);
 			_space.listeners.add(landDetect4);
+			
+			landDetect4 =  new InteractionListener(CbEvent.BEGIN, InteractionType.COLLISION, ROLES, BORDER, onRoles2Border);
+			_space.listeners.add(landDetect4);
+		}
+		
+		private function onRoles2Border(cb:InteractionCallback):void
+		{
+			var role:Body = cb.int1.castBody;
+			var bp:BattlePlayer = role2BattlePlayer(role);
+			MySignals.Socket_Send.dispatch(new PlayerFallReq);
 		}
 		
 		private function onBullets2Border(cb:InteractionCallback):void
@@ -243,7 +250,6 @@ package view.battle
 			}
 			
 			MySignals.Socket_Send.dispatch(new PlayerRoundReq);
-			
 		}
 		
 		private function onBullets2GrandBegin(cb:InteractionCallback):void
@@ -304,19 +310,7 @@ package view.battle
 			
 			_justExplosin = true;
 		}
-		
-		private function onRole2GrandBegin(cb:InteractionCallback):void
-		{
-			var role:Body = cb.int1.castBody;
-			var grand:Body = cb.int2.castBody;
-		}
-		
-		private function onRole2GrandEnd(cb:InteractionCallback):void
-		{
-			var role:Body = cb.int1.castBody;
-			var grand:Body = cb.int2.castBody;
-		}
-		
+				
 		private var _shootView:ShootView;
 		private var _smallMap:SmallMapView;
 		private var _bottomView:BottomView;
@@ -347,7 +341,54 @@ package view.battle
 		{
 			listen(MySignals.onPlayerRoundAck, onPlayerRoundBegin);
 			listen(MySignals.onPlayerHurtAck, onPlayerHurtAck);
+			listen(MySignals.onBattleFinishAck, onBattleFinishAck);
+			listen(MySignals.onPlayerFallAck, onPlayerFallAck); 
 			_shootView.SHOOT.add(onShootReady);
+		}
+		
+		private function onPlayerFallAck(pfa:PlayerFallAck):void
+		{
+			var role:Body = PlayerId2Role(pfa.playerId);
+			var bp:BattlePlayer = role2BattlePlayer(role);
+			bp.curBlood = 0;
+			playerDead(role, bp);
+		}
+		
+		private function onBattleFinishAck(bfa:BattleFinishAck):void
+		{
+			var bp:BattlePlayer = playerid2BattlePlayer(Buffer.mainPlayer.id);
+			if(bp && bp.group == bfa.winGroup)
+			{
+				var winUI:DisplayObject = new WinUI;
+			}
+			else
+			{
+				winUI = new LoseUI;
+			}
+			winUI.x = StaticTable.STAGE_WIDTH;
+			winUI.y = (StaticTable.STAGE_HEIGHT-winUI.height)*.5;
+			stage.addChild(winUI);
+			var tl:TimelineLite = new TimelineLite({onComplete:onBattleFinish, onCompleteParams:[winUI]});
+			tl.append(new TweenLite(winUI, 0.4, {x:(StaticTable.STAGE_WIDTH-winUI.width)*.5}));
+			tl.append(new TweenLite(winUI, 0.4, {x:-winUI.width, delay:1}));
+			tl.play();
+		}
+		
+		private function onBattleFinish(ui:DisplayObject):void
+		{
+			LHelp.RemoveFromParent(ui);
+		}
+		
+		private function playerid2BattlePlayer(id:Number):BattlePlayer
+		{
+			for each(var bp:BattlePlayer in _bba.players)
+			{
+				if(bp.id == id)
+				{
+					return bp;
+				}
+			}
+			return null;
 		}
 		
 		private function onPlayerHurtAck(pha:PlayerHurtAck):void
@@ -358,6 +399,19 @@ package view.battle
 				var bp:BattlePlayer = role2BattlePlayer(role);
 				bp.curBlood -= pha.hurts[i];
 				playeBloodHurt(role.position, pha.hurts[i]);
+				if(bp.curBlood <= 0)
+				{
+					playerDead(role, bp);
+				}
+			}
+		}
+		
+		private function playerDead(role:Body,bp:BattlePlayer):void
+		{
+			var spt:DisplayObject = roleBody2Graphic(role);
+			if(spt)
+			{
+				LHelp.DisGrey(spt);
 			}
 		}
 		
@@ -370,9 +424,9 @@ package view.battle
 				tf.text = hurt + "";
 				tf.x = position.x;
 				tf.y = position.y;
-				tf.alpha = 0.5;
+				tf.alpha = 0.3;
 				_release.addChild(tf);
-				TweenLite.to(tf, 2, {y:tf.y - 50, alpha:1, scaleX:2, scaleY:2, onComplete:LHelp.RemoveFromParent, onCompleteParams:[tf]});
+				TweenLite.to(tf, 2, {y:tf.y - 50, alpha:1, scaleX:3, scaleY:3, onComplete:LHelp.RemoveFromParent, onCompleteParams:[tf]});
 			}
 		}
 		
@@ -391,7 +445,7 @@ package view.battle
 			_bottomView.printfDegree(bp.rotationDeg);
 			_bottomView.printfForce(bp.force);
 			
-			if(_release)this.mouseEnabled = this.mouseChildren = false;
+			if(_release)mouseEnabled = mouseChildren = false;
 			_roundBeginUI.txtContent.text = bp.name + "'s Round!";
 			_roundBeginUI.x = StaticTable.STAGE_WIDTH;
 			_roundBeginUI.y = (StaticTable.STAGE_HEIGHT - _roundBeginUI.height)*.5;
@@ -415,7 +469,7 @@ package view.battle
 			LHelp.RemoveFromParent(_roundBeginUI);
 			var role:Body = controlRoleBody();
 			focusMap(role.position.x, role.position.y, true);
-			this.mouseEnabled = this.mouseChildren = true;
+			mouseEnabled = mouseChildren = true;
 		}
 		
 		private function focusMap(x:Number, y:Number, tween:Boolean = false):void
@@ -508,6 +562,7 @@ package view.battle
 			poly.material.density = _bs.mass / (_bs.boundWidth*_bs.boundHeight);
 			
 			var bullet:Body = new Body(BodyType.DYNAMIC);
+			bullet.isBullet = true;
 			bullet.shapes.add(poly);
 			bullet.userData.bullet = _bs;
 			bullet.cbTypes.add(BULLETS);
@@ -809,6 +864,11 @@ package view.battle
 					}
 				}
 			}
+		}
+		
+		private function roleBody2Graphic(role:Body):DisplayObject
+		{
+			return isDebug?null:role.userData.graphic;
 		}
 		
 		private function shiftView(sx:Number, sy:Number):void
