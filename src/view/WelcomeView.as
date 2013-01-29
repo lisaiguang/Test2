@@ -1,35 +1,48 @@
 package view
 {
-	import flash.display.Sprite;
-	import flash.events.Event;
 	import flash.events.MouseEvent;
 	
-	import view.battle.BattleView;
+	import data.MySignals;
+	import data.obj.BattleBeginAck;
+	import data.obj.BattleBeginReq;
 	
 	import lsg.gas.Welcome;
 	
-	public class WelcomeView extends Sprite
+	import utils.LazySprite;
+	
+	import view.battle.BattleView;
+	
+	public class WelcomeView extends LazySprite
 	{
-		private var _view:Welcome = new Welcome;
+		private var _view:Welcome;
 		
 		public function WelcomeView()
 		{
-			addChild(_view);
-			_view.btnStart.addEventListener(MouseEvent.CLICK, onStart);
-			this.addEventListener(Event.ADDED_TO_STAGE, onAdded);
+			addChild(_view = new Welcome);
+			_view.addEventListener(MouseEvent.CLICK, onStart);
+		}
+		
+		override protected function init():void
+		{
+			listen(MySignals.onBattleBeginAck, onBattleBeginAck);
+		}
+		
+		private function onBattleBeginAck(bba:BattleBeginAck):void
+		{
+			if(bba.error)
+			{
+				
+			}
+			else
+			{
+				MidLayer.CloseWindow(WelcomeView);
+				MidLayer.ShowWindowObj(BattleView,{params:[bba]}); 
+			}
 		}
 		
 		protected function onStart(event:MouseEvent):void
 		{
-			// TODO Auto-generated method stub
-			MidLayer.CloseWindow(WelcomeView);
-			MidLayer.ShowWindow(BattleView);
-		}
-		
-		protected function onAdded(event:Event):void
-		{
-			// TODO Auto-generated method stub
-			this.removeEventListener(Event.ADDED_TO_STAGE, onAdded);
+			MySignals.Socket_Send.dispatch(new BattleBeginReq);
 		}
 	}
 }

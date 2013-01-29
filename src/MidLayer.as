@@ -40,14 +40,19 @@ package
 				{
 					case 0:
 						view = new cls();
+						break;
 					case 1:
 						view = new cls(params[0]);
+						break;
 					case 2:
 						view = new cls(params[0],params[1]);
+						break;
 					case 3:
 						view = new cls(params[0],params[1],params[2]);
+						break;
 					case 4:
 						view = new cls(params[0],params[1],params[2],params[3]);
+						break;
 					default:
 						throw new Error("params: can't support more than 4 params");
 				}
