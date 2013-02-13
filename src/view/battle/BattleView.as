@@ -45,6 +45,7 @@ package view.battle
 	import nape.phys.Body;
 	import nape.phys.BodyList;
 	import nape.phys.BodyType;
+	import nape.shape.Circle;
 	import nape.shape.Polygon;
 	import nape.space.Space;
 	import nape.util.BitmapDebug;
@@ -64,7 +65,7 @@ package view.battle
 	
 	public class BattleView extends LazySprite
 	{
-		public static const isDebug:Boolean = false;
+		public static const isDebug:Boolean = true;
 		
 		private var _bba:BattleBeginAck;
 		public function BattleView(bba:BattleBeginAck)
@@ -176,11 +177,12 @@ package view.battle
 		{	
 			var rs:RoleDesc = StaticTable.GetRoleDesc(player.role);
 			
-			var poly:Polygon = new Polygon(Polygon.box(rs.boundWidth, rs.boundHeight, true));
+			var poly:Circle = new Circle(rs.boundWidth / 2);
 			poly.filter.collisionGroup = GROUP_ROLE;
 			poly.filter.collisionMask = ~(GROUP_ROLE);
 			
 			var role:Body = new Body(BodyType.DYNAMIC);
+			role.allowRotation = false;
 			role.shapes.add(poly);
 			role.cbTypes.add(ROLES);
 			role.position.setxy(player.x, player.y);
@@ -269,7 +271,7 @@ package view.battle
 			MySignals.Socket_Send.dispatch(new PlayerRoundReq);
 		}
 		
-		private var _justExplosin:Boolean =false;
+		//private var _justExplosin:Boolean =false;
 		private function explosion(pos:Vec2, bid:int):void 
 		{
 			var bomb:Sprite = StaticTable.GetBulletClear(bid);
@@ -308,9 +310,9 @@ package view.battle
 				MySignals.Socket_Send.dispatch(phr);
 			}
 			
-			_justExplosin = true;
+			//_justExplosin = true;
 		}
-				
+		
 		private var _shootView:ShootView;
 		private var _smallMap:SmallMapView;
 		private var _bottomView:BottomView;
@@ -437,6 +439,7 @@ package view.battle
 		
 		private function onPlayerRoundBegin(prb:PlayerRoundAck, tween:Boolean = true):void
 		{
+			_shooted = false;
 			_prb = prb;
 			_isMyTurn = _prb.playerId == Buffer.mainPlayer.id;
 			
@@ -546,9 +549,11 @@ package view.battle
 		private var _bullets:Vector.<Body>;
 		private var BULLETS:CbType = new CbType;
 		private static const GROUP_BULLET:int = 4;
+		private var _shooted:Boolean = false;
 		
 		private function onShoot(bid:int):void
 		{
+			_shooted = true;
 			if(!_bullets)_bullets = new Vector.<Body>;
 			
 			var bp:BattlePlayer = controlBattlePlayer();
@@ -619,135 +624,133 @@ package view.battle
 			
 			for each(var role:Body in _roles)
 			{
-				_interactingBodies.clear();
-				role.interactingBodies(InteractionType.COLLISION, 1, _interactingBodies);
 				
-				if(_justExplosin)
+				/*if(_justExplosin)
 				{
-					_justExplosin = false;
+				_justExplosin = false;
 				}
 				else if(_interactingBodies.length > 0)
 				{
-					if(role.velocity.x <= 0.01 && role.velocity.y <= 0.01 && role.angularVel <= 0.01)
-					{
-						if(!role.allowRotation)
-						{
-							role.allowRotation = true;
-						}
-						if(role.rotation >= ROTATION_LIMT || role.rotation <= -ROTATION_LIMT)
-						{
-							role.rotation = 0;
-						}
-					}
-					else
-					{
-						if(role.rotation >= Math.PI / 3)
-						{
-							if(role.rotation >= ROTATION_LIMT)
-							{
-								role.angularVel = -3.14 * 3;
-							}
-							else if(role.angularVel >= 1)
-							{
-								role.angularVel -= 3.14 * 3;
-							}
-						}
-						else if(role.rotation <= -Math.PI / 3)
-						{
-							if(role.rotation <= -ROTATION_LIMT)
-							{
-								role.angularVel = 3.14 * 3;
-							}
-							else if(role.angularVel <= -1)
-							{
-								role.angularVel += 3.14 * 3;
-							}
-						}
-					}
+				if(role.velocity.x <= 0.01 && role.velocity.y <= 0.01 && role.angularVel <= 0.01)
+				{
+				if(!role.allowRotation)
+				{
+				role.allowRotation = true;
+				}
+				if(role.rotation >= ROTATION_LIMT || role.rotation <= -ROTATION_LIMT)
+				{
+				role.rotation = 0;
+				}
 				}
 				else
 				{
-					if(role.allowRotation)
-					{
-						role.allowRotation = false;
-					}
-					
-					if(role.rotation != 0)
-					{
-						role.rotation = 0;
-						role.angularVel = 0;
-					}
+				if(role.rotation >= Math.PI / 3)
+				{
+				if(role.rotation >= ROTATION_LIMT)
+				{
+				role.angularVel = -3.14 * 3;
 				}
+				else if(role.angularVel >= 1)
+				{
+				role.angularVel -= 3.14 * 3;
+				}
+				}
+				else if(role.rotation <= -Math.PI / 3)
+				{
+				if(role.rotation <= -ROTATION_LIMT)
+				{
+				role.angularVel = 3.14 * 3;
+				}
+				else if(role.angularVel <= -1)
+				{
+				role.angularVel += 3.14 * 3;
+				}
+				}
+				}
+				}
+				else
+				{
+				if(role.allowRotation)
+				{
+				role.allowRotation = false;
+				}
+				
+				if(role.rotation != 0)
+				{
+				role.rotation = 0;
+				role.angularVel = 0;
+				}
+				}*/
 				
 				var bp:BattlePlayer = role2BattlePlayer(role);
 				_smallMap.SetRoleXY(bp.id, role.position.x, role.position.y);
 				
 				if(_prb && bp.id == _prb.playerId)
 				{
-					if(_interactingBodies.length > 0)
-					{	
+					if(_bottomView.isLeftPressing)
+					{
+						role.position.x -= 1;
+						bp.direction = EnumDirection.LEFT;
+					}
+					
+					if(_bottomView.isRightPressing)
+					{
+						role.position.x += 1;
+						bp.direction = EnumDirection.RIGHT;
+					}
+					
+					var refuse:Boolean = false;
+					
+					if(motion >= 1)
+					{
+						motion = 0;
+						refuse = true;
+					}
+					else if(role.rotation >= ROTATION_LIMT && bp.direction == EnumDirection.LEFT)
+					{
+						refuse = true;
+					}
+					else if(role.rotation <= -ROTATION_LIMT && bp.direction == EnumDirection.RIGHT)
+					{
+						refuse = true;
+					}
+					else
+					{
+						_interactingBodies.clear();
+						role.interactingBodies(InteractionType.COLLISION, 1, _interactingBodies);
+						var closestA:Vec2 = Vec2.get();
+						var closestB:Vec2 = Vec2.get();
+						for(var i:int = 0; i < _interactingBodies.length; i++)
+						{
+							var iBody:Body = _interactingBodies.at(i);
+							var distance:Number = Geom.distanceBody(role, iBody,closestA, closestB);
+							if(distance < -1)
+							{
+								refuse = true;
+								break;
+							}
+						}
+						closestA.dispose();
+						closestB.dispose();
+					}
+					
+					if(refuse)
+					{
 						if(_bottomView.isLeftPressing)
 						{
-							role.position.x -= 1;
-							bp.direction = EnumDirection.LEFT;
+							role.position.x += 1;
 						}
 						
 						if(_bottomView.isRightPressing)
 						{
-							role.position.x += 1;
-							bp.direction = EnumDirection.RIGHT;
-						}
-						
-						var refuse:Boolean = false;
-						
-						if(motion >= 1)
-						{
-							motion = 0;
-							refuse = true;
-						}
-						else if(role.rotation >= ROTATION_LIMT && bp.direction == EnumDirection.LEFT)
-						{
-							refuse = true;
-						}
-						else if(role.rotation <= -ROTATION_LIMT && bp.direction == EnumDirection.RIGHT)
-						{
-							refuse = true;
-						}
-						else
-						{
-							var closestA:Vec2 = Vec2.get();
-							var closestB:Vec2 = Vec2.get();
-							for(var i:int = 0; i < _interactingBodies.length; i++)
-							{
-								var iBody:Body = _interactingBodies.at(i);
-								var distance:Number = Geom.distanceBody(role, iBody,closestA, closestB);
-								if(distance < -1)
-								{
-									refuse = true;
-									break;
-								}
-							}
-							closestA.dispose();
-							closestB.dispose();
-						}
-						
-						if(refuse)
-						{
-							if(_bottomView.isLeftPressing)
-							{
-								role.position.x += 1;
-							}
-							
-							if(_bottomView.isRightPressing)
-							{
-								role.position.x -= 1;
-							}
-						}
-						else
-						{
-							motion+= 0.5;
+							role.position.x -= 1;
 						}
 					}
+					else
+					{
+						motion+= 0.5;
+					}
+					
 					
 					if(_bottomView.isUpPressing)
 					{
@@ -775,16 +778,19 @@ package view.battle
 						_bottomView.printfDegree(bp.rotationDeg);
 					}
 					
-					if(_bottomView.isFirePressing)
+					if(!_shooted)
 					{
-						bp.force = bp.force >= 100 ? 100 : bp.force + FORCE_STEP;
-						_bottomView.printfForce(bp.force);
-					}
-					else if(bp.force > 0)
-					{
-						onShoot(_bid);
-						bp.force = 0;
-						_bottomView.printfForce(bp.force);
+						if(_bottomView.isFirePressing)
+						{
+							bp.force = bp.force >= 100 ? 100 : bp.force + FORCE_STEP;
+							_bottomView.printfForce(bp.force);
+						}
+						else if(bp.force > 0)
+						{
+							onShoot(_bid);
+							bp.force = 0;
+							_bottomView.printfForce(bp.force);
+						}
 					}
 					
 					if(!isDebug)
@@ -855,11 +861,7 @@ package view.battle
 						focusBullet = false;
 						if(!pointInView(bulletMc.x, bulletMc.y))
 						{
-							var cx:Number = -map.x + StaticTable.STAGE_WIDTH * 0.5;
-							var cy:Number = -map.y + StaticTable.STAGE_HEIGHT * 0.5;
-							cx += bullet.position.x < cx ? -bulletMc.width : bulletMc.width ;
-							cy += bullet.position.y < cy ? -bulletMc.height : bulletMc.height ;
-							focusMap(cx, cy);
+							focusMap(bullet.position.x, bullet.position.y);
 						}
 					}
 				}
@@ -869,13 +871,6 @@ package view.battle
 		private function roleBody2Graphic(role:Body):DisplayObject
 		{
 			return isDebug?null:role.userData.graphic;
-		}
-		
-		private function shiftView(sx:Number, sy:Number):void
-		{
-			sx += map.x + StaticTable.STAGE_WIDTH * 0.5;
-			sy += map.y + StaticTable.STAGE_HEIGHT * 0.5;
-			focusMap(sx, sy);
 		}
 		
 		private function pointInView(px:Number, py:Number):Boolean

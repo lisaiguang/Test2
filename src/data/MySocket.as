@@ -120,6 +120,9 @@ package data
 		private var _isFinish:Boolean = false;
 		private function checkIfBattleFinish():void
 		{
+			if(_isFinish){
+				return;
+			}
 			for(var i:int = 0; i < _bba.players.length; i++)
 			{
 				if(_bba.players[i].curBlood <= 0)
