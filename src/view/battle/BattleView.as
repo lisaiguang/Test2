@@ -2,6 +2,7 @@ package view.battle
 {
 	import com.greensock.TimelineLite;
 	import com.greensock.TweenLite;
+	import com.urbansquall.ginger.AnimationPlayer;
 	
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
@@ -13,32 +14,43 @@ package view.battle
 	import flash.geom.Matrix;
 	import flash.geom.Rectangle;
 	import flash.text.TextField;
+	import flash.text.TextFormat;
+	import flash.utils.getTimer;
 	
 	import data.Buffer;
 	import data.MySignals;
 	import data.StaticTable;
-	import data.obj.BattleBeginAck;
-	import data.obj.BattleFinishAck;
-	import data.obj.BattlePlayer;
-	import data.obj.BulletDesc;
-	import data.obj.EnumDirection;
-	import data.obj.PlayerFallAck;
-	import data.obj.PlayerFallReq;
-	import data.obj.PlayerHurtAck;
-	import data.obj.PlayerHurtReq;
-	import data.obj.PlayerRoundAck;
-	import data.obj.PlayerRoundReq;
-	import data.obj.RoleDesc;
+	import data.staticObj.BulletDesc;
+	import data.staticObj.RoleDesc;
 	
 	import lsg.battle.LoseUI;
 	import lsg.battle.RoundBeginUI;
 	import lsg.battle.WinUI;
+	
+	import message.BattleBeginAck;
+	import message.BattleFinishAck;
+	import message.BattlePlayer;
+	import message.EnumAction;
+	import message.EnumDirection;
+	import message.PlayerDisjustAck;
+	import message.PlayerDisjustReq;
+	import message.PlayerFallAck;
+	import message.PlayerFallReq;
+	import message.PlayerHurtAck;
+	import message.PlayerHurtReq;
+	import message.PlayerMoveAck;
+	import message.PlayerMoveReq;
+	import message.PlayerRoundAck;
+	import message.PlayerRoundReq;
+	import message.PlayerShootAck;
+	import message.PlayerShootReq;
 	
 	import nape.callbacks.CbEvent;
 	import nape.callbacks.CbType;
 	import nape.callbacks.InteractionCallback;
 	import nape.callbacks.InteractionListener;
 	import nape.callbacks.InteractionType;
+	import nape.dynamics.Arbiter;
 	import nape.geom.AABB;
 	import nape.geom.Geom;
 	import nape.geom.Vec2;
@@ -54,18 +66,18 @@ package view.battle
 	import phys.Terrain;
 	
 	import starling.utils.Color;
-	import starling.utils.deg2rad;
 	import starling.utils.rad2deg;
 	
 	import utils.LHelp;
 	import utils.LazySprite;
 	import utils.McSprite;
+	import utils.MyMath;
 	
-	//wait to be improve role's motion by role.velocity and angle!
+	import view.island.IslandView;
 	
 	public class BattleView extends LazySprite
 	{
-		public static const isDebug:Boolean = true;
+		public static const isDebug:Boolean = false;
 		
 		private var _bba:BattleBeginAck;
 		public function BattleView(bba:BattleBeginAck)
@@ -78,41 +90,34 @@ package view.battle
 			setUp();
 			addHeadUp();
 			InitPos();
-			initSignals();
+			listenSignals();
 			
 			addEventListener(Event.ENTER_FRAME, onFrameIn);
-			addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
+			map.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
 			
-			Test2.Delay(1500, onPlayerRoundBegin, [_bba.firstRound, true]);
+			TweenLite.delayedCall(1.5, onPlayerRoundBegin, [_bba.firstRound, true]);
 		}
 		
 		private var _isDrag:Boolean = false;
 		private var _dragRect:Rectangle;
-		
 		protected function onMouseDown(event:MouseEvent):void
 		{
 			stage.addEventListener(MouseEvent.MOUSE_UP, onMouseUp);
-			if(!isDebug)
-			{
-				if(!_dragRect)_dragRect = new Rectangle(StaticTable.STAGE_WIDTH - _release.width, StaticTable.STAGE_HEIGHT - _release.height, _release.width - StaticTable.STAGE_WIDTH, _release.height - StaticTable.STAGE_HEIGHT);
-				_release.startDrag(false, _dragRect);
-			}
+			if(!_dragRect)_dragRect = new Rectangle(StaticTable.STAGE_WIDTH - map.width, StaticTable.STAGE_HEIGHT - map.height, map.width - StaticTable.STAGE_WIDTH, map.height - StaticTable.STAGE_HEIGHT);
+			map.startDrag(false, _dragRect);
 			_isDrag = true;
 		}
 		
 		protected function onMouseUp(event:MouseEvent):void
 		{
 			stage.removeEventListener(MouseEvent.MOUSE_UP, onMouseUp);
-			if(!isDebug)
-			{
-				_release.stopDrag();
-			}
+			map.stopDrag();
 			_isDrag = false;
 		}
 		
 		private var _space:Space;
 		private var _debug:Debug;
-		private var _release:Sprite;
+		private var map:Sprite;
 		private var _terrain:Terrain;
 		private var BORDER:CbType = new CbType;
 		public static const BORDER_PADDING:int = 40;
@@ -123,7 +128,7 @@ package view.battle
 			_space = new Space(gravity);
 			
 			var bd:BitmapData = StaticTable.GetMapBmd(_bba.mapId);
-			_terrain = new Terrain(_space, bd, new Vec2(0,0), 80, 8);
+			_terrain = new Terrain(_space, bd, new Vec2(0,0), 64, 8);
 			
 			var border:Body = new Body(BodyType.STATIC);
 			border.shapes.add(new Polygon(Polygon.rect(-BORDER_PADDING, -BORDER_PADDING, bd.width + BORDER_PADDING*2, 1)));
@@ -140,33 +145,22 @@ package view.battle
 			}
 			
 			createNapeListeners();
+			map = new Sprite;
+			addChild(map);
 			
 			if(isDebug)
 			{
 				_debug = new BitmapDebug(bd.width, bd.height, stage.color);
 				_debug.drawBodyDetail = true;
-				addChild(_debug.display);
+				map.addChild(_debug.display);
 			}
 			else
 			{
-				_release = new Sprite;
-				addChild(_release);
 				var bmp:Bitmap = new Bitmap(bd);
-				_release.addChild(bmp);
+				map.addChild(bmp);
 			}
 		}
 		
-		private function get map():DisplayObject
-		{
-			if(isDebug)
-			{
-				return _debug.display;
-			}
-			else
-			{
-				return _release;
-			}
-		}
 		
 		private var _roles:Vector.<Body>;
 		private var _myRole:Body;
@@ -237,45 +231,75 @@ package view.battle
 		{
 			var role:Body = cb.int1.castBody;
 			var bp:BattlePlayer = role2BattlePlayer(role);
-			MySignals.Socket_Send.dispatch(new PlayerFallReq);
+			var pfr:PlayerFallReq = new PlayerFallReq;
+			pfr.playerId = bp.id;
+			MySignals.Socket_Send.dispatch(pfr);
 		}
 		
 		private function onBullets2Border(cb:InteractionCallback):void
 		{
 			var bullet:Body = cb.int1.castBody;
-			bullet.space = null;
-			_bullets.splice(_bullets.indexOf(bullet),1);
-			
+			var position:Number = _bullets.indexOf(bullet);
+			if(position == -1)
+			{
+				return;
+			}
+			else
+			{
+				_bullets.splice(position,1);
+			}
 			if(bullet.userData.graphic)
 			{
-				_release.removeChild(bullet.userData.graphic);
+				map.removeChild(bullet.userData.graphic);
 			}
+			bullet.space = null;
 			
-			MySignals.Socket_Send.dispatch(new PlayerRoundReq);
+			if(_bullets.length == 0 && _hasLastBullet)
+			{
+				MySignals.Socket_Send.dispatch(new PlayerRoundReq);
+			}
 		}
 		
 		private function onBullets2GrandBegin(cb:InteractionCallback):void
 		{
 			var bullet:Body = cb.int1.castBody;
-			
-			if(bullet.userData.graphic && bullet.userData.graphic.parent)
+			var position:Number = _bullets.indexOf(bullet);
+			if(position == -1)
 			{
-				_release.removeChild(bullet.userData.graphic);
+				return;
+			}
+			else
+			{
+				_bullets.splice(position,1);
 			}
 			
-			var bs:BulletDesc = bulletBody2bulletDesc(bullet);
-			explosion(bullet.position, bs.id);
+			if(bullet.userData.graphic)
+			{
+				map.removeChild(bullet.userData.graphic);
+			}
 			bullet.space = null;
-			_bullets.splice(_bullets.indexOf(bullet),1);
 			
-			MySignals.Socket_Send.dispatch(new PlayerRoundReq);
+			var bs:BulletDesc = bulletBody2bulletDesc(bullet);
+			if(bs.shootType != 4)
+			{
+				explosion(bullet.position, bs.id);
+				
+				if(_bullets.length == 0 && _hasLastBullet)
+				{
+					MySignals.Socket_Send.dispatch(new PlayerRoundReq);
+				}
+			}
+			else
+			{
+				controlRoleBody().position.setxy(bullet.position.x, bullet.position.y);
+				MySignals.Socket_Send.dispatch(new PlayerRoundReq);
+			}
 		}
 		
-		//private var _justExplosin:Boolean =false;
 		private function explosion(pos:Vec2, bid:int):void 
 		{
+			var ts:int = getTimer();
 			var bomb:Sprite = StaticTable.GetBulletClear(bid);
-			
 			var rect:Rectangle = bomb.getBounds(bomb);
 			rect.x += pos.x;
 			rect.y += pos.y;
@@ -309,8 +333,7 @@ package view.battle
 				phr.pids = pids;
 				MySignals.Socket_Send.dispatch(phr);
 			}
-			
-			//_justExplosin = true;
+			trace("time:" + (getTimer() - ts));
 		}
 		
 		private var _shootView:ShootView;
@@ -320,16 +343,11 @@ package view.battle
 		
 		private function addHeadUp():void
 		{
-			stage.addChild(_shootView = new ShootView);
-			stage.addChild(_smallMap = new SmallMapView);
+			addChild(_shootView = new ShootView);
+			addChild(_smallMap = new SmallMapView);
 			_smallMap.SetMap(_terrain.bd);
-			stage.addChild(_bottomView = new BottomView);
-			
-			if(!isDebug)
-			{
-				_release.addChild(_adjustView = new AdjustView);
-				_adjustView.visible = false;
-			}
+			addChild(_bottomView = new BottomView);
+			map.addChild(_adjustView = new AdjustView);
 		}
 		
 		private function InitPos():void
@@ -339,13 +357,57 @@ package view.battle
 			_bottomView.InitPos();
 		}
 		
-		private function initSignals():void
+		private function listenSignals():void
 		{
 			listen(MySignals.onPlayerRoundAck, onPlayerRoundBegin);
 			listen(MySignals.onPlayerHurtAck, onPlayerHurtAck);
 			listen(MySignals.onBattleFinishAck, onBattleFinishAck);
 			listen(MySignals.onPlayerFallAck, onPlayerFallAck); 
-			_shootView.SHOOT.add(onShootReady);
+			listen(MySignals.onPlayerShootAck, onPlayerShootAck);
+			listen(MySignals.onPlayerMoveAck, onPlayerMoveAck);
+			listen(MySignals.onPlayerDisjustAck, onPlayerDisjustAck);
+		}
+		
+		private function onPlayerDisjustAck(pda:PlayerDisjustAck):void
+		{
+			var bp:BattlePlayer = playerid2BattlePlayer(pda.pid);
+			if(bp.degree != pda.degree)
+			{
+				bp.degree = pda.degree;
+				_bottomView.printfDegree(bp.rotationDeg, bp.direction);
+				_adjustView.printfDegree(bp.rotationDeg);
+			}
+			if(pda.action == 1)
+			{
+				_playerDisjustAck = pda;
+			}
+			else
+			{
+				_playerDisjustAck = null;
+			}
+		}
+		
+		private function onPlayerMoveAck(pma:PlayerMoveAck):void
+		{
+			var role:Body = PlayerId2Role(pma.pid);
+			role.position.setxy(pma.x, pma.y);
+			var bp:BattlePlayer = role2BattlePlayer(role);
+			bp.direction = pma.direction;
+			if(pma.action == 1)
+			{
+				_playerMoveAck = pma;
+				bp.action = EnumAction.ROLE_MOVING;
+			}
+			else
+			{
+				_playerMoveAck = null;
+				bp.action = EnumAction.ROLE_WAITING;
+			}
+		}
+		
+		private function onPlayerShootAck(psa:PlayerShootAck):void
+		{
+			onShoot(psa.pid, psa.bid, psa.rad, psa.force * 0.2);
 		}
 		
 		private function onPlayerFallAck(pfa:PlayerFallAck):void
@@ -369,16 +431,21 @@ package view.battle
 			}
 			winUI.x = StaticTable.STAGE_WIDTH;
 			winUI.y = (StaticTable.STAGE_HEIGHT-winUI.height)*.5;
-			stage.addChild(winUI);
+			addChild(winUI);
 			var tl:TimelineLite = new TimelineLite({onComplete:onBattleFinish, onCompleteParams:[winUI]});
 			tl.append(new TweenLite(winUI, 0.4, {x:(StaticTable.STAGE_WIDTH-winUI.width)*.5}));
-			tl.append(new TweenLite(winUI, 0.4, {x:-winUI.width, delay:1}));
 			tl.play();
 		}
 		
 		private function onBattleFinish(ui:DisplayObject):void
 		{
-			LHelp.RemoveFromParent(ui);
+			TweenLite.delayedCall(3, onClose);
+		}
+		
+		private function onClose():void
+		{
+			MidLayer.CloseWindow(BattleView);
+			MidLayer.ShowWindow(IslandView);
 		}
 		
 		private function playerid2BattlePlayer(id:Number):BattlePlayer
@@ -413,23 +480,20 @@ package view.battle
 			var spt:DisplayObject = roleBody2Graphic(role);
 			if(spt)
 			{
-				LHelp.DisGrey(spt);
+				LHelp.AddGrey(spt);
 			}
 		}
 		
+		private var _format:TextFormat = new TextFormat(null, 24, Color.RED);
 		private function playeBloodHurt(position:Vec2, hurt:uint):void
 		{
-			if(!isDebug)
-			{
-				var tf:TextField = new TextField();
-				tf.textColor = Color.RED;
-				tf.text = hurt + "";
-				tf.x = position.x;
-				tf.y = position.y;
-				tf.alpha = 0.3;
-				_release.addChild(tf);
-				TweenLite.to(tf, 2, {y:tf.y - 50, alpha:1, scaleX:3, scaleY:3, onComplete:LHelp.RemoveFromParent, onCompleteParams:[tf]});
-			}
+			var tf:TextField = new TextField();
+			tf.defaultTextFormat = _format;
+			tf.text = hurt + "";
+			tf.x = position.x;
+			tf.y = position.y;
+			map.addChild(tf);
+			TweenLite.to(tf, 2, {y:tf.y - 80, onComplete:LHelp.RemoveFromParent, onCompleteParams:[tf]});
 		}
 		
 		private var _prb:PlayerRoundAck;
@@ -439,16 +503,24 @@ package view.battle
 		
 		private function onPlayerRoundBegin(prb:PlayerRoundAck, tween:Boolean = true):void
 		{
-			_shooted = false;
+			_hasLastBullet = _shooted = false;
 			_prb = prb;
 			_isMyTurn = _prb.playerId == Buffer.mainPlayer.id;
 			
 			var bp:BattlePlayer = controlBattlePlayer();
-			_shootView.printfBullets(bp.curBulletIds);
-			_bottomView.printfDegree(bp.rotationDeg);
-			_bottomView.printfForce(bp.force);
 			
-			if(_release)mouseEnabled = mouseChildren = false;
+			_adjustView.visible = _isMyTurn;
+			if(_isMyTurn)
+			{
+				_adjustView.x = bp.x;
+				_adjustView.y = bp.y;
+				_adjustView.printfDegree(bp.rotationDeg);
+				_shootView.printfBullets(bp.curBulletIds);
+				_bottomView.printfForce(bp.force, bp.lastForce);
+				_bottomView.printfDegree(bp.rotationDeg, bp.direction);
+			}
+			
+			if(map)mouseEnabled = mouseChildren = false;
 			_roundBeginUI.txtContent.text = bp.name + "'s Round!";
 			_roundBeginUI.x = StaticTable.STAGE_WIDTH;
 			_roundBeginUI.y = (StaticTable.STAGE_HEIGHT - _roundBeginUI.height)*.5;
@@ -456,7 +528,7 @@ package view.battle
 			
 			if(!tl) 
 			{
-				tl = new TimelineLite({onComplete:onPlayerRoundBeginMotionFinish});
+				tl = new TimelineLite({onComplete:onPlayerRoundBeginTipFinish});
 				tl.append(new TweenLite(_roundBeginUI, 0.4, {x:(StaticTable.STAGE_WIDTH-_roundBeginUI.width)*.5}));
 				tl.append(new TweenLite(_roundBeginUI, 0.4, {x:-_roundBeginUI.width, delay:1}));
 				tl.play();
@@ -467,20 +539,20 @@ package view.battle
 			}
 		}
 		
-		private function onPlayerRoundBeginMotionFinish():void
+		private function onPlayerRoundBeginTipFinish():void
 		{
 			LHelp.RemoveFromParent(_roundBeginUI);
 			var role:Body = controlRoleBody();
-			focusMap(role.position.x, role.position.y, true);
+			focusMap(role.position.x, role.position.y, 2.5);
 			mouseEnabled = mouseChildren = true;
 		}
 		
-		private function focusMap(x:Number, y:Number, tween:Boolean = false):void
+		private function focusMap(x:Number, y:Number, tween:Number = 0):void
 		{
 			MapLeftTop(StaticTable.STAGE_WIDTH * 0.5 - x, StaticTable.STAGE_HEIGHT * 0.5 - y, tween);
 		}
 		
-		private function MapLeftTop(x:Number, y:Number, tween:Boolean = false):void
+		private function MapLeftTop(x:Number, y:Number, tween:Number = 0):void
 		{
 			var minX:int = StaticTable.STAGE_WIDTH - _terrain.bd.width;
 			var minY:int = StaticTable.STAGE_HEIGHT - _terrain.bd.height;
@@ -506,14 +578,14 @@ package view.battle
 			if(tween)
 			{
 				var distance:Number=LHelp.distance(x,y,map.x,map.y) / 250;
-				if(distance < 0.2)
+				if(distance / tween < 0.05)
 				{
 					map.x = x;
 					map.y = y;
 				}
 				else
 				{
-					TweenLite.to(map,  distance, {x:x, y:y});
+					TweenLite.to(map,  distance / tween, {x:x, y:y});
 				}
 			}
 			else
@@ -535,56 +607,65 @@ package view.battle
 			return PlayerId2Role(_prb.playerId).userData.battleplayer;
 		}
 		
-		private var _bid:int;
-		private function onShootReady(bid:int):void{
-			if(_bid){
-				_shootView.printfBulletUnReady(bid);
-				_bid = 0;
-			}else{
-				_shootView.printfBulletReady(bid);
-				_bid = bid;
-			}
-		}
-		
 		private var _bullets:Vector.<Body>;
 		private var BULLETS:CbType = new CbType;
 		private static const GROUP_BULLET:int = 4;
 		private var _shooted:Boolean = false;
 		
-		private function onShoot(bid:int):void
+		private function onShoot(pid, bid:int, rad:Number, force:Number):void
 		{
 			_shooted = true;
 			if(!_bullets)_bullets = new Vector.<Body>;
-			
-			var bp:BattlePlayer = controlBattlePlayer();
-			if(bid == 0) bid = bp.curBulletIds[0];
+			if(bid == 0) bid = 1;
 			
 			var _bs:BulletDesc = StaticTable.GetBulletDesc(bid);
-			
+			if(_bs.shootType == 1)
+			{
+				shootAbullet(pid, _bs, rad, force);
+			}
+			else if(_bs.shootType == 2)
+			{
+				shootAbullet(pid, _bs, rad, force, false);
+				TweenLite.delayedCall(0.5, shootAbullet, [pid, _bs, rad, force, false]);
+				TweenLite.delayedCall(1.0, shootAbullet, [pid, _bs, rad, force, true]);
+			}
+			else if(_bs.shootType == 3)
+			{
+				shootAbullet(pid, _bs, rad, force);
+				shootAbullet(pid, _bs, rad - Math.PI / 16, force);
+				shootAbullet(pid, _bs, rad + Math.PI / 16, force);
+			}
+			else if(_bs.shootType == 4)
+			{
+				shootAbullet(pid, _bs, rad, force, false);
+			}
+		}
+		
+		private var _hasLastBullet:Boolean = false;
+		private function shootAbullet(pid:Number, _bs:BulletDesc, rotationRad:Number, forceFactor:Number, lastBullet:Boolean = true):void
+		{
+			_hasLastBullet = lastBullet;
 			var poly:Polygon = new Polygon(Polygon.box(_bs.boundWidth, _bs.boundHeight, true));
 			poly.filter.collisionGroup = GROUP_BULLET;
 			poly.filter.collisionMask = ~(GROUP_BULLET|GROUP_ROLE);
 			poly.material.density = _bs.mass / (_bs.boundWidth*_bs.boundHeight);
 			
 			var bullet:Body = new Body(BodyType.DYNAMIC);
-			bullet.isBullet = true;
 			bullet.shapes.add(poly);
 			bullet.userData.bullet = _bs;
 			bullet.cbTypes.add(BULLETS);
 			bullet.space = _space;
 			_bullets.push(bullet);
 			
-			var role:Body = controlRoleBody();
+			var role:Body = PlayerId2Role(pid);
 			bullet.position.x = role.position.x;
 			bullet.position.y = role.position.y - role.bounds.height * 0.5;
 			
-			bullet.rotation = deg2rad(bp.rotationDeg);
+			bullet.rotation = rotationRad;
 			var target:Vec2 = Vec2.get(bullet.position.x + Math.cos(bullet.rotation), bullet.position.y + Math.sin(bullet.rotation));
-			var force:Vec2 = target.sub(bullet.position, true).muleq(bp.force * 0.2);
+			var force:Vec2 = target.sub(bullet.position, true).muleq(forceFactor);
 			bullet.applyImpulse(force,null, true);
 			target.dispose();
-			
-			_bid = 0;
 		}
 		
 		private function bulletBody2bulletDesc(body:Body):BulletDesc
@@ -602,19 +683,21 @@ package view.battle
 		}
 		
 		private var _interactingBodies:BodyList = new BodyList;
-		private var motion:int;
 		private static const ROTATION_LIMT:Number = Math.PI / 2.5;
 		private static const FORCE_STEP:Number = 0.75;//high is fast
-		private static const DEGREE_STEP:Number = 0.75;
+		private static const DEGREE_STEP:Number = 0.6;
+		private static const MOVE_STEP:Number = 1;
+		private var _bid:int;
+		private var _playerMoveAck:PlayerMoveAck;
+		private var _playerDisjustAck:PlayerDisjustAck;
 		
 		protected function onFrameIn(event:Event):void
 		{
 			_space.step(Test2.ELAPSED / 1000);
-			drawSpace();
 			
 			if(_isDrag)
 			{
-				if(!isDebug)_smallMap.SetMapTopLeft(map.x, map.y);
+				_smallMap.SetMapTopLeft(map.x, map.y);
 			}
 			
 			for each(var bullet:Body in _bullets)
@@ -624,89 +707,161 @@ package view.battle
 			
 			for each(var role:Body in _roles)
 			{
-				
-				/*if(_justExplosin)
-				{
-				_justExplosin = false;
-				}
-				else if(_interactingBodies.length > 0)
-				{
-				if(role.velocity.x <= 0.01 && role.velocity.y <= 0.01 && role.angularVel <= 0.01)
-				{
-				if(!role.allowRotation)
-				{
-				role.allowRotation = true;
-				}
-				if(role.rotation >= ROTATION_LIMT || role.rotation <= -ROTATION_LIMT)
-				{
-				role.rotation = 0;
-				}
-				}
-				else
-				{
-				if(role.rotation >= Math.PI / 3)
-				{
-				if(role.rotation >= ROTATION_LIMT)
-				{
-				role.angularVel = -3.14 * 3;
-				}
-				else if(role.angularVel >= 1)
-				{
-				role.angularVel -= 3.14 * 3;
-				}
-				}
-				else if(role.rotation <= -Math.PI / 3)
-				{
-				if(role.rotation <= -ROTATION_LIMT)
-				{
-				role.angularVel = 3.14 * 3;
-				}
-				else if(role.angularVel <= -1)
-				{
-				role.angularVel += 3.14 * 3;
-				}
-				}
-				}
-				}
-				else
-				{
-				if(role.allowRotation)
-				{
-				role.allowRotation = false;
-				}
-				
-				if(role.rotation != 0)
-				{
-				role.rotation = 0;
-				role.angularVel = 0;
-				}
-				}*/
-				
 				var bp:BattlePlayer = role2BattlePlayer(role);
-				_smallMap.SetRoleXY(bp.id, role.position.x, role.position.y);
+				var isControlBp:Boolean = _prb && bp.id == _prb.playerId;
 				
-				if(_prb && bp.id == _prb.playerId)
+				bp.moved = bp.x != role.position.x || bp.y != role.position.y;
+				if(bp.moved)
 				{
-					if(_bottomView.isLeftPressing)
+					bp.x = role.position.x;
+					bp.y = role.position.y;
+					_smallMap.SetRoleXY(bp.id, bp.x, bp.y);
+					
+					var thred:Number = ROTATION_LIMT;
+					for(var i:int = 0; i < role.arbiters.length; i++)
 					{
-						role.position.x -= 1;
-						bp.direction = EnumDirection.LEFT;
+						var arb:Arbiter = role.arbiters.at(i);
+						if (!arb.isCollisionArbiter())
+						{
+							continue;
+						}
+						var angle:Number = arb.collisionArbiter.normal.angle;
+						if(angle < 0)
+						{
+							angle += Math.PI;
+						}
+						angle -= MyMath.HALF_PI;
+						var thred2:Number = Math.abs(angle);
+						if(thred2 < thred)
+						{
+							bp.rotation = angle;
+							thred = thred2;
+						}
 					}
 					
-					if(_bottomView.isRightPressing)
+					if(bp.id == Buffer.mainPlayer.id)
 					{
-						role.position.x += 1;
-						bp.direction = EnumDirection.RIGHT;
+						if(_isMyTurn)
+						{
+							_adjustView.x = bp.x;
+							_adjustView.y = bp.y;
+							
+						}
+						_bottomView.printfDegree(bp.rotationDeg, bp.direction);
+						_adjustView.printfDegree(bp.rotationDeg);
+					}
+				}
+				
+				if(isControlBp && _isMyTurn)
+				{					
+					if(!_playerMoveAck)
+					{
+						if(_bottomView.isLeftPressing)
+						{
+							var pmr:PlayerMoveReq = createPlayerMoveReq(bp, EnumDirection.LEFT, 1);
+						}
+						else if(_bottomView.isRightPressing)
+						{
+							pmr = createPlayerMoveReq(bp, EnumDirection.RIGHT, 1);
+						}
+						if(pmr) MySignals.Socket_Send.dispatch(pmr);
+					}
+					else
+					{
+						if(_playerMoveAck.direction == EnumDirection.LEFT && !_bottomView.isLeftPressing)
+						{
+							pmr = createPlayerMoveReq(bp, EnumDirection.LEFT, 0);
+						}
+						else if(_playerMoveAck.direction == EnumDirection.RIGHT && !_bottomView.isRightPressing)
+						{
+							pmr = createPlayerMoveReq(bp, EnumDirection.RIGHT, 0);
+						}
+						if(pmr) MySignals.Socket_Send.dispatch(pmr);
+					}
+					
+					if(!_playerDisjustAck)
+					{
+						if(_bottomView.isUpPressing)
+						{
+							var pdr:PlayerDisjustReq = createPlayerDisjustReq(bp, EnumDirection.UP, 1);
+						}
+						else if(_bottomView.isDownPressing)
+						{
+							pdr = createPlayerDisjustReq(bp, EnumDirection.DOWN, 1);
+						}
+						if(pdr) MySignals.Socket_Send.dispatch(pdr);
+					}
+					else
+					{
+						if(_playerDisjustAck.direction == EnumDirection.UP && !_bottomView.isUpPressing)
+						{
+							pdr = createPlayerDisjustReq(bp, EnumDirection.UP, 0);
+						}
+						else if(_playerDisjustAck.direction == EnumDirection.DOWN && !_bottomView.isDownPressing)
+						{
+							pdr = createPlayerDisjustReq(bp, EnumDirection.DOWN, 0);
+						}
+						if(pdr) MySignals.Socket_Send.dispatch(pdr);
+					}
+					
+					if(!_shooted)
+					{
+						if(_shootView.bulletPress)
+						{
+							_bid = _shootView.bulletPress;
+							bp.force = bp.force >= 100 ? 100 : bp.force + FORCE_STEP;
+							_bottomView.printfForce(bp.force, 0);
+						}
+						else if(bp.force > 0)
+						{
+							var _playerShootReq:PlayerShootReq = new PlayerShootReq;
+							_playerShootReq.pid = bp.id;
+							_playerShootReq.bid = _bid;
+							_playerShootReq.force = bp.force;
+							_playerShootReq.rad = bp.rotationRad;
+							MySignals.Socket_Send.dispatch(_playerShootReq);
+							bp.lastForce = bp.force;
+							_bid = bp.force = 0;
+							_bottomView.printfForce(bp.force, bp.lastForce);
+						}
+					}
+				}
+				
+				if(_playerDisjustAck && _playerDisjustAck.pid == bp.id)
+				{
+					if(_playerDisjustAck.direction == EnumDirection.UP)
+					{
+						bp.degree += DEGREE_STEP;
+						if(bp.degree >= 90)
+						{
+							bp.degree = 90;
+						}
+					}
+					else
+					{
+						bp.degree -= DEGREE_STEP;
+						if(bp.degree <= 0)
+						{
+							bp.degree = 0;
+						}
+					}
+					_bottomView.printfDegree(bp.rotationDeg, bp.direction);
+					_adjustView.printfDegree(bp.rotationDeg);
+				}
+				
+				if(_playerMoveAck && _playerMoveAck.pid == bp.id)
+				{
+					if(_playerMoveAck.direction == EnumDirection.LEFT)
+					{
+						role.position.x -= MOVE_STEP;
+					}
+					else
+					{
+						role.position.x += MOVE_STEP;
 					}
 					
 					var refuse:Boolean = false;
-					
-					if(motion >= 1)
-					{
-						motion = 0;
-						refuse = true;
-					}
-					else if(role.rotation >= ROTATION_LIMT && bp.direction == EnumDirection.LEFT)
+					if(role.rotation >= ROTATION_LIMT && bp.direction == EnumDirection.LEFT)
 					{
 						refuse = true;
 					}
@@ -720,11 +875,11 @@ package view.battle
 						role.interactingBodies(InteractionType.COLLISION, 1, _interactingBodies);
 						var closestA:Vec2 = Vec2.get();
 						var closestB:Vec2 = Vec2.get();
-						for(var i:int = 0; i < _interactingBodies.length; i++)
+						for(i = 0; i < _interactingBodies.length; i++)
 						{
 							var iBody:Body = _interactingBodies.at(i);
 							var distance:Number = Geom.distanceBody(role, iBody,closestA, closestB);
-							if(distance < -1)
+							if(distance <= -1)
 							{
 								refuse = true;
 								break;
@@ -736,72 +891,40 @@ package view.battle
 					
 					if(refuse)
 					{
-						if(_bottomView.isLeftPressing)
+						if(_playerMoveAck.direction == EnumDirection.LEFT)
 						{
-							role.position.x += 1;
-						}
-						
-						if(_bottomView.isRightPressing)
-						{
-							role.position.x -= 1;
-						}
-					}
-					else
-					{
-						motion+= 0.5;
-					}
-					
-					
-					if(_bottomView.isUpPressing)
-					{
-						if(bp.degree >= 90)
-						{
-							bp.degree = 90;
+							role.position.x += MOVE_STEP;
 						}
 						else
 						{
-							bp.degree += DEGREE_STEP;
+							role.position.x -= MOVE_STEP;
 						}
-						_bottomView.printfDegree(bp.rotationDeg);
-					}
-					
-					if(_bottomView.isDownPressing)
-					{
-						if(bp.degree <= 0)
-						{
-							bp.degree = 0;
-						}
-						else
-						{
-							bp.degree -= DEGREE_STEP;
-						}
-						_bottomView.printfDegree(bp.rotationDeg);
-					}
-					
-					if(!_shooted)
-					{
-						if(_bottomView.isFirePressing)
-						{
-							bp.force = bp.force >= 100 ? 100 : bp.force + FORCE_STEP;
-							_bottomView.printfForce(bp.force);
-						}
-						else if(bp.force > 0)
-						{
-							onShoot(_bid);
-							bp.force = 0;
-							_bottomView.printfForce(bp.force);
-						}
-					}
-					
-					if(!isDebug)
-					{
-						_adjustView.x = role.position.x;
-						_adjustView.y = role.position.y;
-						_adjustView.printfDegree(bp.rotationDeg);
-						if(!_adjustView.visible)_adjustView.visible = true;
 					}
 				}
 			}
+			drawSpace();
+		}
+		
+		private function createPlayerMoveReq(bp:BattlePlayer, direction:int, action:int):PlayerMoveReq
+		{
+			var pmr:PlayerMoveReq = new PlayerMoveReq;
+			pmr.pid = bp.id;
+			pmr.x = bp.x;
+			pmr.y = bp.y;
+			pmr.rotation = bp.rotation;
+			pmr.direction = direction;
+			pmr.action = action;
+			return pmr;
+		}
+		
+		private function createPlayerDisjustReq(bp:BattlePlayer, direction:int, action:int):PlayerDisjustReq
+		{
+			var pdr:PlayerDisjustReq = new PlayerDisjustReq;
+			pdr.pid = bp.id;
+			pdr.degree = bp.degree;
+			pdr.action = action;
+			pdr.direction = direction;
+			return pdr;
 		}
 		
 		private function drawSpace():void
@@ -812,57 +935,69 @@ package view.battle
 				_debug.draw(_space);
 				_debug.flush()
 			}
-			else
+			
+			for each(var role:Body in _roles)
 			{
-				for each(var role:Body in _roles)
+				var bp:BattlePlayer = role2BattlePlayer(role);
+				var roleMc:AnimationPlayer = role.userData.graphic;
+				
+				if(!roleMc)
 				{
-					var bp:BattlePlayer = role2BattlePlayer(role);
-					var roleMc:McSprite = role.userData.graphic;
-					
-					if(!roleMc)
-					{
-						roleMc = StaticTable.GetRoleMcSprite(bp.role);
-						role.userData.graphic = roleMc;
-						_release.addChild(roleMc);
-					}
-					
-					if(bp.direction == EnumDirection.LEFT)
-					{
-						roleMc.rotationY = 180;
-					}
-					else
-					{
-						roleMc.rotationY = 0;
-					}
-					
-					roleMc.x = role.position.x;
-					roleMc.y = role.position.y;
-					roleMc.rotation = rad2deg(role.rotation);
+					roleMc = StaticTable.GetRoleAniPlayer(bp.role);
+					roleMc.rotationY = bp.direction == EnumDirection.LEFT ? 0:180;
+					role.userData.graphic = roleMc;
+					map.addChild(roleMc);
+				}
+				else
+				{
+					roleMc.update(Test2.ELAPSED);
 				}
 				
-				var focusBullet:Boolean = true;
-				for each(var bullet:Body in _bullets)
+				if(bp.direction == EnumDirection.LEFT)
 				{
-					var bulletMc:McSprite = bullet.userData.graphic;
-					var bs:BulletDesc = bulletBody2bulletDesc(bullet);
-					
-					if(!bulletMc)
+					if(roleMc.rotationY != 0)
+						roleMc.rotationY = 0;
+				}
+				else
+				{
+					if(roleMc.rotationY != 180)
+						roleMc.rotationY = 180;
+				}
+				
+				if(bp.moved)
+				{
+					roleMc.x = bp.x;
+					roleMc.y = bp.y;
+					roleMc.rotation = rad2deg(bp.rotation);
+				}
+				
+				if(roleMc.currentAnimationID != bp.action)
+				{
+					roleMc.play(bp.action);
+				}
+			}
+			
+			var focusBullet:Boolean = true;
+			for each(var bullet:Body in _bullets)
+			{
+				var bulletMc:McSprite = bullet.userData.graphic;
+				var bs:BulletDesc = bulletBody2bulletDesc(bullet);
+				if(!bulletMc)
+				{
+					bulletMc = StaticTable.GetBulletMcSprite(bs.bulletId);
+					bullet.userData.graphic = bulletMc;
+					map.addChild(bulletMc);
+				}
+				bulletMc.x = bullet.position.x;
+				bulletMc.y = bullet.position.y;
+				bulletMc.rotation = rad2deg(bullet.rotation);
+				
+				if(focusBullet)
+				{
+					focusBullet = false;
+					if(!pointInView(bulletMc.x, bulletMc.y, bs.boundWidth * 1.5))
 					{
-						bulletMc = StaticTable.GetBulletMcSprite(bs.id);
-						bullet.userData.graphic = bulletMc;
-						_release.addChild(bulletMc);
-					}
-					bulletMc.x = bullet.position.x;
-					bulletMc.y = bullet.position.y;
-					bulletMc.rotation = rad2deg(bullet.rotation);
-					
-					if(focusBullet)
-					{
-						focusBullet = false;
-						if(!pointInView(bulletMc.x, bulletMc.y))
-						{
-							focusMap(bullet.position.x, bullet.position.y);
-						}
+						focusMap(bulletMc.x, bulletMc.y, 50);
 					}
 				}
 			}
@@ -870,14 +1005,14 @@ package view.battle
 		
 		private function roleBody2Graphic(role:Body):DisplayObject
 		{
-			return isDebug?null:role.userData.graphic;
+			return role.userData.graphic;
 		}
 		
-		private function pointInView(px:Number, py:Number):Boolean
+		private function pointInView(px:Number, py:Number, radius:Number):Boolean
 		{
 			var tx:Number = px + map.x;
 			var ty:Number = py + map.y;
-			return (tx >= 0 && tx <= StaticTable.STAGE_WIDTH && ty >= 0 && ty <= StaticTable.STAGE_HEIGHT);
+			return (tx - radius >= 0 && tx + radius <= StaticTable.STAGE_WIDTH && ty - radius >= 0 && ty + radius <= StaticTable.STAGE_HEIGHT);
 		}
 	}
 }

@@ -10,16 +10,30 @@ package view.battle
 	
 	import lsg.shoot.IconBg;
 	
-	import org.osflash.signals.Signal;
-	
-	import utils.LHelp;
-	
 	public class ShootView extends Sprite
 	{
 		private var spts:Vector.<DisplayObjectContainer> = new Vector.<DisplayObjectContainer>;
 		
 		public function ShootView()
 		{
+			addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
+		}
+		
+		public var bulletPress:int;
+		protected function onMouseDown(event:MouseEvent):void
+		{
+			var tname:String = event.target.name;
+			if(tname.charAt(0) == "b")
+			{
+				bulletPress = Spt2Bid(event.target as DisplayObject); 
+				stage.addEventListener(MouseEvent.MOUSE_UP, onStageMouseUp);
+			}
+		}
+		
+		protected function onStageMouseUp(event:MouseEvent):void
+		{
+			stage.removeEventListener(MouseEvent.MOUSE_UP, onStageMouseUp);
+			bulletPress = 0;
 		}
 		
 		private var _bulletIds:Vector.<int>;
@@ -40,12 +54,11 @@ package view.battle
 				var spt:IconBg = new IconBg;
 				spt.name = "b" + bid;
 				spt.x = 0;
-				spt.y = i * spt.height;
+				spt.y = (bulletIds.length - i - 1) * (spt.height + 2);
 				addChild(spt);
 				spts.push(spt);
-				spt.addEventListener(MouseEvent.CLICK, onSptClick);
 				
-				var icon:Bitmap = new Bitmap(StaticTable.GetBulletIcon(bid));
+				var icon:Bitmap = StaticTable.GetBulletIcon(bid);
 				icon.x = spt.width *.5 - icon.width*.5;
 				icon.y = spt.height *.5 - icon.height*.5;
 				spt.addChild(icon);
@@ -54,9 +67,9 @@ package view.battle
 			InitPos();
 		}
 		
-		private function Spt2Bid(spt:DisplayObjectContainer):int
+		private function Spt2Bid(spt:DisplayObject):int
 		{
-			return _bulletIds[spts.indexOf(spt)];
+			return int(spt.name.substr(1));
 		}
 		
 		private function Bid2Spt(bid:int):IconBg
@@ -64,30 +77,10 @@ package view.battle
 			return getChildByName("b" + bid) as IconBg;
 		}
 		
-		public var SHOOT:Signal = new Signal(int);
-		
-		protected function onSptClick(event:MouseEvent):void
-		{
-			var bid:int = Spt2Bid(event.currentTarget as DisplayObjectContainer);
-			SHOOT.dispatch(bid);
-		}
-		
 		public function InitPos():void
 		{
 			x = StaticTable.STAGE_WIDTH - width;
-			y = StaticTable.STAGE_HEIGHT - height - 240;
-		}
-		
-		public function printfBulletReady(bid:int):void
-		{
-			var spt:IconBg = Bid2Spt(bid);
-			LHelp.DisGrey(spt);
-		}
-		
-		public function printfBulletUnReady(bid:int):void
-		{
-			var spt:IconBg = Bid2Spt(bid);
-			spt.filters = [];
+			y = StaticTable.STAGE_HEIGHT - height - 220;
 		}
 	}
 }

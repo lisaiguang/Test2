@@ -1,6 +1,5 @@
 package phys
 {
-	import flash.display.Bitmap;
 	import flash.display.BitmapData;
 	
 	import nape.callbacks.CbType;

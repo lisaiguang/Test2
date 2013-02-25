@@ -1,10 +1,11 @@
 package
 {
+	import flash.display.DisplayObject;
 	import flash.display.DisplayObjectContainer;
+	import flash.display.InteractiveObject;
 	import flash.display.Sprite;
 	import flash.events.Event;
 	import flash.utils.Dictionary;
-	import flash.display.DisplayObject;
 	
 	public class MidLayer extends Sprite
 	{
@@ -22,17 +23,48 @@ package
 			_layer = this;
 		}
 		
+		static public function DisableMouse():void
+		{
+			for(var key:Class in _dic)
+			{
+				var tview:Sprite = _dic[key] as Sprite; 
+				if(tview)
+				{
+					tview.mouseEnabled = tview.mouseChildren = false;
+				}
+			}
+		}
+		
+		static public function EnableMouse():void
+		{
+			for(var key:Class in _dic)
+			{
+				var tview:Sprite = _dic[key] as Sprite; 
+				if(tview)
+				{
+					tview.mouseEnabled = tview.mouseChildren = true;
+				}
+			}
+		}
+		
 		static public function ShowWindow(cls:Class, zhezhao:Boolean = false):void
 		{
 			ShowWindowObj(cls,{});
 		}
 		
 		static private var _dic:Dictionary = new Dictionary;
+		static private var _dicObj:Dictionary = new Dictionary;
 		static public function ShowWindowObj(cls:Class, obj:Object):void
 		{
 			if(HasWindow(cls))CloseWindow(cls);
-			var view:DisplayObject;
+			_dicObj[cls] = obj;
 			
+			if(obj.zhezhao)
+			{
+				MidLayer.DisableMouse();
+			}
+			
+			var view:DisplayObject;
 			if(obj.params)
 			{
 				var params:Array = obj.params;
@@ -64,6 +96,11 @@ package
 			
 			_layer.addChild(view);
 			_dic[cls] = view;
+			
+			if("autoInit" in view)
+			{
+				view["autoInit"]();
+			}
 		}
 		
 		static public function CloseWindow(cls:Class):void
@@ -73,6 +110,17 @@ package
 				var view:DisplayObject = _dic[cls];
 				_layer.removeChild(view);
 				delete _dic[cls];
+				
+				var obj:Object = _dicObj[cls];
+				if(obj.callback)
+				{
+					obj.callback();
+				}
+				if(obj.zhezhao)
+				{
+					MidLayer.EnableMouse();
+				}
+				delete _dicObj[cls];
 			}
 		}
 		

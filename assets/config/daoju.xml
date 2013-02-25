@@ -1,0 +1,9 @@
+<root>
+	<d itemId="1" type="1" level="1" name="普通的火药" desc="用于制造炮弹的火药，威力很普通。" sold="1" />
+	
+	<d itemId="2" type="2" level="1"  name="普通的铁" desc="用于制造弹壳，只能制造普通的炮弹" sold="2" />
+	
+	<d itemId="3" type="3" level="1"  name="榴弹图" desc="榴弹的设计图，用它加上一些材料就可以制造出榴弹" sold="100" />
+	
+	<d itemId="4" type="4" level="1"  name="连射X2" desc="可以制造出具有2连射效果的炮弹" sold="200" />
+</root>

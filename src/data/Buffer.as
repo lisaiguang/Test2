@@ -1,47 +1,207 @@
 package data
 {
 	
-	import data.obj.MainPlayer;
-	import data.obj.Player;
-
+	import message.DaoJu;
+	import message.DaoJuDeleteNtf;
+	import message.MainPlayer;
+	import message.MainPlayerGoldNtf;
+	import message.PaoDan;
+	import message.PaoDanDeleteNtf;
+	import message.PaoDanEquipAck;
+	
 	public class Buffer
 	{
 		private static var _mainPlayer:MainPlayer;
+		private static var _daojus:Vector.<DaoJu> = new Vector.<DaoJu>;
+		public static var PaoDans:Vector.<PaoDan> = new Vector.<PaoDan>;
 		
+		public static function get DaoJus():Vector.<DaoJu>
+		{
+			return _daojus;
+		}
+
 		public static function get mainPlayer():MainPlayer
 		{
 			return _mainPlayer;
 		}
 		
-		private static var _players:Vector.<Player> = new Vector.<Player>;
-
-		public static function get palyers():Vector.<Player>
+		public function Buffer()
 		{
-			return _players;
+			MySignals.onMainPlayer.add(CreatePlayer);
+			MySignals.onMainPlayerGoldNtf.add(onMainPlayerGoldNtf);
+			
+			MySignals.onDaoJu.add(onDaoJu);
+			MySignals.onDaoJuDeleteNtf.add(onDaoJuDeleteNtf);
+			
+			MySignals.onPaoDan.add(onPaoDan);
+			MySignals.onPaoDanEquipAck.add(onPaoDanEquipAck);
+			MySignals.onPaoDanDeleteNtf.add(onPaoDanDeleteNtf);
 		}
 		
-		public static function GetPlayerById(id:Number):Player
+		public static function GetPaoDanNewId():Number
 		{
-			for each(var player:Player in _players)
+			var id:Number = 1;
+			for(var i:int = 0; i < PaoDans.length; i++)
 			{
-				if(player.id == id)
+				if(PaoDans[i].id >= id)id = PaoDans[i].id + 1;
+			}
+			return id;
+		}
+		
+		private function onPaoDanDeleteNtf(pddn:PaoDanDeleteNtf):void
+		{
+			for(var i:int = 0; i< PaoDans.length; i++)
+			{
+				var pd:PaoDan = PaoDans[i];
+				if(pd.id == pddn.id)
 				{
-					return player;
+					PaoDans.splice(i,1);
+					break;
+				}
+			}
+		}
+		
+		private function onPaoDanEquipAck(pdea:PaoDanEquipAck):void
+		{
+			if(pdea.error != 0) return;
+			for(var i:int = 0; i< PaoDans.length; i++)
+			{
+				var pd:PaoDan = PaoDans[i];
+				if(pd.id == pdea.id)
+				{
+					PaoDans.splice(i,1);
+					break;
+				}
+			}
+			
+			if(pd.isEquiped)
+			{
+				PaoDans.unshift(pd);
+			}
+			else
+			{
+				PaoDans.push(pd);
+			}
+		}
+		
+		private function onPaoDan(tpd:PaoDan):void
+		{
+			for(var i:int = 0; i< PaoDans.length; i++)
+			{
+				var pd:PaoDan = PaoDans[i];
+				if(pd.id == tpd.id)
+				{
+					pd.count = tpd.count;
+					pd.isEquiped = pd.isEquiped;
+					return;
+				}
+			}
+			PaoDans.push(tpd);
+		}
+		
+		static public function GetPaoDanById(id:Number):PaoDan
+		{
+			for(var i:int = 0; i< PaoDans.length; i++)
+			{
+				var dj:PaoDan = PaoDans[i];
+				if(dj.id == id)
+				{
+					return dj;
 				}
 			}
 			return null;
 		}
-
 		
-		public function Buffer()
+		static public function GetPaoDanByEquiped():Vector.<PaoDan>
 		{
-			MySignals.Create_Main_Player.add(CreatePlayer);
+			var rsult:Vector.<PaoDan> = new Vector.<PaoDan>;
+			for(var i:int = 0; i< PaoDans.length; i++)
+			{
+				var pd:PaoDan = PaoDans[i];
+				if(pd.isEquiped)
+				{
+					rsult.push(pd);
+				}
+			}
+			return rsult;
 		}
 		
+		static public function GetPaoDanBulletIdByEquiped():Vector.<int>
+		{
+			var rsult:Vector.<int> = new Vector.<int>;
+			for(var i:int = 0; i< PaoDans.length; i++)
+			{
+				var pd:PaoDan = PaoDans[i];
+				if(pd.isEquiped)
+				{
+					rsult.push(pd.bulletId);
+				}
+			}
+			return rsult;
+		}
+		
+		private function onMainPlayerGoldNtf(mpgn:MainPlayerGoldNtf):void
+		{
+			_mainPlayer.gold = mpgn.gold;
+		}
+		
+		public static function GetDaoJusByType(type1:int, type2:int = 0):Vector.<DaoJu>
+		{
+			var result:Vector.<DaoJu> = new Vector.<DaoJu>;
+			for(var i:int = 0; i< _daojus.length; i++)
+			{
+				var dj:DaoJu = _daojus[i];
+				if(dj.daojuDesc.type == type1 || dj.daojuDesc.type == type2)
+				{
+					result.push(dj);
+				}
+			}
+			return result;
+		}
+		
+		public static function GetDaoJuById(id:Number):DaoJu
+		{
+			for(var i:int = 0; i< _daojus.length; i++)
+			{
+				var dj:DaoJu = _daojus[i];
+				if(dj.id == id)
+				{
+					return dj;
+				}
+			}
+			return null;
+		}
+		
+		private function onDaoJu(tdj:DaoJu):void
+		{
+			for(var i:int = 0; i< _daojus.length; i++)
+			{
+				var dj:DaoJu = _daojus[i];
+				if(dj.id == tdj.id)
+				{
+					dj.count = tdj.count;
+					return;
+				}
+			}
+			_daojus.push(tdj);
+		}
+		
+		private function onDaoJuDeleteNtf(djdn:DaoJuDeleteNtf):void
+		{
+			for(var i:int = 0; i< _daojus.length; i++)
+			{
+				var dj:DaoJu = _daojus[i];
+				if(dj.id == djdn.id)
+				{
+					_daojus.splice(i,1);
+					return;
+				}
+			}
+		}
+				
 		private function CreatePlayer(player:MainPlayer):void
 		{
 			_mainPlayer = player;
-			_players.push(_mainPlayer);
 		}
 	}
 }

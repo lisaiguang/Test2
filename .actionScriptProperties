@@ -5,6 +5,8 @@
       <compilerSourcePathEntry kind="1" linkType="1" path="/Users/saiguangli/Documents/tools/as3-signals/src"/>
       <compilerSourcePathEntry kind="1" linkType="1" path="/Users/saiguangli/Documents/tools/hires.as3-master/src"/>
       <compilerSourcePathEntry kind="1" linkType="1" path="/Users/saiguangli/Documents/tools/Starling-Framework/starling/src"/>
+      <compilerSourcePathEntry kind="1" linkType="1" path="/Users/saiguangli/Documents/tools/GingerDemo/src"/>
+      <compilerSourcePathEntry kind="1" linkType="1" path="/Users/saiguangli/Documents/tools/greensock-v11-as3"/>
     </compilerSourcePath>
     <libraryPath defaultLinkType="0">
       <libraryPathEntry kind="4" path="">
@@ -40,7 +42,6 @@
       </libraryPathEntry>
       <libraryPathEntry kind="1" linkType="1" path="swcs"/>
       <libraryPathEntry kind="3" linkType="1" path="/Users/saiguangli/Documents/tools/nape/nape-release.swc" useDefaultLinkType="false"/>
-      <libraryPathEntry kind="3" linkType="1" path="/Users/saiguangli/Documents/tools/greensock-as3/greensock.swc" useDefaultLinkType="false"/>
     </libraryPath>
     <sourceAttachmentPath/>
   </compiler>
@@ -54,8 +55,9 @@
   <buildCSSFiles/>
   <flashCatalyst validateFlashCatalystCompatibility="false"/>
   <buildTargets>
-    <buildTarget buildTargetName="device" iosSettingsVersion="2" isCurrent="true" platformId="com.adobe.flexide.multiplatform.ios.platform" provisioningFile="/Users/saiguangli/Documents/keys/iOS_Team_Provisioning_Profile_.mobileprovision" releasePackageType="">
-      <airSettings airCertificatePath="/Users/saiguangli/Documents/keys/Certificates2.p12" airTimestamp="true" anePathSet="true" version="1">
+    <buildTarget buildTargetName="device" iosSettingsVersion="2" isCurrent="true" platformId="com.adobe.flexide.multiplatform.ios.platform" provisioningFile="/Users/saiguangli/Documents/keys/test2.mobileprovision" releasePackageType="">
+      <multiPlatformSettings enabled="true" hideAneLibSymbols="0" includePlatformLibs="false" platformID="com.adobe.flexide.multiplatform.ios.platform" reducedSizePackaging="false" version="1"/>
+      <airSettings airCertificatePath="/Users/saiguangli/Documents/keys/Certificates.p12" airTimestamp="true" anePathSet="true" version="1">
         <airExcludes/>
         <anePaths/>
         <newLaunchParams/>
@@ -63,10 +65,10 @@
         <newPackagingParams/>
         <modifiedPackagingParams/>
       </airSettings>
-      <multiPlatformSettings enabled="true" hideAneLibSymbols="0" includePlatformLibs="false" platformID="com.adobe.flexide.multiplatform.ios.platform" reducedSizePackaging="false" version="1"/>
       <actionScriptSettings version="1"/>
     </buildTarget>
     <buildTarget buildTargetName="default" isCurrent="true" platformId="default">
+      <multiPlatformSettings enabled="false" hideAneLibSymbols="0" includePlatformLibs="false" platformID="default" reducedSizePackaging="false" version="1"/>
       <airSettings airCertificatePath="" airTimestamp="true" anePathSet="false" version="1">
         <airExcludes/>
         <anePaths/>
@@ -75,9 +77,7 @@
         <newPackagingParams/>
         <modifiedPackagingParams/>
       </airSettings>
-      <multiPlatformSettings enabled="false" hideAneLibSymbols="0" includePlatformLibs="false" platformID="default" reducedSizePackaging="false" version="1"/>
       <actionScriptSettings version="1"/>
     </buildTarget>
   </buildTargets>
 </actionScriptProperties>
-

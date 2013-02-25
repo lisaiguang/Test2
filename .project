@@ -24,9 +24,19 @@
 	</natures>
 	<linkedResources>
 		<link>
+			<name>[source path] GingerDemo-src</name>
+			<type>2</type>
+			<location>/Users/saiguangli/Documents/tools/GingerDemo/src</location>
+		</link>
+		<link>
 			<name>[source path] as3-signals-src</name>
 			<type>2</type>
 			<location>/Users/saiguangli/Documents/tools/as3-signals/src</location>
+		</link>
+		<link>
+			<name>[source path] greensock-v11-as3</name>
+			<type>2</type>
+			<location>/Users/saiguangli/Documents/tools/greensock-v11-as3</location>
 		</link>
 		<link>
 			<name>[source path] hires.as3-master-src</name>

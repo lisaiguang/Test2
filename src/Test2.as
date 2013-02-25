@@ -1,6 +1,7 @@
 package
 {
-	import com.greensock.TweenLite;
+	import com.greensock.plugins.TransformAroundCenterPlugin;
+	import com.greensock.plugins.TweenPlugin;
 	
 	import flash.desktop.NativeApplication;
 	import flash.display.Sprite;
@@ -13,11 +14,16 @@ package
 	import data.MySignals;
 	import data.MySocket;
 	import data.StaticTable;
-	import data.obj.MainPlayer;
+	
+	import message.DaoJu;
+	import message.MainPlayer;
+	import message.PaoDan;
 	
 	import net.hires.debug.Stats;
 	
 	import view.WelcomeView;
+	
+	import warn.WarnView;
 	
 	public class Test2 extends Sprite
 	{	
@@ -26,6 +32,7 @@ package
 		
 		public function Test2()
 		{
+			TweenPlugin.activate([TransformAroundCenterPlugin]);
 			stage.align = StageAlign.TOP_LEFT;
 			stage.scaleMode = StageScaleMode.NO_SCALE;
 			
@@ -39,8 +46,8 @@ package
 			Starling.handleLostContext = !iOS; 
 			
 			var viewPort:Rectangle = RectangleUtil.fit(
-				new Rectangle(0, 0, stageWidth, stageHeight), 
-				new Rectangle(0, 0, stage.fullScreenWidth, stage.fullScreenHeight), true);
+			new Rectangle(0, 0, stageWidth, stageHeight), 
+			new Rectangle(0, 0, stage.fullScreenWidth, stage.fullScreenHeight), true);
 			
 			var scaleFactor:int = viewPort.width < 480 ? 1 : 2; // midway between 320 and 640
 			var appDir:File = File.applicationDirectory;
@@ -52,11 +59,11 @@ package
 			mStarling.enableErrorChecking = Capabilities.isDebugger;
 			
 			mStarling.addEventListener(starling.events.Event.ROOT_CREATED, 
-				function onRootCreated(event:Object, app:StarlingLayer):void
-				{
-					mStarling.removeEventListener(starling.events.Event.ROOT_CREATED, onRootCreated);
-					mStarling.start();
-				});*/
+			function onRootCreated(event:Object, app:StarlingLayer):void
+			{
+			mStarling.removeEventListener(starling.events.Event.ROOT_CREATED, onRootCreated);
+			mStarling.start();
+			});*/
 			
 			NativeApplication.nativeApplication.addEventListener(
 				flash.events.Event.ACTIVATE, function (e:*):void { /*mStarling.start();*/ });
@@ -75,29 +82,6 @@ package
 			var ts:int = getTimer();
 			ELAPSED = ts - TIMESTAMP;
 			TIMESTAMP = ts;
-			
-			for (var i:int = 0; i < _mills.length; i++)
-			{
-				_mills[i]-=ELAPSED;
-				if(_mills[i] <= 0)
-				{
-					_funcs[i].apply(null, _params[i]);
-					_mills.splice(i,1);
-					_funcs.splice(i,1);
-					_params.splice(i,1);
-					i--;
-				}
-			}
-		}
-		
-		private static var _mills:Vector.<int> = new Vector.<int>;
-		private static var _funcs:Vector.<Function> = new Vector.<Function>;
-		private static var _params:Vector.<Array> = new Vector.<Array>;
-		public static function Delay(mills:int, func:Function, params:Array = null):void
-		{
-			_mills.push(mills);
-			_funcs.push(func);
-			_params.push(params);
 		}
 		
 		protected function onAddToStage(event:flash.events.Event):void
@@ -121,13 +105,46 @@ package
 			var player:MainPlayer = new MainPlayer;
 			player.id = 1;
 			player.name = "lsg";
-			MySignals.Create_Main_Player.dispatch(player);
+			player.gold = 1000;
+			MySignals.onMainPlayer.dispatch(player);
+			
+			for(var i:int = 1; i <= 100; i ++)
+			{
+				var dj:DaoJu = new DaoJu;
+				dj.id = i;
+				dj.itemId = i % 4 + 1;
+				dj.count = 1;
+				MySignals.onDaoJu.dispatch(dj);
+			}
+			
+			for(i = 0; i < 4; i++)
+			{
+				var pd:PaoDan = new PaoDan;
+				pd.id = i + 1;
+				pd.bulletId = i % 4 + 1;
+				pd.count = 1;
+				pd.isEquiped = true;
+				MySignals.onPaoDan.dispatch(pd);
+			}
 		}
 		
 		private var _socket:MySocket = new MySocket;
 		
 		private function SocketInit():void
 		{
+		}
+		
+		public static function Warn(content:String, okFun:Function = null, cancleFun:Function = null, okParams:Array = null, cancleParams:Array = null):void
+		{
+			MidLayer.ShowWindowObj(WarnView, {zhezhao:true, params:[{content:content, ok:okFun, cancle:cancleFun, okParams:okParams, cancleParams:cancleParams}]});
+		}
+		
+		public static function Error(error:int):void
+		{
+			if(StaticTable.ERROR_DIC[error])
+				Warn(StaticTable.ERROR_DIC[error]);
+			else
+				Warn("undefined error : "+error);
 		}
 	}
 }

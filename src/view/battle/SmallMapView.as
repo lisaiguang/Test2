@@ -14,12 +14,13 @@ package view.battle
 	{
 		public function InitPos():void
 		{
-			x = StaticTable.STAGE_WIDTH - width;
+			x = 0;
 			y = 0;
 		}
 		
 		public function SmallMapView()
 		{
+			visible = false;
 		}
 		
 		private var _bmp:Bitmap;

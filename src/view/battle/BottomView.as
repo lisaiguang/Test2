@@ -3,6 +3,7 @@ package view.battle
 	import flash.events.MouseEvent;
 	
 	import data.StaticTable;
+	import message.EnumDirection;
 	
 	import lsg.battle.BottomUI;
 	
@@ -10,11 +11,6 @@ package view.battle
 	{
 		public function BottomView()
 		{
-			/*btnFire.addEventListener(MouseEvent.MOUSE_DOWN, onFireDown);
-			btnUp.addEventListener(MouseEvent.MOUSE_DOWN, onUpDown);
-			btnDown.addEventListener(MouseEvent.MOUSE_DOWN, onDownDown);
-			btnLeft.addEventListener(MouseEvent.MOUSE_DOWN, onLeftDown);
-			btnRight.addEventListener(MouseEvent.MOUSE_DOWN, onRightDown);*/
 			addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
 		}
 		
@@ -22,10 +18,6 @@ package view.battle
 		{
 			switch(event.target.name)
 			{
-				case "btnFire":
-					isFirePressing = true;
-					stage.addEventListener(MouseEvent.MOUSE_UP, onStageMouseUp);
-					break;
 				case "btnUp":
 					isUpPressing = true;
 					stage.addEventListener(MouseEvent.MOUSE_UP, onStageMouseUp);
@@ -77,33 +69,25 @@ package view.battle
 			isUpPressing = true;
 		}
 		
-		public var isFirePressing:Boolean = false;
-		
-		protected function onFireDown(event:MouseEvent):void
-		{
-			stage.addEventListener(MouseEvent.MOUSE_UP, onStageMouseUp);
-			isFirePressing = true;
-		}
-		
 		protected function onStageMouseUp(event:MouseEvent):void
 		{
 			stage.removeEventListener(MouseEvent.MOUSE_UP, onStageMouseUp);
-			isDownPressing = isUpPressing = isRightPressing = isLeftPressing = isFirePressing = false;
+			isDownPressing = isUpPressing = isRightPressing = isLeftPressing = false;
 		}
 		
 		public function InitPos():void
 		{
 			x = 10;
-			y = StaticTable.STAGE_HEIGHT - height - 5;
+			y = StaticTable.STAGE_HEIGHT - height - 10;
 		}
 		
-		public function printfDegree(degree:int):void
+		public function printfDegree(degree:Number, direction:int):void
 		{
-			txtDegree.text = (degree < -90 ? degree + 180: -degree) + "°";
+			txtDegree.text = int(direction == EnumDirection.LEFT? 180 + degree:-degree) + "°";
 			mcPointer.rotation = degree;
 		}
 		
-		public function printfForce(force:int):void
+		public function printfForce(force:int, lastForce:int):void
 		{
 			txtForce.text = force + "%";
 			barForce.width = 440 * force * 0.01;
