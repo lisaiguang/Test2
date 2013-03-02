@@ -37,12 +37,13 @@ package view.paodan
 		public function PaoDanView()
 		{
 			addChild(_ui);
+			_ui.mcPaoDanDetail.gotoAndStop(1);
 			_ui.btnClose.addEventListener(MouseEvent.CLICK, onClose);
 			_ui.btnChuShou.addEventListener(MouseEvent.CLICK, onSold);
 			_ui.btnEquip.addEventListener(MouseEvent.CLICK, onEquip);
 			_ui.btnUpequip.addEventListener(MouseEvent.CLICK, onUnEquip);
 			
-			_lchecker = new MCheckers([_ui.tabPaodan], {over:1, select:2, check:_ui.tabPaodan, click:onTab});
+			_lchecker = new MCheckers([_ui.tabPaodan, _ui.tabTeShu], {over:1, select:2, check:_ui.tabPaodan, click:onTab});
 			
 			addChild(_mc = new Sprite);
 			_mask = new BlitMask(_mc, 0, 0, 500, 400);
@@ -51,7 +52,7 @@ package view.paodan
 			_sp = new SlidePage(_mc, _mask);
 			_sp.enableScrollX = true;
 			
-			printfPaoDans(Buffer.PaoDans);
+			onTab();
 			printfMoney(Buffer.mainPlayer.gold);
 			
 			listen(MySignals.onMainPlayerGoldNtf, onMainPlayerGoldNtf);
@@ -75,7 +76,7 @@ package view.paodan
 		{
 			if(_select)
 			{
-				Test2.Warn("您是否卸下" + _select.paodan.bulletDesc.name + "？", sendEquip, null, [false]);
+				Test2.Warn("您是否卸下" + _select.paodan.bulletDesc.tuzhi.name + "？", sendEquip, null, [false]);
 			}
 		}
 		
@@ -91,7 +92,7 @@ package view.paodan
 		{
 			if(_select)
 			{
-				Test2.Warn("您是否装备" + _select.paodan.bulletDesc.name + "？", sendEquip, null, [true]);
+				Test2.Warn("您是否装备" + _select.paodan.bulletDesc.tuzhi.name + "？", sendEquip, null, [true]);
 			}
 		}
 		
@@ -99,7 +100,7 @@ package view.paodan
 		{
 			if(_select)
 			{
-				Test2.Warn("您是否装备" + _select.paodan.bulletDesc.name + "？", sendSold);
+				Test2.Warn("您是否装备" + _select.paodan.bulletDesc.tuzhi.name + "？", sendSold);
 			}
 		}
 		
@@ -181,27 +182,55 @@ package view.paodan
 		
 		private function printfSelectPaoDan(pd:PaoDan):void
 		{
+			if(_lchecker.getCheckIndex() == 0 && _ui.mcPaoDanDetail.currentFrame != 1)
+			{
+				_ui.mcPaoDanDetail.gotoAndStop(1);
+			}
+			
+			if(_lchecker.getCheckIndex() == 1 && _ui.mcPaoDanDetail.currentFrame != 2)
+			{
+				_ui.mcPaoDanDetail.gotoAndStop(2);
+			}
+			
 			if(pd == null)
 			{
-				_ui.txtSize.text = "";
-				_ui.txtRange.text = "";
-				_ui.txtHurt.text = "";
 				_ui.txtName.text = "";
-				_ui.txtDesc.text = "";
-				_ui.txtSold.text = "";
-				_ui.btnEquip.visible = _ui.btnUpequip.visible = _ui.btnChuShou.visible = false;
+				if(_ui.mcPaoDanDetail.currentFrame == 1)
+				{
+					_ui.mcPaoDanDetail.txtSize.text = "";
+					_ui.mcPaoDanDetail.txtRange.text = "";
+					_ui.mcPaoDanDetail.txtHurt.text = "";
+					_ui.mcPaoDanDetail.txtSold.text = "";
+					_ui.mcPaoDanDetail.txtBaoShi.text = "";
+					_ui.btnEquip.visible = _ui.btnUpequip.visible = _ui.btnChuShou.visible = false;
+				}
+				else
+				{
+					_ui.mcPaoDanDetail.txtDesc.text = "";
+					_ui.btnEquip.visible = _ui.btnUpequip.visible = _ui.btnChuShou.visible = false;
+				}
 			}
 			else
 			{
-				_ui.txtSize.text = pd.bulletDesc.boundWidth + "x" + pd.bulletDesc.boundHeight;
-				_ui.txtRange.text = pd.bulletDesc.range + "";
-				_ui.txtHurt.text = pd.bulletDesc.hurt + "";
-				_ui.txtName.text = pd.bulletDesc.name;
-				_ui.txtDesc.text = pd.bulletDesc.desc;
-				_ui.txtSold.text = pd.bulletDesc.sold + "";
-				_ui.btnEquip.visible = !pd.isEquiped;
-				_ui.btnUpequip.visible = pd.isEquiped;
-				_ui.btnChuShou.visible = true;
+				_ui.txtName.text = pd.bulletDesc.tuzhi.name;
+				if(_ui.mcPaoDanDetail.currentFrame == 1)
+				{
+					_ui.mcPaoDanDetail.txtSize.text = pd.bulletDesc.tuzhi.width + "x" + pd.bulletDesc.tuzhi.height;
+					_ui.mcPaoDanDetail.txtRange.text = pd.bulletDesc.range + "";
+					_ui.mcPaoDanDetail.txtHurt.text = pd.bulletDesc.hurt + "";
+					_ui.mcPaoDanDetail.txtBaoShi.text = StaticTable.GetBaoShiName(pd.bulletDesc.baoshi);
+					_ui.mcPaoDanDetail.txtSold.text = pd.bulletDesc.sold + "";
+					_ui.btnEquip.visible = !pd.isEquiped;
+					_ui.btnUpequip.visible = pd.isEquiped;
+					_ui.btnChuShou.visible = true;
+				}
+				else
+				{
+					_ui.mcPaoDanDetail.txtDesc.text = pd.bulletDesc.desc;
+					_ui.btnEquip.visible = !pd.isEquiped;
+					_ui.btnUpequip.visible = pd.isEquiped;
+					_ui.btnChuShou.visible = false;
+				}
 			}
 		}
 		
@@ -222,7 +251,21 @@ package view.paodan
 		
 		private function onTab(update:Boolean = true):void
 		{
-			printfPaoDans(Buffer.PaoDans);
+			switch(_lchecker.getCheckIndex())
+			{
+				case 0:
+				{
+					printfPaoDans(Buffer.GetPaoDanNormal(true));
+					break;
+				}
+					
+				case 1:
+				{
+					printfPaoDans(Buffer.GetPaoDanNormal(false));
+					break;
+				}
+			}
+			
 			if(update)
 			{
 				_mc.x = _ui.x + 268;

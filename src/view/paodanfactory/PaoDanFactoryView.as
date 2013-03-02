@@ -78,6 +78,13 @@ package view.paodanfactory
 			{
 				checker.removeChildAt(numChildren - 1);
 				_txts[index].text = "";
+				if(index == _schecker.getCheckIndex())
+				{
+					if(_selects[index])
+					{
+						LHelp.RemoveGlow(_selects[index]);
+					}
+				}
 				_selects[index] = null;
 			}
 		}
@@ -89,10 +96,11 @@ package view.paodanfactory
 			{
 				clearSelect(i);
 			}
-			printfSelectDaoJu();
-			onTab();
+			printfSelectDaoJu(null);
+			
 			if(mess.error == 0)
 			{
+				_schecker.SetCheck(null);
 				var pd:PaoDan = Buffer.GetPaoDanById(mess.paodanId);
 				printfPaoDan(pd);
 			}
@@ -114,8 +122,10 @@ package view.paodanfactory
 				_ps = new PaoDanSprite(pd);
 				_ui.mcPaoDan.addChild(_ps);
 				_ui.txtPaoDan.text = pd.bulletDesc.sold + "G";
-				_ui.txtName.text = pd.bulletDesc.name;
+				_ui.txtName.text = pd.bulletDesc.tuzhi.name;
 				_ui.txtDesc.text = pd.bulletDesc.desc;
+				LHelp.Clear(_mc);
+				LHelp.AddGlow(_ui.mcPaoDan);
 			}
 			else
 			{
@@ -123,6 +133,7 @@ package view.paodanfactory
 				_ui.txtPaoDan.text = "";
 				_ui.txtName.text = "";
 				_ui.txtDesc.text = "";
+				LHelp.RemoveGlow(_ui.mcPaoDan);
 			}
 		}
 		
@@ -223,7 +234,7 @@ package view.paodanfactory
 			}
 			else
 			{
-				printfSelectDaoJu();
+				printfSelectDaoJu(null);
 			}
 			_mask.update(null, true);
 		}
@@ -237,13 +248,13 @@ package view.paodanfactory
 				if(isClick && _select.daoju.id == ds.daoju.id)
 				{
 					_select = null;
-					printfSelectDaoJu();
+					printfSelectDaoJu(null);
 					return;
 				}
 			}
 			_select = ds;
 			LHelp.AddGlow(_select);
-			printfSelectDaoJu();
+			printfSelectDaoJu(_select.daoju);
 			
 			if(isClick)
 			{
@@ -277,13 +288,8 @@ package view.paodanfactory
 			}
 		}
 		
-		private function printfSelectDaoJu():void
+		private function printfSelectDaoJu(dj:DaoJu):void
 		{
-			var dj:DaoJu = null;
-			if(_select)
-			{
-				dj = _select.daoju;
-			}
 			if(dj)
 			{
 				_ui.txtName.text = dj.daojuDesc.name;

@@ -15,6 +15,7 @@ package view.island
 	
 	import view.battle.BattleView;
 	import view.daoju.DaoJuView;
+	import view.gangkou.GangKouView;
 	import view.paodan.PaoDanView;
 	import view.paodanfactory.PaoDanFactoryView;
 	
@@ -28,10 +29,17 @@ package view.island
 			addChild(_ui);
 			_ui.mcJinJi.addEventListener(MouseEvent.CLICK, onJinJiClick);
 			_ui.mcPaoDan.addEventListener(MouseEvent.CLICK, onPaoDanFactoryClick);
+			_ui.mcGangKou.addEventListener(MouseEvent.CLICK, onGangKouClick);
 			
 			addChild(_menuUI);
 			_menuUI.btnDaoJu.addEventListener(MouseEvent.CLICK, onDaoJuClick);
 			_menuUI.btnPao.addEventListener(MouseEvent.CLICK, onPaoDanClick);
+		}
+		
+		protected function onGangKouClick(event:MouseEvent):void
+		{
+			MidLayer.CloseWindow(IslandView);
+			MidLayer.ShowWindowObj(GangKouView, {zhezhao:true});
 		}
 		
 		protected function onPaoDanFactoryClick(event:MouseEvent):void

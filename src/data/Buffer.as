@@ -38,6 +38,16 @@ package data
 			MySignals.onPaoDanDeleteNtf.add(onPaoDanDeleteNtf);
 		}
 		
+		public static function GetPaoDanNormal(isNormal:Boolean = true):Vector.<PaoDan>
+		{
+			var result:Vector.<PaoDan> = new Vector.<PaoDan>;
+			for(var i:int = 0; i < PaoDans.length; i++)
+			{
+				if(PaoDans[i].bulletDesc.isNormal == isNormal)result.push(PaoDans[i]);
+			}
+			return result;
+		}
+		
 		public static function GetPaoDanNewId():Number
 		{
 			var id:Number = 1;

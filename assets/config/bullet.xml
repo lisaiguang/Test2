@@ -1,6 +1,10 @@
 <root>
-	<b id="1" bulletId="1" shootType="1" hurt="200" name="普通的榴弹炮" desc="普通的榴弹炮，爆炸范围比较大，但是伤害较小" width="20" height="10" mass="16" clear="0,40" sold="100"/>
-	<b id="2" bulletId="1" shootType="2" hurt="120" name="连射榴弹炮" desc="连射的榴弹炮，能够连续发射3枚榴弹炮但是伤害减小了" width="20" height="10" mass="16" clear="0,40" sold="300"/>
-	<b id="3" bulletId="1" shootType="3" hurt="120" name="散射榴弹炮" desc="散射的榴弹炮，能够同时发射3枚榴弹炮但是伤害减小了" width="20" height="10" mass="16" clear="0,40" sold="300"/>
-	<b id="4" bulletId="2" shootType="4" hurt="0" name="定位飞弹" desc="能够将玩家转移到飞弹到达的位置" width="20" height="10" mass="16" clear="0,0" sold="100"/>
+	<tz id="1" width="20" height="10" mass="16" name="榴弹炮">
+		<b id="1" bs="0" hurt="200" clear="0,40" sold="100" />
+		<b id="2" bs="1" hurt="120" clear="0,40" sold="300" />
+		<b id="3" bs="2" hurt="120" clear="0,40" sold="300" />
+	</tz>
+	<tz id="2" width="20" height="10" mass="16" name="定位飞弹">
+		<sb id="4" desc="能够将玩家转移到飞弹到达的位置" />
+	</tz>
 </root>

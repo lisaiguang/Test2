@@ -24,6 +24,11 @@
 	</natures>
 	<linkedResources>
 		<link>
+			<name>[source path] As3IsoLib-src</name>
+			<type>2</type>
+			<location>/Users/saiguangli/Documents/tools/As3IsoLib/src</location>
+		</link>
+		<link>
 			<name>[source path] GingerDemo-src</name>
 			<type>2</type>
 			<location>/Users/saiguangli/Documents/tools/GingerDemo/src</location>
@@ -32,6 +37,11 @@
 			<name>[source path] as3-signals-src</name>
 			<type>2</type>
 			<location>/Users/saiguangli/Documents/tools/as3-signals/src</location>
+		</link>
+		<link>
+			<name>[source path] bit101</name>
+			<type>2</type>
+			<location>/Users/saiguangli/Documents/tools/bit101</location>
 		</link>
 		<link>
 			<name>[source path] greensock-v11-as3</name>

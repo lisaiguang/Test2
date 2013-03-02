@@ -5,6 +5,7 @@ package data
 	import flash.utils.Dictionary;
 	
 	import data.staticObj.BulletDesc;
+	import data.staticObj.EnumBaoShi;
 	
 	import message.BattleBeginAck;
 	import message.BattleBeginReq;
@@ -349,22 +350,16 @@ package data
 					{
 						MySignals.onDaoJu.dispatch(baoshi);
 					}
-					pd = new PaoDan();
-					pd.id = Buffer.GetPaoDanNewId();
-					pd.bulletId = 2;
-					pd.count = 1;
-					pd.isEquiped = false;
-					MySignals.onPaoDan.dispatch(pd);
 				}
-				else
-				{
-					pd = new PaoDan();
-					pd.id = Buffer.GetPaoDanNewId();
-					pd.bulletId = 1;
-					pd.count = 1;
-					pd.isEquiped = false;
-					MySignals.onPaoDan.dispatch(pd);
-				}
+				
+				pd = new PaoDan();
+				pd.id = Buffer.GetPaoDanNewId();
+				pd.bulletId = StaticTable.GetNormalBulletByTuzhiBaoShi(tuzhi.daojuDesc.tz, baoshi ? baoshi.daojuDesc.bs:EnumBaoShi.NONE).id;
+				pd.level = 0;
+				pd.count = 1;
+				pd.isEquiped = false;
+				MySignals.onPaoDan.dispatch(pd);
+				
 				var djhca:DaoJuHeChengAck = new DaoJuHeChengAck;
 				djhca.paodanId = pd.id;
 				djhca.count = 1;

@@ -6,12 +6,13 @@ package data
 	
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
-	import flash.display.Sprite;
+	import flash.display.Shape;
 	import flash.utils.Dictionary;
 	
 	import data.staticObj.BulletDesc;
 	import data.staticObj.DaoJuDesc;
 	import data.staticObj.RoleDesc;
+	import data.staticObj.TuZhiDesc;
 	
 	import lsg.DaojuIcon1;
 	import lsg.DaojuIcon2;
@@ -28,9 +29,10 @@ package data
 	import lsg.role.r1;
 	
 	import message.EnumAction;
+	import message.EnumDaoJuType;
 	
 	import utils.McSprite;
-
+	
 	public class StaticTable
 	{
 		public static var STAGE_WIDTH:int  = 960;
@@ -51,36 +53,57 @@ package data
 		public static function Init():void
 		{
 			var bulletsXml:XML = new XML(new bulletConfig);
-			for(var i:int = 0; i < bulletsXml.b.length(); i++)
+			for(i = 0; i < bulletsXml.sb.length(); i++)
 			{
-				var bulletXML:XML = bulletsXml.b[i];
-				var bs:BulletDesc = new BulletDesc;
-				bs.id = int(bulletXML.@id);
-				bs.bulletId = int(bulletXML.@bulletId);
-				bs.shootType = int(bulletXML.@shootType);
-				bs.hurt = int(bulletXML.@hurt);
-				bs.boundWidth = int(bulletXML.@width);
-				bs.boundHeight = int(bulletXML.@height);
-				bs.mass = int(bulletXML.@mass);
-				bs.name = bulletXML.@name;
-				bs.desc = bulletXML.@desc;
-				bs.sold = int(bulletXML.@sold);
-				
-				var clearParams:Array = String(bulletXML.@clear).split(",");
-				for each(var param:* in clearParams)
+				tzDes = new TuZhiDesc;
+				tzDes.id 
+			}
+			for(var i:int = 0; i < bulletsXml.tz.length(); i++)
+			{
+				var tzXml:XML = bulletsXml.tz[i];
+				var tzDes:TuZhiDesc = new TuZhiDesc;
+				tzDes.id = int(tzXml.@id);
+				tzDes.width = int(tzXml.@width);
+				tzDes.height = int(tzXml.@height);
+				tzDes.mass = int(tzXml.@mass);
+				tzDes.name = tzXml.@name;
+				TUZHI_DESC.push(tzDes);
+				for(var j:int = 0; j < tzXml.b.length(); j++)
 				{
-					bs.clearParams.push(int(param));
+					var bulletXML:XML = tzXml.b[j];
+					var bs:BulletDesc = new BulletDesc;
+					bs.id = int(bulletXML.@id);
+					bs.tuzhi = tzDes;
+					bs.baoshi = bulletXML.@bs?int(bulletXML.@bs):0;
+					bs.hurt = int(bulletXML.@hurt);
+					bs.sold = int(bulletXML.@sold);
+					var clearParams:Array = String(bulletXML.@clear).split(",");					
+					var bomb:Shape = new Shape;
+					bomb.graphics.beginFill(0xffffff, 1);
+					if(clearParams[0] == BulletDesc.CLEAR_CIRCLE)
+					{
+						bs.range = clearParams[1] * clearParams[1] * Math.PI;
+						bomb.graphics.drawCircle(0, 0, clearParams[1]);
+					}
+					else if(clearParams[0] == BulletDesc.CLEAR_RECT)
+					{
+						bs.range = clearParams[1]  * clearParams[2];
+						bomb.graphics.drawRect(0,0,clearParams[1],clearParams[2]);
+					}
+					bomb.graphics.endFill();
+					bs.clearShape = bomb;
+					StaticTable.BULLET_DESC.push(bs);
 				}
-				StaticTable.BULLET_DESC.push(bs);
-				
-				var bomb:Sprite = new Sprite;
-				bomb.graphics.beginFill(0xffffff, 1);
-				if(bs.clearParams[0] == BulletDesc.CLEAR_CIRCLE)
-					bomb.graphics.drawCircle(0, 0, bs.clearParams[1]);
-				else if(bs.clearParams[0] == BulletDesc.CLEAR_RECT)
-					bomb.graphics.drawRect(0,0,bs.clearParams[1],bs.clearParams[2]);
-				bomb.graphics.endFill();
-				clearDic[bs.id] =bomb;
+				for(j = 0; j < tzXml.sb.length(); j++)
+				{
+					bulletXML = tzXml.sb[j];
+					bs = new BulletDesc;
+					bs.tuzhi = tzDes;
+					bs.baoshi = bulletXML.@bs?int(bulletXML.@bs):0;
+					bs.id = int(bulletXML.@id);
+					bs.desc = bulletXML.@desc;
+					StaticTable.BULLET_DESC.push(bs);
+				}
 			}
 			bulletConfig = null;
 			
@@ -102,9 +125,20 @@ package data
 			{
 				var dx:XML = xml.d[i];
 				var ds:DaoJuDesc = new DaoJuDesc;
-				ds.itemId = int(dx.@itemId);
+				ds.itemId = int(dx.@id);
 				ds.type = int(dx.@type);
-				ds.level = int(dx.@level);
+				if(ds.type == 1 || ds.type == 2)
+				{
+					ds.extra = int(dx.@level);
+				}
+				else if(ds.type == 3)
+				{
+					ds.extra = int(dx.@tz);
+				}
+				else
+				{
+					ds.extra = int(dx.@bs);
+				}
 				ds.name = dx.@name;
 				ds.desc = dx.@desc;
 				ds.sold = int(dx.@sold);
@@ -129,6 +163,16 @@ package data
 		}
 		public static var ERROR_DIC:Dictionary = new Dictionary;
 		public static var DAOJU_DESC:Vector.<DaoJuDesc> = new Vector.<DaoJuDesc>;
+		
+		public static function GetBaoShiName(baoshi:int):String
+		{
+			for each(var bs:DaoJuDesc in DAOJU_DESC)
+			{
+				if(bs.type == EnumDaoJuType.BaoShi && bs.bs == baoshi)return bs.name;
+			}
+			return "无镶嵌";
+		}
+		
 		public static function GetDaoJuDesc(itemId:int):DaoJuDesc
 		{
 			for each(var bs:DaoJuDesc in DAOJU_DESC)
@@ -171,11 +215,31 @@ package data
 		}
 		
 		public static var BULLET_DESC:Vector.<BulletDesc> = new Vector.<BulletDesc>;
+		public static var TUZHI_DESC:Vector.<TuZhiDesc> = new Vector.<TuZhiDesc>;
+		
+		public static function GetTuZhiDescById(id:int):TuZhiDesc
+		{
+			for each(var bs:TuZhiDesc in TUZHI_DESC)
+			{
+				if(bs.id == id)return bs;
+			}
+			return null;
+		}
+		
 		public static function GetBulletDesc(id:int):BulletDesc
 		{
 			for each(var bs:BulletDesc in BULLET_DESC)
 			{
 				if(bs.id == id)return bs;
+			}
+			return null;
+		}
+		
+		public static function GetNormalBulletByTuzhiBaoShi(tzId:int, baoshi:int):BulletDesc
+		{
+			for each(var bs:BulletDesc in BULLET_DESC)
+			{
+				if(bs.isNormal && bs.tuzhi.id == tzId && bs.baoshi == baoshi)return bs;
 			}
 			return null;
 		}
@@ -208,7 +272,7 @@ package data
 				case 4:
 					bd = BitmapDataPool.getBitmapData(Icon4);
 					break;
-					
+				
 			}
 			var bmp:Bitmap = new Bitmap(bd);
 			return bmp;
@@ -251,12 +315,6 @@ package data
 			ap.addAnimation(EnumAction.ROLE_MOVING,  animation);
 			
 			return ap;
-		}
-		
-		private static var clearDic:Dictionary = new Dictionary;
-		public static function GetBulletClear(id:int):Sprite
-		{
-			return clearDic[id];
 		}
 	}
 }

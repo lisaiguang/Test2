@@ -8,6 +8,7 @@ package view.battle
 	import flash.display.BitmapData;
 	import flash.display.BlendMode;
 	import flash.display.DisplayObject;
+	import flash.display.Shape;
 	import flash.display.Sprite;
 	import flash.events.Event;
 	import flash.events.MouseEvent;
@@ -21,6 +22,7 @@ package view.battle
 	import data.MySignals;
 	import data.StaticTable;
 	import data.staticObj.BulletDesc;
+	import data.staticObj.EnumBaoShi;
 	import data.staticObj.RoleDesc;
 	
 	import lsg.battle.LoseUI;
@@ -77,7 +79,7 @@ package view.battle
 	
 	public class BattleView extends LazySprite
 	{
-		public static const isDebug:Boolean = false;
+		public static const isDebug:Boolean = true;
 		
 		private var _bba:BattleBeginAck;
 		public function BattleView(bba:BattleBeginAck)
@@ -128,7 +130,7 @@ package view.battle
 			_space = new Space(gravity);
 			
 			var bd:BitmapData = StaticTable.GetMapBmd(_bba.mapId);
-			_terrain = new Terrain(_space, bd, new Vec2(0,0), 64, 8);
+			_terrain = new Terrain(_space, bd, new Vec2(0,0), 42, 6);
 			
 			var border:Body = new Body(BodyType.STATIC);
 			border.shapes.add(new Polygon(Polygon.rect(-BORDER_PADDING, -BORDER_PADDING, bd.width + BORDER_PADDING*2, 1)));
@@ -280,9 +282,9 @@ package view.battle
 			bullet.space = null;
 			
 			var bs:BulletDesc = bulletBody2bulletDesc(bullet);
-			if(bs.shootType != 4)
+			if(bs.isNormal)
 			{
-				explosion(bullet.position, bs.id);
+				explosion(bullet.position, bs);
 				
 				if(_bullets.length == 0 && _hasLastBullet)
 				{
@@ -296,10 +298,10 @@ package view.battle
 			}
 		}
 		
-		private function explosion(pos:Vec2, bid:int):void 
+		private function explosion(pos:Vec2, bs:BulletDesc):void 
 		{
 			var ts:int = getTimer();
-			var bomb:Sprite = StaticTable.GetBulletClear(bid);
+			var bomb:Shape = bs.clearShape;
 			var rect:Rectangle = bomb.getBounds(bomb);
 			rect.x += pos.x;
 			rect.y += pos.y;
@@ -328,7 +330,7 @@ package view.battle
 			if(pids)
 			{
 				var phr:PlayerHurtReq = new PlayerHurtReq;
-				phr.bid = bid;
+				phr.bid = bs.id;
 				phr.distances = distances;
 				phr.pids = pids;
 				MySignals.Socket_Send.dispatch(phr);
@@ -619,25 +621,22 @@ package view.battle
 			if(bid == 0) bid = 1;
 			
 			var _bs:BulletDesc = StaticTable.GetBulletDesc(bid);
-			if(_bs.shootType == 1)
+			trace(_bs, _bs.baoshi);
+			if(_bs.baoshi == EnumBaoShi.NONE)
 			{
 				shootAbullet(pid, _bs, rad, force);
 			}
-			else if(_bs.shootType == 2)
+			else if(_bs.baoshi == EnumBaoShi.LIAN_SHE)
 			{
 				shootAbullet(pid, _bs, rad, force, false);
 				TweenLite.delayedCall(0.5, shootAbullet, [pid, _bs, rad, force, false]);
 				TweenLite.delayedCall(1.0, shootAbullet, [pid, _bs, rad, force, true]);
 			}
-			else if(_bs.shootType == 3)
+			else if(_bs.baoshi == EnumBaoShi.SAN_SHE)
 			{
 				shootAbullet(pid, _bs, rad, force);
 				shootAbullet(pid, _bs, rad - Math.PI / 16, force);
 				shootAbullet(pid, _bs, rad + Math.PI / 16, force);
-			}
-			else if(_bs.shootType == 4)
-			{
-				shootAbullet(pid, _bs, rad, force, false);
 			}
 		}
 		
@@ -645,10 +644,10 @@ package view.battle
 		private function shootAbullet(pid:Number, _bs:BulletDesc, rotationRad:Number, forceFactor:Number, lastBullet:Boolean = true):void
 		{
 			_hasLastBullet = lastBullet;
-			var poly:Polygon = new Polygon(Polygon.box(_bs.boundWidth, _bs.boundHeight, true));
+			var poly:Polygon = new Polygon(Polygon.box(_bs.tuzhi.width, _bs.tuzhi.height, true));
 			poly.filter.collisionGroup = GROUP_BULLET;
 			poly.filter.collisionMask = ~(GROUP_BULLET|GROUP_ROLE);
-			poly.material.density = _bs.mass / (_bs.boundWidth*_bs.boundHeight);
+			poly.material.density = _bs.tuzhi.mass / (_bs.tuzhi.width*_bs.tuzhi.height);
 			
 			var bullet:Body = new Body(BodyType.DYNAMIC);
 			bullet.shapes.add(poly);
@@ -984,7 +983,7 @@ package view.battle
 				var bs:BulletDesc = bulletBody2bulletDesc(bullet);
 				if(!bulletMc)
 				{
-					bulletMc = StaticTable.GetBulletMcSprite(bs.bulletId);
+					bulletMc = StaticTable.GetBulletMcSprite(bs.tuzhi.id);
 					bullet.userData.graphic = bulletMc;
 					map.addChild(bulletMc);
 				}
@@ -995,7 +994,7 @@ package view.battle
 				if(focusBullet)
 				{
 					focusBullet = false;
-					if(!pointInView(bulletMc.x, bulletMc.y, bs.boundWidth * 1.5))
+					if(!pointInView(bulletMc.x, bulletMc.y, bs.tuzhi.width * 1.5))
 					{
 						focusMap(bulletMc.x, bulletMc.y, 50);
 					}

@@ -76,7 +76,7 @@ package phys
 					//compute polygons in cell
 					bounds.x = x*cellsize;
 					bounds.y = y*cellsize;
-					var polys:GeomPolyList = MarchingSquares.run(bitmapIso, bounds, Vec2.weak(subsize,subsize));
+					var polys:GeomPolyList = MarchingSquares.run(bitmapIso, bounds, Vec2.weak(subsize,subsize), 2);
 					if(polys.empty()) continue;
 					
 					if(b==null)

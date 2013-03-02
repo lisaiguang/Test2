@@ -7,6 +7,7 @@ package message
 	{
 		public var id:Number;
 		public var bulletId:int;
+		public var level:int;
 		public var count:int;
 		public var isEquiped:Boolean;
 		
