@@ -100,13 +100,10 @@ package view.gangkou
 						tl.kill();
 					}
 					
-					LHelp.RecordTime();
-					
 					_pathGrid.setEndNode(ex,ey);
 					_pathGrid.setStartNode(sx,sy);
 					var astar:AStar = new AStar();
 					astar.findPath(_pathGrid);
-					LHelp.PrintTime("find path:");
 					
 					var path:Array = astar.path;
 					if(path && path.length > 0)
