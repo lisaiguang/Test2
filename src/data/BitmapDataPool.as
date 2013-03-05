@@ -19,5 +19,15 @@ package data
 			return _dic[cls];
 		}
 		
+		public static function destoryBitmapData(cls:Class):void
+		{
+			if(_dic[cls])
+			{
+				var bd:BitmapData = _dic[cls];
+				bd.dispose();
+				delete _dic[cls];
+			}
+		}
+		
 	}
 }

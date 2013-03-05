@@ -4,6 +4,9 @@ package utils
 	import flash.display.DisplayObjectContainer;
 	import flash.filters.ColorMatrixFilter;
 	import flash.filters.GlowFilter;
+	import flash.utils.getTimer;
+	
+	import data.StaticTable;
 	
 	import starling.utils.Color;
 
@@ -73,6 +76,22 @@ package utils
 			{
 				_content.removeChildAt(0);
 			}
+		}
+		
+		public static function pointInRound(x:Number, y:Number, cx:Number, cy:Number, radius:Number):Boolean
+		{
+			return Math.abs(x - cx) <= radius && Math.abs(y - cy) <= radius;
+		}
+		
+		private static var _ts:int;
+		public static function RecordTime():void
+		{
+			_ts = getTimer();
+		}
+		
+		public static function PrintTime(prex:String):void
+		{
+			trace(prex, (getTimer() - _ts), "ms");
 		}
 	}
 }

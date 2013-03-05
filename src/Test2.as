@@ -22,9 +22,8 @@ package
 	import net.hires.debug.Stats;
 	
 	import view.WelcomeView;
-	
 	import warn.WarnView;
-	
+	//[SWF(frameRate="60")]
 	public class Test2 extends Sprite
 	{	
 		/*private var mStarling:Starling;*/
@@ -106,6 +105,9 @@ package
 			player.id = 1;
 			player.name = "lsg";
 			player.gold = 1000;
+			player.curCityId = 1;
+			player.curMapId = 1;
+			player.curShip = 1;
 			MySignals.onMainPlayer.dispatch(player);
 			
 			for(var i:int = 1; i <= 100; i ++)

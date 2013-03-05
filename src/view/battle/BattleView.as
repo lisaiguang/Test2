@@ -75,7 +75,7 @@ package view.battle
 	import utils.McSprite;
 	import utils.MyMath;
 	
-	import view.island.IslandView;
+	import view.city.CityView;
 	
 	public class BattleView extends LazySprite
 	{
@@ -447,7 +447,7 @@ package view.battle
 		private function onClose():void
 		{
 			MidLayer.CloseWindow(BattleView);
-			MidLayer.ShowWindow(IslandView);
+			MidLayer.ShowWindow(CityView);
 		}
 		
 		private function playerid2BattlePlayer(id:Number):BattlePlayer

@@ -2,7 +2,13 @@ package message
 {
 	public class EnumAction
 	{
-		public static const ROLE_MOVING:String = "ROLE_MOVING";
-		public static const ROLE_WAITING:String = "ROLE_WAITING";
+		public static const ROLE_MOVING:String = "role_moving";
+		public static const ROLE_WAITING:String = "role_waiting";
+		
+		//public static const SHIP_WAITING:String = "SHIP_WAITING";
+		public static const SHIP_UP:String = "up";
+		public static const SHIP_DOWN:String = "down";
+		public static const SHIP_LEFT:String = "left";
+		public static const SHIP_RIGHT:String = "right";
 	}
 }

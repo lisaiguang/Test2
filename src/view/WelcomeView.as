@@ -6,7 +6,7 @@ package view
 	
 	import utils.LazySprite;
 	
-	import view.island.IslandView;
+	import view.city.CityView;
 	
 	public class WelcomeView extends LazySprite
 	{
@@ -21,7 +21,7 @@ package view
 		protected function onStart(event:MouseEvent = null):void
 		{
 			MidLayer.CloseWindow(WelcomeView);
-			MidLayer.ShowWindow(IslandView); 
+			MidLayer.ShowWindow(CityView); 
 		}
 	}
 }

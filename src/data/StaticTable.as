@@ -9,8 +9,13 @@ package data
 	import flash.display.Shape;
 	import flash.utils.Dictionary;
 	
+	import bit101.Grid;
+	
+	import data.staticObj.AnimationDesc;
 	import data.staticObj.BulletDesc;
 	import data.staticObj.DaoJuDesc;
+	import data.staticObj.MapCityDesc;
+	import data.staticObj.MapDesc;
 	import data.staticObj.RoleDesc;
 	import data.staticObj.TuZhiDesc;
 	
@@ -18,6 +23,12 @@ package data
 	import lsg.DaojuIcon2;
 	import lsg.DaojuIcon3;
 	import lsg.DaojuIcon4;
+	import lsg.bmp.city1;
+	import lsg.bmp.land1;
+	import lsg.bmp.role1;
+	import lsg.bmp.sea1;
+	import lsg.bmp.seaGrid1;
+	import lsg.bmp.ship1;
 	import lsg.bullet.Icon1;
 	import lsg.bullet.Icon2;
 	import lsg.bullet.Icon3;
@@ -26,9 +37,7 @@ package data
 	import lsg.bullet.b2;
 	import lsg.map.bg1;
 	import lsg.map.preview1;
-	import lsg.role.r1;
 	
-	import message.EnumAction;
 	import message.EnumDaoJuType;
 	
 	import utils.McSprite;
@@ -49,6 +58,12 @@ package data
 		
 		[Embed(source = "../../assets/config/error.xml", mimeType="application/octet-stream")]
 		private static var ErrorConfig:Class;
+		
+		[Embed(source = "../../assets/config/animation.xml", mimeType="application/octet-stream")]
+		private static var AnimationConfig:Class;
+		
+		[Embed(source = "../../assets/config/seamap.xml", mimeType="application/octet-stream")]
+		private static var SeamapConfig:Class;
 		
 		public static function Init():void
 		{
@@ -153,14 +168,154 @@ package data
 				ERROR_DIC[int(ex.@id)] = ex.@str;
 			}
 			ErrorConfig = null;
+			
+			xml = new XML(new AnimationConfig);
+			for(i = 0; i < xml.bmp.length(); i++)
+			{
+				var bmpXml:XML = xml.bmp[i];
+				var animations:Array = [];
+				BMP_NAME2ANIMATIONS[String(bmpXml.@name)] = animations;
+				for(j=0;j<bmpXml.a.length();j++)
+				{
+					var aniXml:XML = bmpXml.a[j];
+					var aniDesc:AnimationDesc = new AnimationDesc;
+					aniDesc.name = aniXml.@name;
+					aniDesc.width = Number(aniXml.@width);
+					aniDesc.height = Number(aniXml.@height);
+					aniDesc.startX = Number(aniXml.@startX);
+					aniDesc.startY = Number(aniXml.@startY);
+					aniDesc.count = int(aniXml.@count);
+					aniDesc.looping = aniXml.@loop?Boolean(aniXml.@loop):true;
+					animations.push(aniDesc);
+					ANIMATION_DESC.push(aniDesc);
+				}
+			}
+			AnimationConfig = null;
+			
+			xml = new XML(new SeamapConfig);
+			for(i = 0; i < xml.map.length(); i++)
+			{
+				var mapXml:XML = xml.map[i];
+				var mapDesc:MapDesc = new MapDesc;
+				mapDesc.id = int(mapXml.@id);
+				mapDesc.name = mapXml.@name;
+				mapDesc.width = Number(mapXml.@width);
+				mapDesc.height = Number(mapXml.@height);
+				mapDesc.rows = Number(mapXml.@rows);
+				mapDesc.cols = Number(mapXml.@cols);
+				mapDesc.blockWidth = mapDesc.height / mapDesc.rows;
+				mapDesc.blockHeight = mapDesc.width / mapDesc.cols;
+				for(j=0;j<mapXml.city.length();j++)
+				{
+					var cityXml:XML = mapXml.city[j];
+					var mcDesc:MapCityDesc = new MapCityDesc;
+					mcDesc.id = int(cityXml.@id);
+					mcDesc.posX = Number(cityXml.@posX);
+					mcDesc.posY = Number(cityXml.@posY);
+					mcDesc.entryX = Number(cityXml.@entryX);
+					mcDesc.entryY = Number(cityXml.@entryY);
+					mcDesc.outX = Number(cityXml.@outX);
+					mcDesc.outY = Number(cityXml.@outY);
+					mcDesc.mapDesc = mapDesc;
+					mapDesc.citys.push(mcDesc);
+				}
+				SEAMAP_DESC.push(mapDesc);
+			}
+			SeamapConfig = null;
+		}
+		public static var SEAMAP_DESC:Vector.<MapDesc> = new Vector.<MapDesc>;
+		
+		public static function GetSeaMapDesc(id:int):MapDesc
+		{
+			for each(var md:MapDesc in SEAMAP_DESC)
+			{
+				if(md.id == id)return md;
+			}
+			return null;
 		}
 		
-		public static function GetPaoDanIdByHeCheng(hy:int, js:int, tz:int, bs:int = 0):int
+		public static function GetMapCityDesc(mapId:int, cityId:int):MapCityDesc
 		{
-			var id:int;
-			
-			return id;
+			for each(var md:MapDesc in SEAMAP_DESC)
+			{
+				if(md.id == mapId)
+				{
+					for each(var mc:MapCityDesc in md.citys)
+					{
+						if(mc.id == cityId)return mc;
+					}
+				}
+			}
+			return null;
 		}
+		
+		public static function GetSeaMapGrid(mapId:int):Grid
+		{
+			var bd:BitmapData = new seaGrid1;
+			var grid:Grid = new Grid(bd.width, bd.height);
+			for(var i:int = 0; i < bd.width; i++)
+			{
+				for(var j:int = 0; j < bd.height; j++)
+				{
+					grid.setWalkable(i,j, bd.getPixel32(i,j)>>>24 == 0);
+				}
+			}
+			return grid;
+		}
+		
+		public static function GetBmpByCityId(cityId:int):Bitmap
+		{
+			return GetBmp("city1", false);
+		}
+		
+		public static function GetBmp(name:String, cache:Boolean = true):Bitmap
+		{
+			switch(name)
+			{
+				case "land1":
+					if(cache)
+						var bd:BitmapData = BitmapDataPool.getBitmapData(land1);
+					else
+						bd = new land1;
+					break;
+				case "sea1":
+					if(cache)
+						bd = BitmapDataPool.getBitmapData(sea1);
+					else
+						bd = new sea1;
+					break;
+				case "city1":
+					if(cache)
+						bd = BitmapDataPool.getBitmapData(city1);
+					else
+						bd = new city1;
+					break;
+				
+			}
+			var bmp:Bitmap = new Bitmap(bd);
+			return bmp;
+		}
+		
+		public static function DestoryBmp(name:String):void
+		{
+			switch(name)
+			{
+				case "land1":
+					BitmapDataPool.destoryBitmapData(land1);
+					break;
+				case "sea1":
+					BitmapDataPool.destoryBitmapData(sea1);
+					break;
+				case "city1":
+					BitmapDataPool.destoryBitmapData(city1);
+					break;
+				
+			}
+		}
+		
+		public static var ANIMATION_DESC:Vector.<AnimationDesc> = new Vector.<AnimationDesc>;
+		public static var BMP_NAME2ANIMATIONS:Dictionary = new Dictionary;
+		
 		public static var ERROR_DIC:Dictionary = new Dictionary;
 		public static var DAOJU_DESC:Vector.<DaoJuDesc> = new Vector.<DaoJuDesc>;
 		
@@ -302,18 +457,35 @@ package data
 		}
 		
 		public static function GetRoleAniPlayer(role:int):AnimationPlayer
+		{			
+			return GetAinPlayerByBmpName("role1");
+		}
+		
+		public static function GetShipAniPlayer(id:int):AnimationPlayer
+		{			
+			return GetAinPlayerByBmpName("ship1");
+		}
+		
+		public static function GetAinPlayerByBmpName(name:String):AnimationPlayer
 		{
-			var bd:BitmapData = new r1;
+			var animations:Array = BMP_NAME2ANIMATIONS[name];
 			var ap:AnimationPlayer = new AnimationPlayer();
-			
-			animation = AnimationBuilder.importStrip(12, bd, 32, 64, 4, 0, 64, 1, -16, -32);
-			animation.isLooping = true;
-			ap.addAnimation(EnumAction.ROLE_WAITING, animation);
-			
-			var animation:Animation = AnimationBuilder.importStrip( 12, bd, 32, 64, 4, 0, 0, 1, -16, -32);
-			animation.isLooping = true;
-			ap.addAnimation(EnumAction.ROLE_MOVING,  animation);
-			
+			var bd:BitmapData;
+			switch(name)
+			{
+				case "ship1":
+					bd = new ship1;
+					break;
+				case "role1":
+					bd = new role1;
+			}
+			for(var i:int = 0; i<animations.length; i++)
+			{
+				var aniDesc:AnimationDesc = animations[i];
+				var animation:Animation = AnimationBuilder.importStrip(12, bd, aniDesc.width, aniDesc.height, aniDesc.count, aniDesc.startX, aniDesc.startY, 1, -aniDesc.width / 2, -aniDesc.height / 2);
+				animation.isLooping = aniDesc.looping;
+				ap.addAnimation(aniDesc.name, animation);
+			}
 			return ap;
 		}
 	}

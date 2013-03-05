@@ -1,0 +1,5 @@
+<root>
+	<map id="1" name="渤海" width="2240" height="1600" cols="7" rows="5" >
+		<city id="1" posX="1930" posY="1020" entryX="1890" entryY="1145" outX="1860" outY="1145"/>
+	</map>
+</root>
