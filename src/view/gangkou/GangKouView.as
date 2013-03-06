@@ -1,13 +1,12 @@
 package view.gangkou
 {
-	import com.greensock.TimelineLite;
 	import com.greensock.TweenLite;
-	import com.greensock.easing.Linear;
 	import com.urbansquall.ginger.AnimationPlayer;
 	
 	import flash.display.Bitmap;
 	import flash.events.Event;
 	import flash.events.MouseEvent;
+	import flash.utils.getTimer;
 	
 	import bit101.AStar;
 	import bit101.Grid;
@@ -19,6 +18,10 @@ package view.gangkou
 	
 	import lsg.gangkou.McAnchor;
 	import lsg.gangkou.McEntry;
+	
+	import message.EnumAction;
+	
+	import nape.geom.Vec2;
 	
 	import utils.LHelp;
 	import utils.LazySprite;
@@ -33,7 +36,7 @@ package view.gangkou
 		
 		private var _terrain:Array;
 		private var _pathGrid:Grid;
-
+		
 		private static const GRID_SIZE:int = 16;
 		
 		public function GangKouView()
@@ -75,7 +78,9 @@ package view.gangkou
 		}
 		
 		private var _mcAnchor:McAnchor;
-		private var tl:TimelineLite;
+		/*private var tl:TimelineLite;
+		private var _path:Array;*/
+		/*private var _pts:Vector.<Vec2>;*/
 		protected function onMouseClick(e:MouseEvent):void
 		{
 			var ex:int = (e.stageX - x) / GRID_SIZE;
@@ -95,30 +100,60 @@ package view.gangkou
 					_mcAnchor.y = e.stageY - y;
 					_mcAnchor.visible = true;
 					
-					if(tl)
+					/*if(tl)
 					{
 						tl.kill();
-					}
+					}*/
 					
 					_pathGrid.setEndNode(ex,ey);
 					_pathGrid.setStartNode(sx,sy);
 					var astar:AStar = new AStar();
 					astar.findPath(_pathGrid);
 					
-					var path:Array = astar.path;
-					if(path && path.length > 0)
+					/*var path:Array = astar.path;
+					_pts = new Vector.<Vec2>;
+					for(var i:int = 1; i < path.length - 1; i++)
+					{
+						_pts.push(new Vec2(path[i].x * GRID_SIZE, path[i].y * GRID_SIZE));
+					}
+					_pts.push(new Vec2(e.stageX - x, e.stageY - y));*/
+					
+					/*_path = astar.path;
+					if(_path && _path.length > 0)
 					{
 						tl = new TimelineLite({onComplete:onShipMoveFinished});
-						for (var i:int = 1; i < path.length; i++)
+						for (var i:int = 1; i < _path.length; i++)
 						{
 							var speed:Number = .3;
-							var targetX:Number = path[i].x * GRID_SIZE;
-							var targetY:Number = path[i].y * GRID_SIZE;
-							speed *= LHelp.distance(path[i].x, path[i].y, i > 0 ? path[i - 1].x : sx, i > 0 ? path[i - 1].y : sy);
+							var targetX:Number = _path[i].x * GRID_SIZE;
+							var targetY:Number = _path[i].y * GRID_SIZE;
+							speed *= LHelp.distance(_path[i].x, _path[i].y, i > 0 ? _path[i - 1].x : sx, i > 0 ? _path[i - 1].y : sy);
 							tl.append(new TweenLite(_ship, speed, {x:targetX, y:targetY, ease:Linear.easeNone}));
 						}
 						tl.play();
+					}*/
+					
+					var path:Array = astar.path;
+					_directions = new Vector.<Vec2>;
+					_times = new Vector.<int>;
+					for (var i:int = 1; i < path.length; i++)
+					{
+						if(i==0)
+						{
+							direction = new Vec2(path[i].x * GRID_SIZE + GRID_SIZE / 2 - _ship.x, path[i].y * GRID_SIZE + GRID_SIZE / 2 - _ship.y);
+						}
+						else if(i < path.length - 1)
+						{
+							var direction:Vec2 = new Vec2((path[i].x - path[i - 1].x)*GRID_SIZE, (path[i].y - path[i - 1].y)*GRID_SIZE);
+						}
+						else
+						{
+							direction = new Vec2((e.stageX - x)  - (path[i - 1].x*GRID_SIZE + GRID_SIZE / 2), (e.stageY - y) - (path[i - 1].y*GRID_SIZE + GRID_SIZE / 2));
+						}
+						_times.push(direction.length / SHIP_SPEED);
+						_directions.push(direction.normalise());
 					}
+					_startTimeOffset = getTimer() - Test2.TIMESTAMP;
 				}
 			}
 		}
@@ -137,13 +172,91 @@ package view.gangkou
 			_mcAnchor.visible = false;
 		}
 		
+		private var _directions:Vector.<Vec2>;
+		private var _times:Vector.<int>;
+		private var _startTimeOffset:int;
+		private static const SHIP_SPEED:Number = 60 / 1000;
+		
 		private function onFrameIn(event:Event):void
 		{
-			if(tl && tl.active)
+			/*if(_pts && _pts.length > 0)
 			{
+				var maxX:Number = _pts[0].x - _ship.x;
+				var maxY:Number = _pts[0].y - _ship.y;
+				var distance:Vec2 = Vec2.get(maxX, maxY).normalise().muleq(SHIP_SPEED*Test2.ELAPSED);
+			}*/
+			if(_directions && _directions.length > 0)
+			{
+				var elapsed:int = Test2.ELAPSED;
+				if(_startTimeOffset)
+				{
+					elapsed -= _startTimeOffset;
+					_startTimeOffset = 0;
+				}
+				if(_times[0] > elapsed)
+				{
+					_times[0] -= elapsed;
+					var distance:Vec2 = _directions[0].mul(SHIP_SPEED * elapsed);
+					_ship.x += distance.x;
+					_ship.y += distance.y;
+					distance.dispose();
+				}
+				else
+				{
+					elapsed -= _times[0];
+					distance = _directions[0].mul(SHIP_SPEED * _times[0]);
+					_ship.x += distance.x;
+					_ship.y += distance.y;
+					distance.dispose();
+					_directions.shift();
+					_times.shift();
+					if(elapsed && _directions.length > 0)
+					{
+						_times[0] -= elapsed;
+						distance = _directions[0].mul(SHIP_SPEED * elapsed);
+						_ship.x += distance.x;
+						_ship.y += distance.y;
+						distance.dispose();
+						if(_times[0] <= 0)
+						{
+							_directions.shift();
+							_times.shift();
+						}
+					}
+				}
+				if(_directions.length <= 0)
+				{
+					onShipMoveFinished();
+				}
+				else
+				{
+					var angle:Number = _directions[0].angle;
+					if(angle > -Math.PI / 4 && angle <= Math.PI / 4)
+					{
+						if(_ship.currentAnimationID != EnumAction.SHIP_LEFT)  _ship.play(EnumAction.SHIP_LEFT);
+					}
+					else if(angle > Math.PI / 4 && angle <= 3 * Math.PI / 4)
+					{
+						if(_ship.currentAnimationID != EnumAction.SHIP_DOWN)  _ship.play(EnumAction.SHIP_DOWN);
+					}
+					else if(angle > -3 * Math.PI / 4 && angle <= -Math.PI / 4)
+					{
+						if(_ship.currentAnimationID != EnumAction.SHIP_UP)  _ship.play(EnumAction.SHIP_UP);
+					}
+					else if(angle > 3 * Math.PI / 4 || -3 * Math.PI / 4)
+					{
+						if(_ship.currentAnimationID != EnumAction.SHIP_RIGHT)  _ship.play(EnumAction.SHIP_RIGHT);
+					}
+				}
 				focusMap(_ship.x, _ship.y);
 			}
 			_ship.update(Test2.ELAPSED);
+		}
+		
+		private function setShipXY(sx:Number, sy:Number):void
+		{
+			_ship.x = sx;
+			_ship.y = sy;
 		}
 		
 		private function drawCitys():void
@@ -181,12 +294,6 @@ package view.gangkou
 				mcEntry.y = mcDesc.entryY;
 				addChild(mcEntry);
 			}
-		}
-		
-		private function setShipXY(sx:Number, sy:Number):void
-		{
-			_ship.x = sx;
-			_ship.y = sy;
 		}
 		
 		private function focusMap(x:Number, y:Number, tween:Number = 0):void
