@@ -1,9 +1,15 @@
 <root>
 	<bmp name="ship1">
-		<a name="up" width="127" height="135" count="4" startX="0" startY="405" />
-		<a name="down" width="127" height="135" count="4" startX="0" startY="0" />
-		<a name="left" width="127" height="135" count="4" startX="0" startY="270" />
-		<a name="right" width="127" height="135" count="4" startX="0" startY="135" />
+		<a name="up" width="165" height="160" count="4" startX="0" startY="480" />
+		<a name="down" width="165" height="160" count="4" startX="0" startY="0" offsetY="-120"/>
+		<a name="left" width="165" height="160" count="4" startX="0" startY="320" offsetY="-120"/>
+		<a name="right" width="165" height="160" count="4" startX="0" startY="160" offsetY="-120"/>
+	</bmp>
+	<bmp name="ship2">
+		<a name="up" width="127" height="135" count="4" startX="0" startY="405"/>
+		<a name="down" width="127" height="135" count="4" startX="0" startY="0"  offsetY="-100"/>
+		<a name="left" width="127" height="135" count="4" startX="0" startY="270"  offsetY="-100"/>
+		<a name="right" width="127" height="135" count="4" startX="0" startY="135"  offsetY="-100"/>
 	</bmp>
 	<bmp name="role1">
 		<a name="role_moving" width="32" height="64" count="4" startX="0" startY="0" />

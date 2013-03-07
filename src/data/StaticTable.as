@@ -14,9 +14,11 @@ package data
 	import data.staticObj.AnimationDesc;
 	import data.staticObj.BulletDesc;
 	import data.staticObj.DaoJuDesc;
+	import data.staticObj.EnumBodyType;
 	import data.staticObj.MapCityDesc;
 	import data.staticObj.MapDesc;
 	import data.staticObj.RoleDesc;
+	import data.staticObj.ShipDesc;
 	import data.staticObj.TuZhiDesc;
 	
 	import lsg.DaojuIcon1;
@@ -29,6 +31,7 @@ package data
 	import lsg.bmp.sea1;
 	import lsg.bmp.seaGrid1;
 	import lsg.bmp.ship1;
+	import lsg.bmp.ship2;
 	import lsg.bullet.Icon1;
 	import lsg.bullet.Icon2;
 	import lsg.bullet.Icon3;
@@ -40,6 +43,7 @@ package data
 	
 	import message.EnumDaoJuType;
 	
+	import utils.BodyPlayer;
 	import utils.McSprite;
 	
 	public class StaticTable
@@ -64,6 +68,9 @@ package data
 		
 		[Embed(source = "../../assets/config/seamap.xml", mimeType="application/octet-stream")]
 		private static var SeamapConfig:Class;
+		
+		[Embed(source = "../../assets/config/body.xml", mimeType="application/octet-stream")]
+		private static var BodyConfig:Class;
 		
 		public static function Init():void
 		{
@@ -114,7 +121,7 @@ package data
 					bulletXML = tzXml.sb[j];
 					bs = new BulletDesc;
 					bs.tuzhi = tzDes;
-					bs.baoshi = bulletXML.@bs?int(bulletXML.@bs):0;
+					bs.baoshi = bulletXML.hasOwnProperty("@bs")?int(bulletXML.@bs):0;
 					bs.id = int(bulletXML.@id);
 					bs.desc = bulletXML.@desc;
 					StaticTable.BULLET_DESC.push(bs);
@@ -185,7 +192,9 @@ package data
 					aniDesc.startX = Number(aniXml.@startX);
 					aniDesc.startY = Number(aniXml.@startY);
 					aniDesc.count = int(aniXml.@count);
-					aniDesc.looping = aniXml.@loop?Boolean(aniXml.@loop):true;
+					aniDesc.looping = aniXml.hasOwnProperty("@loop")?Boolean(aniXml.@loop):true;
+					aniDesc.offsetX = aniXml.hasOwnProperty("@offsetX")? Number(aniXml.@offsetX) : -aniDesc.width/2;
+					aniDesc.offsetY = aniXml.hasOwnProperty("@offsetY")? Number(aniXml.@offsetY) : -aniDesc.height/2;
 					animations.push(aniDesc);
 					ANIMATION_DESC.push(aniDesc);
 				}
@@ -222,9 +231,40 @@ package data
 				SEAMAP_DESC.push(mapDesc);
 			}
 			SeamapConfig = null;
+			
+			xml = new XML(new BodyConfig);
+			for(i = 0; i < xml.ship.length(); i++)
+			{
+				var shipXml:XML = xml.ship[i];
+				var shipDesc:ShipDesc = new ShipDesc;
+				shipDesc.id = int(shipXml.@id);
+				shipDesc.type = int(shipXml.@type);
+				shipDesc.animation = "ship" + shipDesc.id;
+				if(shipDesc.type == EnumBodyType.CIRCLE)
+				{
+					shipDesc.raidus = Number(shipXml.@radius);
+				}
+				else if(shipDesc.type == EnumBodyType.RECT)
+				{
+					shipDesc.width = Number(shipXml.@width);
+					shipDesc.height = Number(shipXml.@height);
+				}
+				SHIP_DESC.push(shipDesc);
+			}
+			BodyConfig = null;
 		}
-		public static var SEAMAP_DESC:Vector.<MapDesc> = new Vector.<MapDesc>;
 		
+		public static var SHIP_DESC:Vector.<ShipDesc> = new Vector.<ShipDesc>;
+		public static function GetShipDesc(id:int):ShipDesc
+		{
+			for each(var sd:ShipDesc in SHIP_DESC)
+			{
+				if(sd.id == id)return sd;
+			}
+			return null;
+		}
+		
+		public static var SEAMAP_DESC:Vector.<MapDesc> = new Vector.<MapDesc>;
 		public static function GetSeaMapDesc(id:int):MapDesc
 		{
 			for each(var md:MapDesc in SEAMAP_DESC)
@@ -270,30 +310,40 @@ package data
 		
 		public static function GetBmp(name:String, cache:Boolean = true):Bitmap
 		{
+			var bmp:Bitmap = new Bitmap(GetBmpData(name, cache));
+			return bmp;
+		}
+		
+		public static function GetBmpData(name:String, cache:Boolean = true):BitmapData
+		{
 			switch(name)
 			{
 				case "land1":
-					if(cache)
-						var bd:BitmapData = BitmapDataPool.getBitmapData(land1);
-					else
-						bd = new land1;
+					if(cache) var bd:BitmapData = BitmapDataPool.getBitmapData(land1);
+					else bd = new land1;
 					break;
 				case "sea1":
-					if(cache)
-						bd = BitmapDataPool.getBitmapData(sea1);
-					else
-						bd = new sea1;
+					if(cache) bd = BitmapDataPool.getBitmapData(sea1);
+					else bd = new sea1;
 					break;
 				case "city1":
-					if(cache)
-						bd = BitmapDataPool.getBitmapData(city1);
-					else
-						bd = new city1;
+					if(cache) bd = BitmapDataPool.getBitmapData(city1);
+					else bd = new city1;
 					break;
-				
+				case "ship1":
+					if(cache) bd = BitmapDataPool.getBitmapData(ship1);
+					else bd = new city1;
+					break;
+				case "ship2":
+					if(cache) bd = BitmapDataPool.getBitmapData(ship2);
+					else bd = new city1;
+					break;
+				case "role1":
+					if(cache) bd = BitmapDataPool.getBitmapData(role1);
+					else bd = new city1;
+					break;
 			}
-			var bmp:Bitmap = new Bitmap(bd);
-			return bmp;
+			return bd;
 		}
 		
 		public static function DestoryBmp(name:String):void
@@ -309,7 +359,6 @@ package data
 				case "city1":
 					BitmapDataPool.destoryBitmapData(city1);
 					break;
-				
 			}
 		}
 		
@@ -461,28 +510,32 @@ package data
 			return GetAinPlayerByBmpName("role1");
 		}
 		
-		public static function GetShipAniPlayer(id:int):AnimationPlayer
-		{			
-			return GetAinPlayerByBmpName("ship1");
-		}
-		
-		public static function GetAinPlayerByBmpName(name:String):AnimationPlayer
+		public static function GetShipBodyPlayer(id:int):BodyPlayer
 		{
-			var animations:Array = BMP_NAME2ANIMATIONS[name];
-			var ap:AnimationPlayer = new AnimationPlayer();
-			var bd:BitmapData;
-			switch(name)
-			{
-				case "ship1":
-					bd = new ship1;
-					break;
-				case "role1":
-					bd = new role1;
-			}
+			var sd:ShipDesc = GetShipDesc(id);
+			var bp:BodyPlayer = new BodyPlayer();
+			bp.bodyDesc = sd;
+			var bd:BitmapData = GetBmpData(sd.animation, true);
+			var animations:Array = BMP_NAME2ANIMATIONS[sd.animation];
 			for(var i:int = 0; i<animations.length; i++)
 			{
 				var aniDesc:AnimationDesc = animations[i];
-				var animation:Animation = AnimationBuilder.importStrip(12, bd, aniDesc.width, aniDesc.height, aniDesc.count, aniDesc.startX, aniDesc.startY, 1, -aniDesc.width / 2, -aniDesc.height / 2);
+				var animation:Animation = AnimationBuilder.importStrip(12, bd, aniDesc.width, aniDesc.height, aniDesc.count, aniDesc.startX, aniDesc.startY, 1, aniDesc.offsetX, aniDesc.offsetY);
+				animation.isLooping = aniDesc.looping;
+				bp.addAnimation(aniDesc.name, animation);
+			}
+			return bp;
+		}
+		
+		public static function GetAinPlayerByBmpName(name:String, cache:Boolean = false):AnimationPlayer
+		{
+			var animations:Array = BMP_NAME2ANIMATIONS[name];
+			var ap:AnimationPlayer = new AnimationPlayer();
+			var bd:BitmapData = GetBmpData(name, cache);
+			for(var i:int = 0; i<animations.length; i++)
+			{
+				var aniDesc:AnimationDesc = animations[i];
+				var animation:Animation = AnimationBuilder.importStrip(12, bd, aniDesc.width, aniDesc.height, aniDesc.count, aniDesc.startX, aniDesc.startY, 1, aniDesc.offsetX, aniDesc.offsetY);
 				animation.isLooping = aniDesc.looping;
 				ap.addAnimation(aniDesc.name, animation);
 			}

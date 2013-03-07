@@ -1,0 +1,4 @@
+<root>
+	<ship id="1" type="1" radius="60"/>
+	<ship id="2" type="1" radius="50"/>
+</root>

@@ -6,7 +6,12 @@ package utils
 	import flash.filters.GlowFilter;
 	import flash.utils.getTimer;
 	
-	import data.StaticTable;
+	import data.staticObj.BodyDesc;
+	import data.staticObj.EnumBodyType;
+	
+	import nape.shape.Circle;
+	import nape.shape.Polygon;
+	import nape.shape.Shape;
 	
 	import starling.utils.Color;
 
@@ -83,6 +88,11 @@ package utils
 			return Math.abs(x - cx) <= radius && Math.abs(y - cy) <= radius;
 		}
 		
+		public static function pointInRect(x:Number, y:Number, cx:Number, cy:Number, halfWidth:Number, halfHeight:Number):Boolean
+		{
+			return Math.abs(x - cx) <= halfWidth && Math.abs(y - cy) <= halfHeight;
+		}
+		
 		private static var _ts:int;
 		public static function RecordTime():void
 		{
@@ -92,6 +102,20 @@ package utils
 		public static function PrintTime(prex:String):void
 		{
 			trace(prex, (getTimer() - _ts), "ms");
+		}
+		
+		public static function GetShape(bs:BodyDesc):Shape
+		{
+			var shape:Shape = null;
+			if(bs.type == EnumBodyType.CIRCLE)
+			{
+				shape = new Circle(bs.raidus);
+			}
+			else if(bs.type == EnumBodyType.RECT)
+			{
+				shape = new Polygon(Polygon.box(bs.width, bs.height, true));
+			}
+			return shape;
 		}
 	}
 }

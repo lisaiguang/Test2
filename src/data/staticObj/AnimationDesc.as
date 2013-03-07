@@ -8,6 +8,8 @@ package data.staticObj
 		public var count:int;
 		public var startX:Number;
 		public var startY:Number;
+		public var offsetX:int;
+		public var offsetY:int;
 		public var looping:Boolean;
 		
 		public function AnimationDesc()
