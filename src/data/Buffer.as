@@ -1,10 +1,13 @@
 package data
 {
 	
+	import data.staticObj.SkillDesc;
+	
 	import message.DaoJu;
 	import message.DaoJuDeleteNtf;
 	import message.MainPlayer;
-	import message.MainPlayerGoldNtf;
+	import message.MainPlayerGoldAck;
+	import message.MainPlayerUpSkillAck;
 	import message.PaoDan;
 	import message.PaoDanDeleteNtf;
 	import message.PaoDanEquipAck;
@@ -28,7 +31,8 @@ package data
 		public function Buffer()
 		{
 			MySignals.onMainPlayer.add(CreatePlayer);
-			MySignals.onMainPlayerGoldNtf.add(onMainPlayerGoldNtf);
+			MySignals.onMainPlayerGoldAck.add(onMainPlayerGoldNtf);
+			MySignals.onMainPlayerUpSkillAck.add(onMainPlayerUpSkillAck);
 			
 			MySignals.onDaoJu.add(onDaoJu);
 			MySignals.onDaoJuDeleteNtf.add(onDaoJuDeleteNtf);
@@ -36,6 +40,18 @@ package data
 			MySignals.onPaoDan.add(onPaoDan);
 			MySignals.onPaoDanEquipAck.add(onPaoDanEquipAck);
 			MySignals.onPaoDanDeleteNtf.add(onPaoDanDeleteNtf);
+		}
+		
+		private function onMainPlayerUpSkillAck(mes:MainPlayerUpSkillAck):void
+		{
+			for(var i:int = 0; i < mainPlayer.skills.length; i++)
+			{
+				var sd:SkillDesc = mainPlayer.skills[i];
+				if(sd.type == mes.type)
+				{
+					mainPlayer.skills[i] = StaticTable.GetSkillDescByTypeLevel(mes.type, mes.level);
+				}
+			}
 		}
 		
 		public static function GetPaoDanNormal(isNormal:Boolean = true):Vector.<PaoDan>
@@ -150,7 +166,7 @@ package data
 			return rsult;
 		}
 		
-		private function onMainPlayerGoldNtf(mpgn:MainPlayerGoldNtf):void
+		private function onMainPlayerGoldNtf(mpgn:MainPlayerGoldAck):void
 		{
 			_mainPlayer.gold = mpgn.gold;
 		}

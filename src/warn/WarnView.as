@@ -1,7 +1,7 @@
 package warn
 {
 	import com.greensock.TweenLite;
-	import com.greensock.easing.Elastic;
+	import com.greensock.easing.Linear;
 	
 	import flash.events.MouseEvent;
 	
@@ -34,7 +34,6 @@ package warn
 			btnCancle.addEventListener(MouseEvent.CLICK, onClose);
 			btnClose.addEventListener(MouseEvent.CLICK, onClose);
 			btnOK.addEventListener(MouseEvent.CLICK, onOK);
-			MidLayer.DisableMouse();
 		}
 		
 		protected function onOK(event:MouseEvent):void
@@ -59,7 +58,7 @@ package warn
 		{
 			this.x = (StaticTable.STAGE_WIDTH - this.width + 45)*.5;
 			this.y = (StaticTable.STAGE_HEIGHT - this.height + 45)*.5;
-			TweenLite.from(this, 0.7, {transformAroundCenter:{scaleX:0.5, scaleY:0.5}, ease:Elastic.easeOut});
+			TweenLite.from(this, 0.2, {transformAroundCenter:{scaleX:0.2, scaleY:0.2}, ease:Linear.easeOut});
 		}
 	}
 }

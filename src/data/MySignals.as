@@ -7,7 +7,8 @@ package data
 	import message.DaoJuHeChengAck;
 	import message.DaoJuSoldAck;
 	import message.MainPlayer;
-	import message.MainPlayerGoldNtf;
+	import message.MainPlayerGoldAck;
+	import message.MainPlayerUpSkillAck;
 	import message.PaoDan;
 	import message.PaoDanDeleteNtf;
 	import message.PaoDanEquipAck;
@@ -36,7 +37,8 @@ package data
 		public static var onPlayerDisjustAck:Signal = new Signal(PlayerDisjustAck);
 		
 		public static var onMainPlayer:Signal = new Signal(MainPlayer);
-		public static var onMainPlayerGoldNtf:Signal = new Signal(MainPlayerGoldNtf);
+		public static var onMainPlayerGoldAck:Signal = new Signal(MainPlayerGoldAck);
+		public static var onMainPlayerUpSkillAck:Signal = new Signal(MainPlayerUpSkillAck);
 		
 		public static var onDaoJu:Signal = new Signal(DaoJu);
 		public static var onDaoJuDeleteNtf:Signal = new Signal(DaoJuDeleteNtf);

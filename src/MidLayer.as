@@ -2,7 +2,6 @@ package
 {
 	import flash.display.DisplayObject;
 	import flash.display.DisplayObjectContainer;
-	import flash.display.InteractiveObject;
 	import flash.display.Sprite;
 	import flash.events.Event;
 	import flash.utils.Dictionary;
@@ -23,26 +22,40 @@ package
 			_layer = this;
 		}
 		
-		static public function DisableMouse():void
+		static public function DisableMouse(zhezhao:*):void
 		{
 			for(var key:Class in _dic)
 			{
 				var tview:Sprite = _dic[key] as Sprite; 
 				if(tview)
 				{
-					tview.mouseEnabled = tview.mouseChildren = false;
+					if(zhezhao)
+					{
+						tview.visible = false;
+					}
+					else
+					{
+						tview.mouseChildren = tview.mouseEnabled = false;
+					}
 				}
 			}
 		}
 		
-		static public function EnableMouse():void
+		static public function EnableMouse(zhezhao:*):void
 		{
 			for(var key:Class in _dic)
 			{
 				var tview:Sprite = _dic[key] as Sprite; 
 				if(tview)
 				{
-					tview.mouseEnabled = tview.mouseChildren = true;
+					if(zhezhao)
+					{
+						tview.visible = true;
+					}
+					else
+					{
+						tview.mouseChildren = tview.mouseEnabled = true;
+					}
 				}
 			}
 		}
@@ -58,11 +71,7 @@ package
 		{
 			if(HasWindow(cls))CloseWindow(cls);
 			_dicObj[cls] = obj;
-			
-			if(obj.zhezhao)
-			{
-				MidLayer.DisableMouse();
-			}
+			MidLayer.DisableMouse(obj.zhezhao);
 			
 			var view:DisplayObject;
 			if(obj.params)
@@ -116,10 +125,7 @@ package
 				{
 					obj.callback();
 				}
-				if(obj.zhezhao)
-				{
-					MidLayer.EnableMouse();
-				}
+				EnableMouse(obj.zhezhao);
 				delete _dicObj[cls];
 			}
 		}

@@ -5,6 +5,7 @@ package data.staticObj
 		public var id:int;
 		public var type:int;
 		public var animation:String;
+		public var name:String;
 		private var _params1:Number;
 		private var _params2:Number;
 

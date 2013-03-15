@@ -1,5 +1,7 @@
 package utils
 {
+	import flash.display.Bitmap;
+	import flash.display.BitmapData;
 	import flash.display.DisplayObject;
 	import flash.display.DisplayObjectContainer;
 	import flash.filters.ColorMatrixFilter;
@@ -101,7 +103,9 @@ package utils
 		
 		public static function PrintTime(prex:String):void
 		{
-			trace(prex, (getTimer() - _ts), "ms");
+			var el:int = getTimer() - _ts;
+			if(el > 2)
+			trace(prex, el, "ms");
 		}
 		
 		public static function GetShape(bs:BodyDesc):Shape
@@ -116,6 +120,17 @@ package utils
 				shape = new Polygon(Polygon.box(bs.width, bs.height, true));
 			}
 			return shape;
+		}
+		
+		public static function GetRectBmp(w:Number, h:Number, color=0x0):Bitmap
+		{
+			var shape:flash.display.Shape = new flash.display.Shape ;
+			shape.graphics.beginFill(color);
+			shape.graphics.drawRect(0,0, w, h);
+			shape.graphics.endFill();
+			var bd:BitmapData = new BitmapData(w, h, false);
+			bd.draw(shape);
+			return new Bitmap(bd)
 		}
 	}
 }

@@ -1,7 +1,7 @@
 package message
 {
 	import data.StaticTable;
-	import data.staticObj.BulletDesc;
+	import data.staticObj.RoleBulletDesc;
 
 	public class PaoDan
 	{
@@ -15,8 +15,8 @@ package message
 		{
 		}
 		
-		private var _ds:BulletDesc;
-		public function get bulletDesc():BulletDesc
+		private var _ds:RoleBulletDesc;
+		public function get bulletDesc():RoleBulletDesc
 		{
 			if(!_ds)_ds=StaticTable.GetBulletDesc(bulletId);
 			return _ds;

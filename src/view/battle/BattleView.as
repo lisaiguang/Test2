@@ -21,7 +21,7 @@ package view.battle
 	import data.Buffer;
 	import data.MySignals;
 	import data.StaticTable;
-	import data.staticObj.BulletDesc;
+	import data.staticObj.RoleBulletDesc;
 	import data.staticObj.EnumBaoShi;
 	import data.staticObj.RoleDesc;
 	
@@ -32,7 +32,7 @@ package view.battle
 	import message.BattleBeginAck;
 	import message.BattleFinishAck;
 	import message.BattlePlayer;
-	import message.EnumAction;
+	import data.staticObj.EnumAction;
 	import message.EnumDirection;
 	import message.PlayerDisjustAck;
 	import message.PlayerDisjustReq;
@@ -79,7 +79,7 @@ package view.battle
 	
 	public class BattleView extends LazySprite
 	{
-		public static const isDebug:Boolean = true;
+		public static const isDebug:Boolean = false;
 		
 		private var _bba:BattleBeginAck;
 		public function BattleView(bba:BattleBeginAck)
@@ -281,7 +281,7 @@ package view.battle
 			}
 			bullet.space = null;
 			
-			var bs:BulletDesc = bulletBody2bulletDesc(bullet);
+			var bs:RoleBulletDesc = bulletBody2bulletDesc(bullet);
 			if(bs.isNormal)
 			{
 				explosion(bullet.position, bs);
@@ -298,7 +298,7 @@ package view.battle
 			}
 		}
 		
-		private function explosion(pos:Vec2, bs:BulletDesc):void 
+		private function explosion(pos:Vec2, bs:RoleBulletDesc):void 
 		{
 			var ts:int = getTimer();
 			var bomb:Shape = bs.clearShape;
@@ -620,7 +620,7 @@ package view.battle
 			if(!_bullets)_bullets = new Vector.<Body>;
 			if(bid == 0) bid = 1;
 			
-			var _bs:BulletDesc = StaticTable.GetBulletDesc(bid);
+			var _bs:RoleBulletDesc = StaticTable.GetBulletDesc(bid);
 			trace(_bs, _bs.baoshi);
 			if(_bs.baoshi == EnumBaoShi.NONE)
 			{
@@ -641,7 +641,7 @@ package view.battle
 		}
 		
 		private var _hasLastBullet:Boolean = false;
-		private function shootAbullet(pid:Number, _bs:BulletDesc, rotationRad:Number, forceFactor:Number, lastBullet:Boolean = true):void
+		private function shootAbullet(pid:Number, _bs:RoleBulletDesc, rotationRad:Number, forceFactor:Number, lastBullet:Boolean = true):void
 		{
 			_hasLastBullet = lastBullet;
 			var poly:Polygon = new Polygon(Polygon.box(_bs.tuzhi.width, _bs.tuzhi.height, true));
@@ -667,7 +667,7 @@ package view.battle
 			target.dispose();
 		}
 		
-		private function bulletBody2bulletDesc(body:Body):BulletDesc
+		private function bulletBody2bulletDesc(body:Body):RoleBulletDesc
 		{
 			return body.userData.bullet;
 		}
@@ -980,7 +980,7 @@ package view.battle
 			for each(var bullet:Body in _bullets)
 			{
 				var bulletMc:McSprite = bullet.userData.graphic;
-				var bs:BulletDesc = bulletBody2bulletDesc(bullet);
+				var bs:RoleBulletDesc = bulletBody2bulletDesc(bullet);
 				if(!bulletMc)
 				{
 					bulletMc = StaticTable.GetBulletMcSprite(bs.tuzhi.id);

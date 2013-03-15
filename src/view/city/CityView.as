@@ -14,10 +14,10 @@ package view.city
 	import utils.LazySprite;
 	
 	import view.battle.BattleView;
-	import view.daoju.DaoJuView;
 	import view.gangkou.GangKouView;
 	import view.paodan.PaoDanView;
 	import view.paodanfactory.PaoDanFactoryView;
+	import view.shendian.ShenDianView;
 	
 	public class CityView extends LazySprite
 	{
@@ -49,7 +49,7 @@ package view.city
 		
 		protected function onDaoJuClick(event:MouseEvent):void
 		{
-			MidLayer.ShowWindowObj(DaoJuView, {zhezhao:true});
+			MidLayer.ShowWindowObj(ShenDianView, {zhezhao:true});
 		}
 		
 		protected function onPaoDanClick(event:MouseEvent):void
@@ -73,7 +73,7 @@ package view.city
 			if(bba.error == 0)
 			{
 				MidLayer.CloseWindow(CityView);
-				MidLayer.ShowWindowObj(BattleView,{params:[bba]});
+				MidLayer.ShowWindowObj(BattleView,{zhezhao:true, params:[bba]});
 			}
 		}
 		

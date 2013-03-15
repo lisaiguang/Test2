@@ -1,5 +1,5 @@
 <root>
-	<map id="1" name="渤海" width="2240" height="1600" cols="7" rows="5" >
-		<city id="1" posX="1930" posY="1020" entryX="1890" entryY="1145" outX="1860" outY="1145"/>
+	<map id="1" name="渤海" width="4480" height="3200" cols="14" rows="10" >
+		<city id="1" posX="4170" posY="2620" entryX="4130" entryY="2745" outX="4100" outY="2745"/>
 	</map>
 </root>

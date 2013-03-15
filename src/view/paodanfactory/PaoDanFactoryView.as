@@ -19,7 +19,7 @@ package view.paodanfactory
 	import message.DaoJuHeChengAck;
 	import message.DaoJuHeChengReq;
 	import message.EnumDaoJuType;
-	import message.MainPlayerGoldNtf;
+	import message.MainPlayerGoldAck;
 	import message.PaoDan;
 	
 	import utils.LHelp;
@@ -62,10 +62,10 @@ package view.paodanfactory
 			InitPos();
 			
 			listen(MySignals.onDaoJuHeChengAck, onDaoJuHeChengAck);
-			listen(MySignals.onMainPlayerGoldNtf, onMainPlayerGoldNtf);
+			listen(MySignals.onMainPlayerGoldAck, onMainPlayerGoldNtf);
 		}
 		
-		private function onMainPlayerGoldNtf(mess:MainPlayerGoldNtf):void
+		private function onMainPlayerGoldNtf(mess:MainPlayerGoldAck):void
 		{
 			printfMoney(mess.gold);
 		}

@@ -22,8 +22,9 @@ package
 	import net.hires.debug.Stats;
 	
 	import view.WelcomeView;
+	
 	import warn.WarnView;
-	//[SWF(frameRate="60")]
+	[SWF(frameRate="30")]
 	public class Test2 extends Sprite
 	{	
 		/*private var mStarling:Starling;*/
@@ -34,11 +35,9 @@ package
 			TweenPlugin.activate([TransformAroundCenterPlugin]);
 			stage.align = StageAlign.TOP_LEFT;
 			stage.scaleMode = StageScaleMode.NO_SCALE;
-			
 			//var stageWidth:int   = StaticTable.STAGE_WIDTH
 			//var stageHeight:int  = StaticTable.STAGE_HEIGHT;
 			//var iOS:Boolean = Capabilities.manufacturer.indexOf("iOS") != -1;
-			
 			this.addChild(_midLayer);
 			this.addChild(new Stats);
 			/*Starling.multitouchEnabled = true;
@@ -63,13 +62,10 @@ package
 			mStarling.removeEventListener(starling.events.Event.ROOT_CREATED, onRootCreated);
 			mStarling.start();
 			});*/
-			
 			NativeApplication.nativeApplication.addEventListener(
 				flash.events.Event.ACTIVATE, function (e:*):void { /*mStarling.start();*/ });
-			
 			NativeApplication.nativeApplication.addEventListener(
 				flash.events.Event.DEACTIVATE, function (e:*):void { /*mStarling.stop();*/ });
-			
 			this.addEventListener(Event.ADDED_TO_STAGE, onAddToStage);
 			this.addEventListener(Event.ENTER_FRAME, onFrameIn);
 		}
@@ -104,10 +100,15 @@ package
 			var player:MainPlayer = new MainPlayer;
 			player.id = 1;
 			player.name = "lsg";
-			player.gold = 1000;
+			player.gold = 100;
 			player.curCityId = 1;
 			player.curMapId = 1;
 			player.curShip = 1;
+			player.curPaoDan = 1;
+			for(i=1; i<=5; i++)
+			{
+				player.skills.push(StaticTable.GetSkillDescByTypeLevel(i,0));
+			}
 			MySignals.onMainPlayer.dispatch(player);
 			
 			for(var i:int = 1; i <= 100; i ++)
@@ -138,7 +139,7 @@ package
 		
 		public static function Warn(content:String, okFun:Function = null, cancleFun:Function = null, okParams:Array = null, cancleParams:Array = null):void
 		{
-			MidLayer.ShowWindowObj(WarnView, {zhezhao:true, params:[{content:content, ok:okFun, cancle:cancleFun, okParams:okParams, cancleParams:cancleParams}]});
+			MidLayer.ShowWindowObj(WarnView, {params:[{content:content, ok:okFun, cancle:cancleFun, okParams:okParams, cancleParams:cancleParams}]});
 		}
 		
 		public static function Error(error:int):void

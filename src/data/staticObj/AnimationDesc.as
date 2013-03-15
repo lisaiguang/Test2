@@ -10,7 +10,9 @@ package data.staticObj
 		public var startY:Number;
 		public var offsetX:int;
 		public var offsetY:int;
-		public var looping:Boolean;
+		public var fps:int;
+		public var rotation:int;
+		public var loop:Boolean;
 		
 		public function AnimationDesc()
 		{

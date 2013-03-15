@@ -12,7 +12,7 @@ package view.paodan
 	
 	import lsg.PaoDanUI;
 	
-	import message.MainPlayerGoldNtf;
+	import message.MainPlayerGoldAck;
 	import message.PaoDan;
 	import message.PaoDanDeleteNtf;
 	import message.PaoDanEquipAck;
@@ -55,7 +55,7 @@ package view.paodan
 			onTab();
 			printfMoney(Buffer.mainPlayer.gold);
 			
-			listen(MySignals.onMainPlayerGoldNtf, onMainPlayerGoldNtf);
+			listen(MySignals.onMainPlayerGoldAck, onMainPlayerGoldNtf);
 			listen(MySignals.onPaoDanEquipAck,  onPaoDanEquipAck);
 			listen(MySignals.onPaoDanSoldAck, onPaoDanSoldAck);
 			listen(MySignals.onPaoDanDeleteNtf, onPaoDanDeleteNtf);
@@ -234,7 +234,7 @@ package view.paodan
 			}
 		}
 		
-		private function onMainPlayerGoldNtf(mpgn:MainPlayerGoldNtf):void
+		private function onMainPlayerGoldNtf(mpgn:MainPlayerGoldAck):void
 		{
 			printfMoney(mpgn.gold);
 		}

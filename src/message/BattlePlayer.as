@@ -5,6 +5,7 @@ package message
 	import starling.utils.deg2rad;
 	import starling.utils.rad2deg;
 	import data.staticObj.RoleDesc;
+	import data.staticObj.EnumAction;
 
 	public class BattlePlayer
 	{

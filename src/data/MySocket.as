@@ -4,8 +4,9 @@ package data
 	
 	import flash.utils.Dictionary;
 	
-	import data.staticObj.BulletDesc;
 	import data.staticObj.EnumBaoShi;
+	import data.staticObj.RoleBulletDesc;
+	import data.staticObj.SkillDesc;
 	
 	import message.BattleBeginAck;
 	import message.BattleBeginReq;
@@ -18,7 +19,10 @@ package data
 	import message.DaoJuSoldAck;
 	import message.DaoJuSoldReq;
 	import message.EnumDirection;
-	import message.MainPlayerGoldNtf;
+	import message.MainPlayerGoldAck;
+	import message.MainPlayerGoldReq;
+	import message.MainPlayerUpSkillAck;
+	import message.MainPlayerUpSkillReq;
 	import message.PaoDan;
 	import message.PaoDanDeleteNtf;
 	import message.PaoDanEquipAck;
@@ -55,7 +59,25 @@ package data
 		
 		private function onSend(mes:*):void
 		{
-			if(mes is BattleBeginReq)
+			if(mes is MainPlayerUpSkillReq)
+			{
+				var skillDesc:SkillDesc = StaticTable.GetSkillDescByTypeLevel(mes.type, mes.level);
+				mpgn = new MainPlayerGoldAck;
+				mpgn.gold = Buffer.mainPlayer.gold - skillDesc.gold;
+				MySignals.onMainPlayerGoldAck.dispatch(mpgn);
+				var mpusa:MainPlayerUpSkillAck = new MainPlayerUpSkillAck;
+				mpusa.type = skillDesc.type;
+				mpusa.level = skillDesc.level + 1;
+				MySignals.onMainPlayerUpSkillAck.dispatch(mpusa);
+			}
+			else if(mes is MainPlayerGoldReq)
+			{
+				var mpgr:MainPlayerGoldReq = mes;
+				var mpga:MainPlayerGoldAck = new MainPlayerGoldAck;
+				mpga.gold = mpgr.addtion + Buffer.mainPlayer.gold;
+				MySignals.onMainPlayerGoldAck.dispatch(mpga);
+			}
+			else if(mes is BattleBeginReq)
 			{
 				var bba:BattleBeginAck = new BattleBeginAck;
 				bba.error = 0;
@@ -150,7 +172,7 @@ package data
 				var pha:PlayerHurtAck = new PlayerHurtAck;
 				pha.pids = new Vector.<Number>;
 				pha.hurts = new Vector.<uint>;
-				var bs:BulletDesc = StaticTable.GetBulletDesc(phr.bid);
+				var bs:RoleBulletDesc = StaticTable.GetBulletDesc(phr.bid);
 				for(var i:int = 0; i < phr.pids.length; i++)
 				{
 					pha.pids.push(phr.pids[i]);
@@ -230,9 +252,9 @@ package data
 				djsa.id = dsr.id;
 				djsa.count = dsr.count;
 				MySignals.onDaoJuSoldAck.dispatch(djsa);
-				var mpgn:MainPlayerGoldNtf = new MainPlayerGoldNtf;
+				var mpgn:MainPlayerGoldAck = new MainPlayerGoldAck;
 				mpgn.gold = Buffer.mainPlayer.gold + dj.daojuDesc.sold;
-				MySignals.onMainPlayerGoldNtf.dispatch(mpgn);
+				MySignals.onMainPlayerGoldAck.dispatch(mpgn);
 			}
 			else if(mes is PaoDanSoldReq)
 			{
@@ -253,9 +275,9 @@ package data
 				pdsa.id = pdsr.id;
 				pdsa.count = pdsr.count;
 				MySignals.onPaoDanSoldAck.dispatch(pdsa);
-				mpgn = new MainPlayerGoldNtf;
+				mpgn = new MainPlayerGoldAck;
 				mpgn.gold = Buffer.mainPlayer.gold + pd.bulletDesc.sold;
-				MySignals.onMainPlayerGoldNtf.dispatch(mpgn);
+				MySignals.onMainPlayerGoldAck.dispatch(mpgn);
 			}
 			else if(mes is PaoDanEquipReq)
 			{
@@ -298,9 +320,9 @@ package data
 				}
 				else
 				{
-					mpgn = new MainPlayerGoldNtf;
+					mpgn = new MainPlayerGoldAck;
 					mpgn.gold = Buffer.mainPlayer.gold - tm;
-					MySignals.onMainPlayerGoldNtf.dispatch(mpgn);
+					MySignals.onMainPlayerGoldAck.dispatch(mpgn);
 				}
 				
 				huoyao.count --;

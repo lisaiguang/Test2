@@ -1,4 +1,16 @@
 <root>
-	<ship id="1" type="1" radius="60"/>
-	<ship id="2" type="1" radius="50"/>
+	<ship id="1" name="运输船" type="1" radius="60" speed="0.05" blood="120" range="300" shootSpeed="0.001" />
+	<ship id="2" name="流浪海盗船" type="1" radius="50" speed="0.045" blood="150" range="0" shootSpeed="0" />
+	<ship id="3" name="海盗船" type="1" radius="45" speed="0.05" blood="120" range="0" shootSpeed="0" />
+	
+	<bullet id="1" name="榴弹炮" type="1" raidus="15" hurt="60" effect="effect1"/>
+	
+	<hdGroup start="0" end="1000">
+		<member id="2" count="5" cost="5" lost="-50" />
+		<member id="3" count="2" cost="15" lost="-150" />
+	</hdGroup>
+	<hdGroup start="1001" end="10000000">
+		<member id="2" count="3" cost="5" lost="-50" />
+		<member id="3" count="3" cost="15" lost="-150" />
+	</hdGroup>
 </root>

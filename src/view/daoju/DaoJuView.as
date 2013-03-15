@@ -17,7 +17,7 @@ package view.daoju
 	import message.DaoJuSoldAck;
 	import message.DaoJuSoldReq;
 	import message.EnumDaoJuType;
-	import message.MainPlayerGoldNtf;
+	import message.MainPlayerGoldAck;
 	
 	import utils.LHelp;
 	import utils.LazySprite;
@@ -50,7 +50,7 @@ package view.daoju
 			printfMoney(Buffer.mainPlayer.gold);
 			
 			listen(MySignals.onDaoJuSoldAck, onDaoJuSoldAck);
-			listen(MySignals.onMainPlayerGoldNtf, onMainPlayerGoldNtf);
+			listen(MySignals.onMainPlayerGoldAck, onMainPlayerGoldNtf);
 			
 			InitPos();
 		}
@@ -75,7 +75,7 @@ package view.daoju
 			}
 		}
 		
-		private function onMainPlayerGoldNtf(mpgn:MainPlayerGoldNtf):void
+		private function onMainPlayerGoldNtf(mpgn:MainPlayerGoldAck):void
 		{
 			printfMoney(mpgn.gold);
 		}

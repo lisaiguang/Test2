@@ -1,6 +1,7 @@
 package data
 {
 	import com.urbansquall.ginger.Animation;
+	import com.urbansquall.ginger.AnimationBmp;
 	import com.urbansquall.ginger.AnimationPlayer;
 	import com.urbansquall.ginger.tools.AnimationBuilder;
 	
@@ -12,26 +13,35 @@ package data
 	import bit101.Grid;
 	
 	import data.staticObj.AnimationDesc;
-	import data.staticObj.BulletDesc;
 	import data.staticObj.DaoJuDesc;
 	import data.staticObj.EnumBodyType;
+	import data.staticObj.HaiDaoGroupDesc;
+	import data.staticObj.HaiDaoGroupMemDesc;
 	import data.staticObj.MapCityDesc;
 	import data.staticObj.MapDesc;
+	import data.staticObj.PaoDanDesc;
+	import data.staticObj.RoleBulletDesc;
 	import data.staticObj.RoleDesc;
 	import data.staticObj.ShipDesc;
+	import data.staticObj.SkillDesc;
 	import data.staticObj.TuZhiDesc;
 	
 	import lsg.DaojuIcon1;
 	import lsg.DaojuIcon2;
 	import lsg.DaojuIcon3;
 	import lsg.DaojuIcon4;
+	import lsg.bmp.anchor;
+	import lsg.bmp.bullet1;
 	import lsg.bmp.city1;
+	import lsg.bmp.entry;
 	import lsg.bmp.land1;
 	import lsg.bmp.role1;
 	import lsg.bmp.sea1;
 	import lsg.bmp.seaGrid1;
 	import lsg.bmp.ship1;
 	import lsg.bmp.ship2;
+	import lsg.bmp.ship3;
+	import lsg.bmp.target;
 	import lsg.bullet.Icon1;
 	import lsg.bullet.Icon2;
 	import lsg.bullet.Icon3;
@@ -40,8 +50,15 @@ package data
 	import lsg.bullet.b2;
 	import lsg.map.bg1;
 	import lsg.map.preview1;
+	import lsg.paodan.effect1;
+	import lsg.paodan.effect2;
+	import lsg.shenji.bingheshiji;
+	import lsg.shenji.bosaidong;
+	import lsg.shenji.xuanwofengbao;
 	
 	import message.EnumDaoJuType;
+	
+	import myphys.MyBody;
 	
 	import utils.BodyPlayer;
 	import utils.McSprite;
@@ -72,6 +89,9 @@ package data
 		[Embed(source = "../../assets/config/body.xml", mimeType="application/octet-stream")]
 		private static var BodyConfig:Class;
 		
+		[Embed(source = "../../assets/config/skill.xml", mimeType="application/octet-stream")]
+		private static var SkillConfig:Class;
+		
 		public static function Init():void
 		{
 			var bulletsXml:XML = new XML(new bulletConfig);
@@ -93,7 +113,7 @@ package data
 				for(var j:int = 0; j < tzXml.b.length(); j++)
 				{
 					var bulletXML:XML = tzXml.b[j];
-					var bs:BulletDesc = new BulletDesc;
+					var bs:RoleBulletDesc = new RoleBulletDesc;
 					bs.id = int(bulletXML.@id);
 					bs.tuzhi = tzDes;
 					bs.baoshi = bulletXML.@bs?int(bulletXML.@bs):0;
@@ -102,12 +122,12 @@ package data
 					var clearParams:Array = String(bulletXML.@clear).split(",");					
 					var bomb:Shape = new Shape;
 					bomb.graphics.beginFill(0xffffff, 1);
-					if(clearParams[0] == BulletDesc.CLEAR_CIRCLE)
+					if(clearParams[0] == RoleBulletDesc.CLEAR_CIRCLE)
 					{
 						bs.range = clearParams[1] * clearParams[1] * Math.PI;
 						bomb.graphics.drawCircle(0, 0, clearParams[1]);
 					}
-					else if(clearParams[0] == BulletDesc.CLEAR_RECT)
+					else if(clearParams[0] == RoleBulletDesc.CLEAR_RECT)
 					{
 						bs.range = clearParams[1]  * clearParams[2];
 						bomb.graphics.drawRect(0,0,clearParams[1],clearParams[2]);
@@ -119,7 +139,7 @@ package data
 				for(j = 0; j < tzXml.sb.length(); j++)
 				{
 					bulletXML = tzXml.sb[j];
-					bs = new BulletDesc;
+					bs = new RoleBulletDesc;
 					bs.tuzhi = tzDes;
 					bs.baoshi = bulletXML.hasOwnProperty("@bs")?int(bulletXML.@bs):0;
 					bs.id = int(bulletXML.@id);
@@ -181,7 +201,7 @@ package data
 			{
 				var bmpXml:XML = xml.bmp[i];
 				var animations:Array = [];
-				BMP_NAME2ANIMATIONS[String(bmpXml.@name)] = animations;
+				BMPNAME2ANIDESCS[String(bmpXml.@name)] = animations;
 				for(j=0;j<bmpXml.a.length();j++)
 				{
 					var aniXml:XML = bmpXml.a[j];
@@ -192,7 +212,9 @@ package data
 					aniDesc.startX = Number(aniXml.@startX);
 					aniDesc.startY = Number(aniXml.@startY);
 					aniDesc.count = int(aniXml.@count);
-					aniDesc.looping = aniXml.hasOwnProperty("@loop")?Boolean(aniXml.@loop):true;
+					aniDesc.fps = aniXml.hasOwnProperty("@fps")?int(aniXml.@fps):12;
+					aniDesc.rotation = aniXml.hasOwnProperty("@rotation")?int(aniXml.@rotation):1;
+					aniDesc.loop = aniXml.hasOwnProperty("@loop")?int(aniXml.@loop):true;
 					aniDesc.offsetX = aniXml.hasOwnProperty("@offsetX")? Number(aniXml.@offsetX) : -aniDesc.width/2;
 					aniDesc.offsetY = aniXml.hasOwnProperty("@offsetY")? Number(aniXml.@offsetY) : -aniDesc.height/2;
 					animations.push(aniDesc);
@@ -240,6 +262,11 @@ package data
 				shipDesc.id = int(shipXml.@id);
 				shipDesc.type = int(shipXml.@type);
 				shipDesc.animation = "ship" + shipDesc.id;
+				shipDesc.name = String(shipXml.@name);
+				shipDesc.speed = Number(shipXml.@speed);
+				shipDesc.blood = int(shipXml.@blood);
+				shipDesc.range = int(shipXml.@range);
+				shipDesc.shootSpeed = Number(shipXml.@shootSpeed);
 				if(shipDesc.type == EnumBodyType.CIRCLE)
 				{
 					shipDesc.raidus = Number(shipXml.@radius);
@@ -251,7 +278,109 @@ package data
 				}
 				SHIP_DESC.push(shipDesc);
 			}
+			for(i = 0; i < xml.bullet.length(); i++)
+			{
+				var pdXml:XML = xml.bullet[i];
+				var pdDesc:PaoDanDesc = new PaoDanDesc;
+				pdDesc.id = int(pdXml.@id);
+				pdDesc.type = int(pdXml.@type);
+				pdDesc.effect = pdXml.@effect;
+				pdDesc.animation = "bullet" + pdDesc.id;
+				pdDesc.name = String(pdXml.@name);
+				if(pdDesc.type == EnumBodyType.CIRCLE)
+				{
+					pdDesc.raidus = Number(pdXml.@radius);
+				}
+				else if(pdDesc.type == EnumBodyType.RECT)
+				{
+					pdDesc.width = Number(pdXml.@width);
+					pdDesc.height = Number(pdXml.@height);
+				}
+				pdDesc.hurt = int(pdXml.@hurt);
+				PAODAN_DESC.push(pdDesc);
+			}
+			for(i = 0; i < xml.hdGroup.length();i++)
+			{
+				var groupXml:XML = xml.hdGroup[i];
+				var groupDesc:HaiDaoGroupDesc=new HaiDaoGroupDesc;
+				groupDesc.start = int(groupXml.@start);
+				groupDesc.end = int(groupXml.@end);
+				for(j = 0; j < groupXml.member.length(); j++)
+				{
+					var memXml:XML = groupXml.member[j];
+					var memDesc:HaiDaoGroupMemDesc = new HaiDaoGroupMemDesc;
+					memDesc.id = int(memXml.@id);
+					memDesc.count = int(memXml.@count);
+					memDesc.cost = int(memXml.@cost);
+					memDesc.lost = int(memXml.@lost);
+					groupDesc.members.push(memDesc);
+				}
+				HAODAO_GROUPS.push(groupDesc);
+			}
 			BodyConfig = null;
+			
+			xml = new XML(new SkillConfig);
+			for(i = 0; i < xml.skill.length(); i++)
+			{
+				var skillXml:XML = xml.skill[i];
+				var skillDesc:SkillDesc = new SkillDesc;
+				skillDesc.type = int(skillXml.@type);
+				skillDesc.level = int(skillXml.@level);
+				skillDesc.name = skillXml.@name;
+				skillDesc.desc = skillXml.@desc;
+				skillDesc.weight = Number(skillXml.@weight);
+				skillDesc.wait = Number(skillXml.@wait);
+				skillDesc.extra = Number(skillXml.@extra);
+				if( skillXml.hasOwnProperty("@gold"))
+				{
+					skillDesc.gold = int(skillXml.@gold);
+				}
+				else
+				{
+					SKILLTYPE2MAXLEVEL[skillDesc.type]=skillDesc.level;
+				}
+				SKILL_DESC.push(skillDesc);
+			}
+			SkillConfig = null;
+		}
+		
+		public static var SKILLTYPE2MAXLEVEL:Dictionary = new Dictionary;
+		public static var SKILL_DESC:Vector.<SkillDesc> = new Vector.<SkillDesc>;
+		public static function GetSkillDescByTypeLevel(type:int, level:int):SkillDesc
+		{
+			for each(var sd:SkillDesc in SKILL_DESC)
+			{
+				if(sd.type == type && sd.level == level)return sd;
+			}
+			return null;
+		}
+		
+		public static var HAODAO_GROUPS:Vector.<HaiDaoGroupDesc> = new Vector.<HaiDaoGroupDesc>;
+		public static function GetHaoDaoGroup(gold:int):HaiDaoGroupDesc
+		{
+			for each(var sd:HaiDaoGroupDesc in HAODAO_GROUPS)
+			{
+				if(sd.start <= gold && sd.end >= gold)return sd;
+			}
+			return null;
+		}
+		
+		public static var PAODAN_DESC:Vector.<PaoDanDesc> = new Vector.<PaoDanDesc>;
+		public static function GetPaoDanDesc(id:int):PaoDanDesc
+		{
+			for each(var sd:PaoDanDesc in PAODAN_DESC)
+			{
+				if(sd.id == id)return sd;
+			}
+			return null;
+		}
+		
+		public static function GetPaoDanMyBody(id:int):MyBody
+		{
+			var pdDesc:PaoDanDesc = GetPaoDanDesc(id);
+			var mybody:MyBody = new MyBody(pdDesc);
+			mybody.animation = GetAniBmpByName(pdDesc.animation);
+			return mybody;
 		}
 		
 		public static var SHIP_DESC:Vector.<ShipDesc> = new Vector.<ShipDesc>;
@@ -318,6 +447,18 @@ package data
 		{
 			switch(name)
 			{
+				case "target":
+					if(cache) bd = BitmapDataPool.getBitmapData(target);
+					else bd = new target;
+					break;
+				case "anchor":
+					if(cache) bd = BitmapDataPool.getBitmapData(anchor);
+					else bd = new anchor;
+					break;
+				case "entry":
+					if(cache) bd = BitmapDataPool.getBitmapData(entry);
+					else bd = new entry;
+					break;
 				case "land1":
 					if(cache) var bd:BitmapData = BitmapDataPool.getBitmapData(land1);
 					else bd = new land1;
@@ -332,15 +473,51 @@ package data
 					break;
 				case "ship1":
 					if(cache) bd = BitmapDataPool.getBitmapData(ship1);
-					else bd = new city1;
+					else bd = new ship1;
 					break;
 				case "ship2":
 					if(cache) bd = BitmapDataPool.getBitmapData(ship2);
-					else bd = new city1;
+					else bd = new ship2;
+					break;
+				case "bullet1":
+					if(cache) bd = BitmapDataPool.getBitmapData(bullet1);
+					else bd = new bullet1;
+					break;
+				case "ship3":
+					if(cache) bd = BitmapDataPool.getBitmapData(ship3);
+					else bd = new ship3;
 					break;
 				case "role1":
 					if(cache) bd = BitmapDataPool.getBitmapData(role1);
-					else bd = new city1;
+					else bd = new role1;
+					break;
+				case "b1":
+					if(cache) bd = BitmapDataPool.getBitmapData(b1);
+					else bd = new b1;
+					break;
+				case "b2":
+					if(cache) bd = BitmapDataPool.getBitmapData(b2);
+					else bd = new b2;
+					break;
+				case "effect1":
+					if(cache) bd = BitmapDataPool.getBitmapData(effect1);
+					else bd = new effect1;
+					break;
+				case "effect2":
+					if(cache) bd = BitmapDataPool.getBitmapData(effect2);
+					else bd = new effect2;
+					break;
+				case "bosaidong":
+					if(cache) bd = BitmapDataPool.getBitmapData(bosaidong);
+					else bd = new bosaidong;
+					break;
+				case "xuanwofengbao":
+					if(cache) bd = BitmapDataPool.getBitmapData(xuanwofengbao);
+					else bd = new xuanwofengbao;
+					break;
+				case "bingheshiji":
+					if(cache) bd = BitmapDataPool.getBitmapData(bingheshiji);
+					else bd = new bingheshiji;
 					break;
 			}
 			return bd;
@@ -363,11 +540,64 @@ package data
 		}
 		
 		public static var ANIMATION_DESC:Vector.<AnimationDesc> = new Vector.<AnimationDesc>;
-		public static var BMP_NAME2ANIMATIONS:Dictionary = new Dictionary;
+		public static var BMPNAME2ANIDESCS:Dictionary = new Dictionary;
+		public static var BMPNAME2ANIMATIONs:Dictionary = new Dictionary;
+		public static function GetAnimationsByBmpName(bn:String):Vector.<Animation>
+		{
+			var animations:Vector.<Animation> = BMPNAME2ANIMATIONs[bn];
+			if(!animations)
+			{
+				animations = new Vector.<Animation>;
+				var bd:BitmapData = GetBmpData(bn, false);
+				var aniDescs:Array = BMPNAME2ANIDESCS[bn];
+				for(var i:int = 0; i< aniDescs.length; i++)
+				{
+					var aniDesc:AnimationDesc = aniDescs[i];
+					var animation:Animation = AnimationBuilder.importStrip(aniDesc.fps, bd, aniDesc.width, aniDesc.height, aniDesc.count, aniDesc.startX, aniDesc.startY,
+						aniDesc.rotation, aniDesc.offsetX, aniDesc.offsetY);
+					animation.isLooping = aniDesc.loop;
+					animations.push(animation);
+				}
+				bd.dispose();
+				BMPNAME2ANIMATIONs[bn] = animations;
+			}
+			return animations;
+		}
+		
+		public static function FreeAnimations():void
+		{
+			for(var key:String in BMPNAME2ANIMATIONs)
+			{
+				delete BMPNAME2ANIMATIONs[key];
+			}
+		}
+		
+		public static function GetAniPlayerByName(name:String):AnimationPlayer
+		{
+			var ab:AnimationPlayer = new AnimationPlayer;
+			var animations:Vector.<Animation> = GetAnimationsByBmpName(name);
+			var aniDescs:Array = BMPNAME2ANIDESCS[name];
+			for(var i:int = 0; i<animations.length; i++)
+			{
+				ab.addAnimation(aniDescs[i].name, animations[i]);
+			}
+			return ab;
+		}
+		
+		public static function GetAniBmpByName(name:String):AnimationBmp
+		{
+			var ab:AnimationBmp = new AnimationBmp;
+			var animations:Vector.<Animation> = GetAnimationsByBmpName(name);
+			var aniDescs:Array = BMPNAME2ANIDESCS[name];
+			for(var i:int = 0; i<animations.length; i++)
+			{
+				ab.addAnimation(aniDescs[i].name, animations[i]);
+			}
+			return ab;
+		}
 		
 		public static var ERROR_DIC:Dictionary = new Dictionary;
 		public static var DAOJU_DESC:Vector.<DaoJuDesc> = new Vector.<DaoJuDesc>;
-		
 		public static function GetBaoShiName(baoshi:int):String
 		{
 			for each(var bs:DaoJuDesc in DAOJU_DESC)
@@ -418,9 +648,8 @@ package data
 			return null;
 		}
 		
-		public static var BULLET_DESC:Vector.<BulletDesc> = new Vector.<BulletDesc>;
+		public static var BULLET_DESC:Vector.<RoleBulletDesc> = new Vector.<RoleBulletDesc>;
 		public static var TUZHI_DESC:Vector.<TuZhiDesc> = new Vector.<TuZhiDesc>;
-		
 		public static function GetTuZhiDescById(id:int):TuZhiDesc
 		{
 			for each(var bs:TuZhiDesc in TUZHI_DESC)
@@ -430,18 +659,18 @@ package data
 			return null;
 		}
 		
-		public static function GetBulletDesc(id:int):BulletDesc
+		public static function GetBulletDesc(id:int):RoleBulletDesc
 		{
-			for each(var bs:BulletDesc in BULLET_DESC)
+			for each(var bs:RoleBulletDesc in BULLET_DESC)
 			{
 				if(bs.id == id)return bs;
 			}
 			return null;
 		}
 		
-		public static function GetNormalBulletByTuzhiBaoShi(tzId:int, baoshi:int):BulletDesc
+		public static function GetNormalBulletByTuzhiBaoShi(tzId:int, baoshi:int):RoleBulletDesc
 		{
-			for each(var bs:BulletDesc in BULLET_DESC)
+			for each(var bs:RoleBulletDesc in BULLET_DESC)
 			{
 				if(bs.isNormal && bs.tuzhi.id == tzId && bs.baoshi == baoshi)return bs;
 			}
@@ -507,7 +736,7 @@ package data
 		
 		public static function GetRoleAniPlayer(role:int):AnimationPlayer
 		{			
-			return GetAinPlayerByBmpName("role1");
+			return GetAniPlayerByName("role1");
 		}
 		
 		public static function GetShipBodyPlayer(id:int):BodyPlayer
@@ -515,31 +744,14 @@ package data
 			var sd:ShipDesc = GetShipDesc(id);
 			var bp:BodyPlayer = new BodyPlayer();
 			bp.bodyDesc = sd;
-			var bd:BitmapData = GetBmpData(sd.animation, true);
-			var animations:Array = BMP_NAME2ANIMATIONS[sd.animation];
+			var animations:Vector.<Animation> = GetAnimationsByBmpName(sd.animation);
+			var aniDescs:Array = BMPNAME2ANIDESCS[sd.animation];
 			for(var i:int = 0; i<animations.length; i++)
 			{
-				var aniDesc:AnimationDesc = animations[i];
-				var animation:Animation = AnimationBuilder.importStrip(12, bd, aniDesc.width, aniDesc.height, aniDesc.count, aniDesc.startX, aniDesc.startY, 1, aniDesc.offsetX, aniDesc.offsetY);
-				animation.isLooping = aniDesc.looping;
-				bp.addAnimation(aniDesc.name, animation);
+				bp.addAnimation(aniDescs[i].name, animations[i]);
 			}
 			return bp;
 		}
 		
-		public static function GetAinPlayerByBmpName(name:String, cache:Boolean = false):AnimationPlayer
-		{
-			var animations:Array = BMP_NAME2ANIMATIONS[name];
-			var ap:AnimationPlayer = new AnimationPlayer();
-			var bd:BitmapData = GetBmpData(name, cache);
-			for(var i:int = 0; i<animations.length; i++)
-			{
-				var aniDesc:AnimationDesc = animations[i];
-				var animation:Animation = AnimationBuilder.importStrip(12, bd, aniDesc.width, aniDesc.height, aniDesc.count, aniDesc.startX, aniDesc.startY, 1, aniDesc.offsetX, aniDesc.offsetY);
-				animation.isLooping = aniDesc.looping;
-				ap.addAnimation(aniDesc.name, animation);
-			}
-			return ap;
-		}
 	}
 }

@@ -1,0 +1,26 @@
+<root>
+	<skill type="1" level="0" weight="0.2" name="神圣连射"
+		desc="朝同一目标发射3发炮弹， 威力为原来的60%" extra="2" wait="1" gold="100" />
+	<skill type="1" level="1" weight="0.2" name="神圣连射"
+		desc="朝同一目标发射3发炮弹， 威力为原来的80%" extra="3" wait="1" />
+		
+	<skill type="2" level="0" weight="0.2" name="神圣散射"
+		desc="朝3个目标发射炮弹， 威力为原来的60%" extra="2" wait="1" gold="100" />
+	<skill type="2" level="1" weight="0.2" name="神圣散射"
+		desc="朝3个目标发射炮弹， 威力为原来的80%" extra="3" wait="1" />
+		
+	<skill type="3" level="0" weight="0.2" name="波塞冬之怒" desc="伤害处在一条直线上的敌人100点血"
+		extra="100" wait="2" gold="200" />
+	<skill type="3" level="1" weight="0.2" name="波塞冬之怒" desc="伤害处在一条直线上的敌人150点血"
+		extra="150" wait="2" />
+		
+	<skill type="4" level="0" weight="0.2" name="漩涡风暴"
+		desc="伤害处在漩涡中的敌人，每秒伤害100点血" extra="100" wait="3" gold="200" />
+	<skill type="4" level="1" weight="0.2" name="漩涡风暴"
+		desc="伤害处在漩涡中的敌人，每秒伤害150点血" extra="150" wait="3" />
+		
+	<skill type="5" level="0" weight="0.2" name="冰川世纪" desc="冻住处在冰川范围里的敌人"
+		extra="162" wait="3" gold="200" />
+	<skill type="5" level="1" weight="0.2" name="冰川世纪" desc="冻住处在冰川范围里的敌人"
+		extra="200" wait="3" />
+</root>
