@@ -324,7 +324,7 @@ package view.gangkou
 						if(hd1.visible && hd1.curBlood > 0 && !_frozens[hd1])
 						{
 							y1 = _bingheshiji.y; x1 = _bingheshiji.x; x0 = hd1.x; y0 = hd1.y;
-							if(LHelp.pointInRound(x0,y0,x1,y1,_frozenRadius + 15))
+							if(LHelp.pointInRound(x0,y0,x1,y1,_frozenRadius + 38))
 							{
 								_frozens[hd1] = FROZEN_SECONDS * 1000;
 							}
@@ -676,8 +676,11 @@ package view.gangkou
 			removeChild(_xuanwofengbao);
 			for(var hd:BodyPlayer in _xuanwoHarmsDic)
 			{
-				playText(hd.x,hd.y-20,"-"+_xuanwoHarmsDic[hd],RED_FORMAT);
-				delete _xuanwoHarmsDic[hd];
+				if(hd.visible && !shipDropping(hd))
+				{
+					playText(hd.x,hd.y-20,"-"+_xuanwoHarmsDic[hd],RED_FORMAT);
+					delete _xuanwoHarmsDic[hd];
+				}
 			}
 		}
 		
@@ -751,10 +754,10 @@ package view.gangkou
 		{
 			var count:int = sd.extra;
 			var tm:Number = 0.1;
-			shootPaoDan(hd, 1, true);
+			shootPaoDan(hd, sd.extra2, true);
 			for(var i:int = 1; i < count; i++)
 			{
-				TweenLite.delayedCall(i * tm, shootPaoDan, [hd, 1, i < count - 1]);
+				TweenLite.delayedCall(i * tm, shootPaoDan, [hd, sd.extra2, i < count - 1]);
 			}
 		}
 		
@@ -763,7 +766,7 @@ package view.gangkou
 			var count:int = sd.extra;
 			for(var i:int = 0; i < hds.length && i < count; i++)
 			{
-				shootPaoDan(hds[i]);
+				shootPaoDan(hds[i], sd.extra2);
 			}
 		}
 		

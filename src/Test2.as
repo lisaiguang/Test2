@@ -24,7 +24,7 @@ package
 	import view.WelcomeView;
 	
 	import warn.WarnView;
-	[SWF(frameRate="30")]
+	[SWF(frameRate="24")]
 	public class Test2 extends Sprite
 	{	
 		/*private var mStarling:Starling;*/

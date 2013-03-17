@@ -331,6 +331,10 @@ package data
 				skillDesc.weight = Number(skillXml.@weight);
 				skillDesc.wait = Number(skillXml.@wait);
 				skillDesc.extra = Number(skillXml.@extra);
+				if(skillXml.hasOwnProperty("@extra2"))
+				{
+					skillDesc.extra2 = Number(skillXml.@extra2);
+				}
 				if( skillXml.hasOwnProperty("@gold"))
 				{
 					skillDesc.gold = int(skillXml.@gold);
