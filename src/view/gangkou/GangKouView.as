@@ -78,25 +78,6 @@ package view.gangkou
 			{
 				_remains.push(_groupDesc.waves[i].remains);
 			}
-			/*for(var i:int = 0; i < _groupDesc.waves.length; i++)
-			{
-			var memDesc:HaiDaoWaveMemDesc = _groupDesc.waves[i];
-			for(var j:int = 0; j < memDesc.count; j++)
-			{
-			var hd:ShipPlayer = StaticTable.GetShipBodyPlayer(memDesc.id);
-			hd.mouseEnabled = hd.mouseChildren = false;
-			hd.setBlood(hd.shipDesc.blood, hd.shipDesc.blood);
-			hd.visible = false;
-			addChild(hd);
-			_hds.push(hd);
-			_arranges.push(hd);
-			if(hd.shipDesc.bulletId)
-			{
-			pd = StaticTable.GetPaoDanBody(hd.shipDesc.bulletId);
-			_vpaodans.push(pd);
-			}
-			}
-			}*/
 			
 			_ship = StaticTable.GetShipBodyPlayer(Buffer.mainPlayer.curShip);
 			_ship.mouseEnabled = _ship.mouseChildren =false;
@@ -138,6 +119,8 @@ package view.gangkou
 		}
 		
 		private var _remains:Vector.<Number> = new Vector.<Number>;
+		private var _hds:Vector.<ShipPlayer> = new Vector.<ShipPlayer>;
+		private var _wvDesc:HaiDaoWaveDesc;
 		private function waveAction():void
 		{
 			for(var i:int = 0; i < _remains.length; i++)
@@ -149,81 +132,92 @@ package view.gangkou
 				_remains[i] -= Test2.ELAPSED;
 				if(_remains[i] <= 0)
 				{
-					var wvDesc:HaiDaoWaveDesc = _groupDesc.waves[i];
-					for(var j:int = 0; j < wvDesc.members.length; j++)
+					_wvDesc = _groupDesc.waves[i];
+					trace(_wvDesc.remains);
+					for(var j:int = 0; j < _wvDesc.members.length; j++)
 					{
-						var memDesc:HaiDaoWaveMemDesc = wvDesc.members[j];
+						var memDesc:HaiDaoWaveMemDesc = _wvDesc.members[j];
 						for(var k:int = 0; k < memDesc.count; k++)
 						{
-							var pos:Number = wvDesc.npcPoses[int(Math.random() * wvDesc.npcPoses.length)];
-							addHaiDao(memDesc.id, pos);
+							var hd:ShipPlayer = StaticTable.GetShipBodyPlayer(memDesc.id);
+							hd.setBlood(hd.shipDesc.blood, hd.shipDesc.blood);
+							_hds.push(hd);
+							trace("_hds push");
 						}
 					}
 				}
 			}
-		}
-		
-		private var _hds:Vector.<ShipPlayer> = new Vector.<ShipPlayer>;
-		private function addHaiDao(shipId:int, pos:Number):void
-		{
-			if(pos == 1)
+			for(i = 0; i < _hds.length; i++)
 			{
-				var hy:Number = Math.random() * StaticTable.STAGE_HEIGHT * 0.5  + _ship.y;
-				var hx:Number = _ship.x + StaticTable.STAGE_WIDTH * .6;
-				if(hx < StaticTable.STAGE_WIDTH)hx = StaticTable.STAGE_WIDTH;
-			}
-			else if(pos == 2)
-			{
-				hy = _ship.y + StaticTable.STAGE_HEIGHT * .6;
-				hx = Math.random() * StaticTable.STAGE_WIDTH * 0.5  + _ship.x;
-				if(hy < StaticTable.STAGE_HEIGHT)hy = StaticTable.STAGE_HEIGHT;
-			}
-			else if(pos == 3)
-			{
-				hy = _ship.y + StaticTable.STAGE_HEIGHT * .6;
-				hx = Math.random() * StaticTable.STAGE_WIDTH * -0.5  + _ship.x;
-				if(hy < StaticTable.STAGE_HEIGHT)hy = StaticTable.STAGE_HEIGHT;
-			}
-			else if(pos == 4)
-			{
-				hy = Math.random() * StaticTable.STAGE_HEIGHT * 0.5  + _ship.y;
-				hx = _ship.x + StaticTable.STAGE_WIDTH * -.6;
-				if(hx > _mapDesc.width - StaticTable.STAGE_WIDTH)hx = _mapDesc.width - StaticTable.STAGE_WIDTH;
-			}
-			else if(pos == 5)
-			{
-				hy = Math.random() * StaticTable.STAGE_HEIGHT * -0.5  + _ship.y;
-				hx = _ship.x + StaticTable.STAGE_WIDTH * -.6;
-				if(hx > _mapDesc.width - StaticTable.STAGE_WIDTH)hx = _mapDesc.width - StaticTable.STAGE_WIDTH;
-			}
-			else if(pos == 6)
-			{
-				hy = _ship.y + StaticTable.STAGE_HEIGHT * -0.6;
-				hx = Math.random() * StaticTable.STAGE_WIDTH * -0.5  + _ship.x;
-				if(hy > _mapDesc.height - StaticTable.STAGE_HEIGHT)hy = _mapDesc.height - StaticTable.STAGE_HEIGHT;
-			}
-			else if(pos == 7)
-			{
-				hy = _ship.y + StaticTable.STAGE_HEIGHT * -.6;
-				hx = Math.random() * StaticTable.STAGE_WIDTH * 0.5  + _ship.x;
-				if(hy > _mapDesc.height - StaticTable.STAGE_HEIGHT)hy = _mapDesc.height - StaticTable.STAGE_HEIGHT;
-			}
-			else if(pos == 8)
-			{
-				hy = Math.random() * StaticTable.STAGE_HEIGHT * -0.5  + _ship.y;
-				hx = _ship.x + StaticTable.STAGE_WIDTH * .6;
-				if(hx < StaticTable.STAGE_WIDTH)hx = StaticTable.STAGE_WIDTH;
-			}
-			if(hx > 0 && hy > 0  && hx < _mapDesc.width && hy < _mapDesc.height && _pathGrid.getNode(hx/GRID_SIZE,hy/GRID_SIZE).walkable)
-			{
-				var hd:ShipPlayer = StaticTable.GetShipBodyPlayer(shipId);
-				hd.x = hx;
-				hd.y = hy;
-				hd.mouseEnabled = hd.mouseChildren = false;
-				hd.setBlood(hd.shipDesc.blood, hd.shipDesc.blood);
-				addChild(hd);
-				_hds.push(hd);
-				_arranges.push(hd);
+				hd = _hds[i];
+				if(!hd.parent)
+				{
+					var pos:Number = _wvDesc.npcPoses[int(Math.random() * _wvDesc.npcPoses.length)];
+					if(pos == 1)
+					{
+						var hy:Number = Math.random() * StaticTable.STAGE_HEIGHT * 0.5  + _ship.y;
+						var hx:Number = _ship.x + StaticTable.STAGE_WIDTH * .6;
+						if(hx < StaticTable.STAGE_WIDTH)hx = StaticTable.STAGE_WIDTH;
+					}
+					else if(pos == 2)
+					{
+						hy = _ship.y + StaticTable.STAGE_HEIGHT * .6;
+						hx = Math.random() * StaticTable.STAGE_WIDTH * 0.5  + _ship.x;
+						if(hy < StaticTable.STAGE_HEIGHT)hy = StaticTable.STAGE_HEIGHT;
+					}
+					else if(pos == 3)
+					{
+						hy = _ship.y + StaticTable.STAGE_HEIGHT * .6;
+						hx = Math.random() * StaticTable.STAGE_WIDTH * -0.5  + _ship.x;
+						if(hy < StaticTable.STAGE_HEIGHT)hy = StaticTable.STAGE_HEIGHT;
+					}
+					else if(pos == 4)
+					{
+						hy = Math.random() * StaticTable.STAGE_HEIGHT * 0.5  + _ship.y;
+						hx = _ship.x + StaticTable.STAGE_WIDTH * -.6;
+						if(hx > _mapDesc.width - StaticTable.STAGE_WIDTH)hx = _mapDesc.width - StaticTable.STAGE_WIDTH;
+					}
+					else if(pos == 5)
+					{
+						hy = Math.random() * StaticTable.STAGE_HEIGHT * -0.5  + _ship.y;
+						hx = _ship.x + StaticTable.STAGE_WIDTH * -.6;
+						if(hx > _mapDesc.width - StaticTable.STAGE_WIDTH)hx = _mapDesc.width - StaticTable.STAGE_WIDTH;
+					}
+					else if(pos == 6)
+					{
+						hy = _ship.y + StaticTable.STAGE_HEIGHT * -0.6;
+						hx = Math.random() * StaticTable.STAGE_WIDTH * -0.5  + _ship.x;
+						if(hy > _mapDesc.height - StaticTable.STAGE_HEIGHT)hy = _mapDesc.height - StaticTable.STAGE_HEIGHT;
+					}
+					else if(pos == 7)
+					{
+						hy = _ship.y + StaticTable.STAGE_HEIGHT * -.6;
+						hx = Math.random() * StaticTable.STAGE_WIDTH * 0.5  + _ship.x;
+						if(hy > _mapDesc.height - StaticTable.STAGE_HEIGHT)hy = _mapDesc.height - StaticTable.STAGE_HEIGHT;
+					}
+					else if(pos == 8)
+					{
+						hy = Math.random() * StaticTable.STAGE_HEIGHT * -0.5  + _ship.y;
+						hx = _ship.x + StaticTable.STAGE_WIDTH * .6;
+						if(hx < StaticTable.STAGE_WIDTH)hx = StaticTable.STAGE_WIDTH;
+					}
+					if(hx > 0 && hy > 0  && hx < _mapDesc.width && hy < _mapDesc.height && _pathGrid.getNode(hx/GRID_SIZE,hy/GRID_SIZE).walkable)
+					{
+						hd.x = hx;
+						hd.y = hy;
+						hd.mouseEnabled = hd.mouseChildren = false;
+						addChild(hd);
+						_arranges.push(hd);
+						trace("add hd:",i);
+					}
+				}
+				else if(!hd.visible)
+				{
+					trace("hd removed:", i);
+					removeChild(hd);
+					_hds.splice(i,1);
+					i--;
+				}
 			}
 		}
 		
@@ -573,6 +567,16 @@ package view.gangkou
 			
 			for(i = 0; i < _arranges.length; i++)
 			{
+				if(!_arranges[i].visible)
+				{
+					trace("_arranges removed:", i);
+					_arranges.splice(i,1);
+					i--;
+				}
+			}
+			
+			for(i = 0; i < _arranges.length; i++)
+			{
 				for(var j:int = i + 1; j < _arranges.length; j++)
 				{
 					if(_arranges[i].y > _arranges[j].y)
@@ -642,7 +646,7 @@ package view.gangkou
 				}
 				if(hd.curBlood <= 0)
 				{
-					dropShip(hd);
+					dropShip(hd, i);
 					continue;
 				}
 				
@@ -723,7 +727,6 @@ package view.gangkou
 		private var _effect2Index:int;
 		private function rabberShip(hd:ShipPlayer):void
 		{
-			//var md:HaiDaoWaveMemDesc = _groupDesc.getMemById(hd.bodyDesc.id);
 			_ship.setBlood(_ship.curBlood + hd.shipDesc.hurt, _ship.maxBlood);
 			playText(_ship.x,_ship.y, "" + hd.shipDesc.hurt, RED_FORMAT);
 			hd.visible = false;
@@ -965,7 +968,7 @@ package view.gangkou
 			return _availableSfs[type - EnumSkillType.SF_START]?1 + _availableSfs[type - EnumSkillType.SF_START].sfDesc.extra:1;
 		}
 		
-		private function dropShip(hd:ShipPlayer):void
+		private function dropShip(hd:ShipPlayer, index:int):void
 		{
 			var mpgr:MainPlayerGoldReq = new MainPlayerGoldReq;
 			var xs:Number = getSfXs(EnumSkillType.SF_TANLAN);
@@ -988,6 +991,11 @@ package view.gangkou
 					}
 				}
 			}
+		}
+		
+		private function onShipDroped(hd:ShipPlayer):void
+		{
+			hd.visible = false;
 		}
 		
 		private var _sfs:Vector.<ShenFuPlayer> = new Vector.<ShenFuPlayer>;
@@ -1079,12 +1087,6 @@ package view.gangkou
 		override protected function destoryed():void
 		{
 			stage.removeChild(_sfSprite);
-		}
-		
-		private function onShipDroped(hd:ShipPlayer):void
-		{
-			hd.alpha = 1;
-			hd.visible=false;
 		}
 		
 		private function shipDropping(hd:ShipPlayer):Boolean
