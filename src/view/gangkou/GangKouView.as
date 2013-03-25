@@ -88,12 +88,6 @@ package view.gangkou
 			_arranges.push(_ship);
 			focusMap(_ship.x, _ship.y);
 			
-			for(i = 0; i < 8; i++)
-			{
-				var pd:PaoDanBody = StaticTable.GetPaoDanBody(Buffer.mainPlayer.curPaoDan);
-				_vpaodans.push(pd);
-			}
-			
 			for(i = 0; i < 2; i++)
 			{
 				var effect:AnimationBmp = StaticTable.GetAniBmpByName("effect2");
@@ -133,7 +127,6 @@ package view.gangkou
 				if(_remains[i] <= 0)
 				{
 					_wvDesc = _groupDesc.waves[i];
-					trace(_wvDesc.remains);
 					for(var j:int = 0; j < _wvDesc.members.length; j++)
 					{
 						var memDesc:HaiDaoWaveMemDesc = _wvDesc.members[j];
@@ -142,11 +135,11 @@ package view.gangkou
 							var hd:ShipPlayer = StaticTable.GetShipBodyPlayer(memDesc.id);
 							hd.setBlood(hd.shipDesc.blood, hd.shipDesc.blood);
 							_hds.push(hd);
-							trace("_hds push");
 						}
 					}
 				}
 			}
+			
 			for(i = 0; i < _hds.length; i++)
 			{
 				hd = _hds[i];
@@ -208,12 +201,10 @@ package view.gangkou
 						hd.mouseEnabled = hd.mouseChildren = false;
 						addChild(hd);
 						_arranges.push(hd);
-						trace("add hd:",i);
 					}
 				}
-				else if(!hd.visible)
+				if(!hd.visible)
 				{
-					trace("hd removed:", i);
 					removeChild(hd);
 					_hds.splice(i,1);
 					i--;
@@ -399,26 +390,6 @@ package view.gangkou
 				_mcAnchor.update(Test2.ELAPSED);
 			}
 			
-			for(i = 0; i < _vpaodans.length; i++)
-			{
-				var mybody:PaoDanBody = _vpaodans[i];
-				if(mybody.paodan.parent)
-				{
-					mybody.paodan.update(Test2.ELAPSED);
-				}
-				if(mybody.effect.parent)
-				{
-					if(mybody.effect.isPlaying())
-					{
-						mybody.effect.update(Test2.ELAPSED);
-					}
-					else
-					{
-						mybody.effect.parent.removeChild(mybody.effect);
-					}
-				}
-			}
-			
 			_ship.update(Test2.ELAPSED);
 			
 			for(i = 0; i < _veffect2s.length; i++)
@@ -569,7 +540,6 @@ package view.gangkou
 			{
 				if(!_arranges[i].visible)
 				{
-					trace("_arranges removed:", i);
 					_arranges.splice(i,1);
 					i--;
 				}
@@ -595,10 +565,28 @@ package view.gangkou
 			for(var i:int = 0; i < _vpaodans.length; i++)
 			{
 				var pd:PaoDanBody = _vpaodans[i];
-				if(!pd.paodan.parent)
+				
+				if(pd.effect.parent)
+				{
+					if(pd.effect.isPlaying())
+					{
+						pd.effect.update(Test2.ELAPSED);
+					}
+					else
+					{
+						pd.effect.parent.removeChild(pd.effect);
+					}
+				}
+				
+				if(pd.paodan.parent)
+				{
+					pd.paodan.update(Test2.ELAPSED);
+				}
+				else
 				{
 					continue;
 				}
+				
 				var hd:ShipPlayer = pd.target;
 				if(pd.collsin(hd))
 				{
@@ -711,16 +699,33 @@ package view.gangkou
 			if(hd.allowShoot)
 			{
 				hd.shootItev = 0;
-				for each(var pd:PaoDanBody in _vpaodans)
-				{
-					if(!pd.paodan.parent && pd.paodanDesc.id == hd.shipDesc.bulletId)break;
-				}
+				var pd:PaoDanBody = getPaoDan(hd.shipDesc.bulletId);
 				pd.paodan.x = hd.x;
 				pd.paodan.y = hd.y;
 				pd.hurtDiscount = 1;
 				pd.target = _ship;
 				addChild(pd.paodan);
 			}
+		}
+		
+		private var _vpaodans:Vector.<MyBody> = new Vector.<MyBody>;
+		private function getPaoDan(bulletId:int):PaoDanBody
+		{
+			var createPaodan:Boolean = true;
+			for each(var pd:PaoDanBody in _vpaodans)
+			{
+				if(!pd.paodan.parent && pd.paodanDesc.id == bulletId)
+				{
+					createPaodan = false;
+					break;
+				}
+			}
+			if(createPaodan)
+			{
+				pd = StaticTable.GetPaoDanBody(bulletId);
+				_vpaodans.push(pd);
+			}
+			return pd;
 		}
 		
 		private var _veffect2s:Vector.<AnimationBmp> = new Vector.<AnimationBmp>;
@@ -902,15 +907,11 @@ package view.gangkou
 		}
 		
 		private var PAODAN_SPEED:Number = 0.3;
-		private var _vpaodans:Vector.<MyBody> = new Vector.<MyBody>;
 		private var _isLianSheing:Boolean = false;
 		private function shootPaoDan(hd:ShipPlayer, discount:Number= 1, isLs:Boolean = false):void
 		{
 			_isLianSheing = isLs;
-			for each(var pd:PaoDanBody in _vpaodans)
-			{
-				if(!pd.paodan.parent && pd.paodanDesc.id == Buffer.mainPlayer.curPaoDan)break;
-			}
+			var pd:PaoDanBody = getPaoDan(Buffer.mainPlayer.curPaoDan);
 			pd.paodan.x = _ship.x;
 			pd.paodan.y = _ship.y;
 			pd.hurtDiscount = discount;
@@ -976,7 +977,7 @@ package view.gangkou
 			MySignals.Socket_Send.dispatch(mpgr);
 			playText(hd.x,hd.y,"+" + mpgr.addtion, YELLOW_FORMAT);
 			TweenLite.to(hd,1,{alpha:0, onComplete:onShipDroped, onCompleteParams:[hd]});
-			return;
+			
 			var rand:Number = Math.random();
 			for(var j:int = 0; j < Buffer.mainPlayer.sfs.length; j++)
 			{
@@ -999,7 +1000,7 @@ package view.gangkou
 		}
 		
 		private var _sfs:Vector.<ShenFuPlayer> = new Vector.<ShenFuPlayer>;
-		private const _dropSf:Number = 0.02, _remainSf:Number = 12*1000;
+		private const _dropSf:Number = 0.02, _remainSf:Number = 20*1000;
 		private function addSF(x:Number, y:Number, sf:ShenFuDesc):void
 		{
 			var sfp:ShenFuPlayer = StaticTable.GetShenFuPlayer(sf);

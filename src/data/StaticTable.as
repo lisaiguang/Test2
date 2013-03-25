@@ -354,7 +354,7 @@ package data
 					var poses:Array = String(waveXml.@npcPos).split(",");
 					for(k=0;k<poses.length;k++)
 					{
-						waveDesc.npcPoses.push(int(poses[j]));
+						waveDesc.npcPoses.push(int(poses[k]));
 					}
 					for(var k:int = 0; k < waveXml.member.length(); k++)
 					{

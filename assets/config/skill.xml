@@ -24,33 +24,33 @@
 	<sj type="5" level="1" weight="0.2" name="冰川世纪" desc="冻住处在冰川范围里的敌人"
 		extra="200" wait="2" />
 
-	<sf type="6" level="0" name="治疗神符" desc="解锁后随机掉落治疗神符" extra="0"
+	<sf type="6" level="0" name="治疗神符" desc="解锁后随机掉落治疗神符" extra="0.2"
 		gold="500" time="0" />
-	<sf type="6" level="1" name="治疗神符" desc="获得治疗神符回复生命值20%" extra="0.2"
+	<sf type="6" level="1" name="治疗神符" desc="获得治疗神符回复生命值20%" extra="0.4"
 		time="0" />
 
 	<sf type="7" level="0" name="加速神符" desc="加快船舰的移动速度20%" extra="0.2"
-		gold="500" time="8" />
+		gold="500" time="12" />
 	<sf type="7" level="1" name="加速神符" desc="加快船舰的移动速度40%" extra="0.4"
-		time="8" />
+		time="12" />
 
 	<sf type="8" level="0" name="防御神符" desc="减少来自敌船炮击的伤害10%" extra="-0.1"
-		gold="500" time="8" />
+		gold="500" time="12" />
 	<sf type="8" level="1" name="防御神符" desc="减少来自敌船炮击的伤害20%" extra="-0.2"
-		time="8" />
+		time="12" />
 
 	<sf type="9" level="0" name="火力神符" desc="增加船舰的基础伤害20%" extra="0.2"
-		gold="500" time="8" />
+		gold="500" time="12" />
 	<sf type="9" level="1" name="火力神符" desc="增加船舰的基础伤害40%" extra="0.4"
-		time="8" />
+		time="12" />
 
 	<sf type="10" level="0" name="范围神符" desc="增加船舰的攻击范围20%" extra="0.2"
-		gold="500" time="8" />
+		gold="500" time="12" />
 	<sf type="10" level="1" name="范围神符" desc="增加船舰的攻击范围40%" extra="0.4"
-		time="8" />
+		time="12" />
 
 	<sf type="11" level="0" name="贪婪神符" desc="增加掉落的金币20%" extra="0.2"
-		gold="500" time="8" />
+		gold="500" time="12" />
 	<sf type="11" level="1" name="贪婪神符" desc="增加掉落的金币40%" extra="0.4"
-		time="8" />
+		time="12" />
 </root>

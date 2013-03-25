@@ -29,19 +29,23 @@
 			<member id="2" count="4" />
 			<member id="3" count="2" />
 		</wave>
-		<wave time="45" npcPos="1,2,3">
-			<member id="2" count="5" />
-			<member id="3" count="3" />
-		</wave>
 		<wave time="50" npcPos="1,2,3">
 			<member id="2" count="5" />
 			<member id="3" count="3" />
 		</wave>
-		<wave time="55" npcPos="1,2,3">
+		<wave time="70" npcPos="1,2,3">
 			<member id="2" count="5" />
 			<member id="3" count="3" />
 		</wave>
-		<wave time="60" npcPos="1,2,3">
+		<wave time="85" npcPos="1,2,3">
+			<member id="2" count="5" />
+			<member id="3" count="3" />
+		</wave>
+		<wave time="100" npcPos="1,2,3">
+			<member id="2" count="5" />
+			<member id="3" count="3" />
+		</wave>
+		<wave time="110" npcPos="1,2,3">
 			<member id="2" count="5" />
 			<member id="3" count="3" />
 		</wave>
