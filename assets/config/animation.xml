@@ -55,6 +55,10 @@
 		<a name="effect" fps="12" width="20" height="10" count="1" startX="0"
 			startY="0" rotation="360" />
 	</bmp>
+	<bmp name="bullet2">
+		<a name="effect" fps="12" width="20" height="10" count="1" startX="0"
+			startY="0" rotation="360" />
+	</bmp>
 
 	<bmp name="effect1">
 		<a name="effect" fps="24" width="72" height="72" count="5" startX="0"

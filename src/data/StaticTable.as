@@ -9,6 +9,7 @@ package data
 	import flash.display.BitmapData;
 	import flash.display.Shape;
 	import flash.utils.Dictionary;
+	import flash.utils.getDefinitionByName;
 	
 	import bit101.Grid;
 	
@@ -16,14 +17,17 @@ package data
 	import data.staticObj.DaoJuDesc;
 	import data.staticObj.EnumBodyType;
 	import data.staticObj.HaiDaoGroupDesc;
-	import data.staticObj.HaiDaoGroupMemDesc;
+	import data.staticObj.HaiDaoWaveDesc;
+	import data.staticObj.HaiDaoWaveMemDesc;
 	import data.staticObj.MapCityDesc;
 	import data.staticObj.MapDesc;
+	import data.staticObj.MapIslandDesc;
 	import data.staticObj.PaoDanDesc;
 	import data.staticObj.RoleBulletDesc;
 	import data.staticObj.RoleDesc;
+	import data.staticObj.ShenFuDesc;
+	import data.staticObj.ShenJiangDesc;
 	import data.staticObj.ShipDesc;
-	import data.staticObj.SkillDesc;
 	import data.staticObj.TuZhiDesc;
 	
 	import lsg.DaojuIcon1;
@@ -32,15 +36,29 @@ package data
 	import lsg.DaojuIcon4;
 	import lsg.bmp.anchor;
 	import lsg.bmp.bullet1;
+	import lsg.bmp.bullet2;
 	import lsg.bmp.city1;
 	import lsg.bmp.entry;
+	import lsg.bmp.island1;
 	import lsg.bmp.land1;
 	import lsg.bmp.role1;
 	import lsg.bmp.sea1;
 	import lsg.bmp.seaGrid1;
+	import lsg.bmp.seaGrid2;
 	import lsg.bmp.ship1;
 	import lsg.bmp.ship2;
 	import lsg.bmp.ship3;
+	import lsg.bmp.skill1;
+	import lsg.bmp.skill10;
+	import lsg.bmp.skill11;
+	import lsg.bmp.skill2;
+	import lsg.bmp.skill3;
+	import lsg.bmp.skill4;
+	import lsg.bmp.skill5;
+	import lsg.bmp.skill6;
+	import lsg.bmp.skill7;
+	import lsg.bmp.skill8;
+	import lsg.bmp.skill9;
 	import lsg.bmp.target;
 	import lsg.bullet.Icon1;
 	import lsg.bullet.Icon2;
@@ -58,9 +76,10 @@ package data
 	
 	import message.EnumDaoJuType;
 	
-	import myphys.MyBody;
+	import mybodys.PaoDanBody;
+	import mybodys.ShenFuPlayer;
+	import mybodys.ShipPlayer;
 	
-	import utils.BodyPlayer;
 	import utils.McSprite;
 	
 	public class StaticTable
@@ -247,8 +266,21 @@ package data
 					mcDesc.entryY = Number(cityXml.@entryY);
 					mcDesc.outX = Number(cityXml.@outX);
 					mcDesc.outY = Number(cityXml.@outY);
-					mcDesc.mapDesc = mapDesc;
 					mapDesc.citys.push(mcDesc);
+				}
+				for(j=0;j<mapXml.block.length();j++)
+				{
+					var blockXml:XML = mapXml.block[j];
+					mapDesc.blockDic[int(blockXml.@col)*1000 + int(blockXml.@row)] = String(blockXml.@name);
+				}
+				for(j=0;j<mapXml.island.length();j++)
+				{
+					var islandXml:XML = mapXml.island[j];
+					var miDesc:MapIslandDesc = new MapIslandDesc;
+					miDesc.x = int(islandXml.@x);
+					miDesc.y = int(islandXml.@y);
+					miDesc.name = String(islandXml.@name);
+					mapDesc.islands.push(miDesc);
 				}
 				SEAMAP_DESC.push(mapDesc);
 			}
@@ -266,7 +298,16 @@ package data
 				shipDesc.speed = Number(shipXml.@speed);
 				shipDesc.blood = int(shipXml.@blood);
 				shipDesc.range = int(shipXml.@range);
-				shipDesc.shootSpeed = Number(shipXml.@shootSpeed);
+				shipDesc.cost = int(shipXml.@cost);
+				shipDesc.hurt = int(shipXml.@hurt);
+				if(shipXml.hasOwnProperty("@shootSpeed"))
+				{
+					shipDesc.shootSpeed = Number(shipXml.@shootSpeed);
+				}
+				if(shipXml.hasOwnProperty("@bulletId"))
+				{
+					shipDesc.bulletId = int(shipXml.@bulletId);
+				}
 				if(shipDesc.type == EnumBodyType.CIRCLE)
 				{
 					shipDesc.raidus = Number(shipXml.@radius);
@@ -303,56 +344,98 @@ package data
 			{
 				var groupXml:XML = xml.hdGroup[i];
 				var groupDesc:HaiDaoGroupDesc=new HaiDaoGroupDesc;
-				groupDesc.start = int(groupXml.@start);
-				groupDesc.end = int(groupXml.@end);
-				for(j = 0; j < groupXml.member.length(); j++)
+				groupDesc.id = int(groupXml.@id);
+				
+				for(j = 0; j < groupXml.wave.length(); j++)
 				{
-					var memXml:XML = groupXml.member[j];
-					var memDesc:HaiDaoGroupMemDesc = new HaiDaoGroupMemDesc;
-					memDesc.id = int(memXml.@id);
-					memDesc.count = int(memXml.@count);
-					memDesc.cost = int(memXml.@cost);
-					memDesc.lost = int(memXml.@lost);
-					groupDesc.members.push(memDesc);
+					var waveXml:XML = groupXml.wave[j];
+					var waveDesc:HaiDaoWaveDesc = new HaiDaoWaveDesc;
+					waveDesc.remains = Number(waveXml.@time) * 1000;
+					var poses:Array = String(waveXml.@npcPos).split(",");
+					for(k=0;k<poses.length;k++)
+					{
+						waveDesc.npcPoses.push(int(poses[j]));
+					}
+					for(var k:int = 0; k < waveXml.member.length(); k++)
+					{
+						var memXml:XML = waveXml.member[k];
+						var memDesc:HaiDaoWaveMemDesc = new HaiDaoWaveMemDesc;
+						memDesc.id = int(memXml.@id);
+						memDesc.count = int(memXml.@count);
+						waveDesc.members.push(memDesc);
+					}
+					groupDesc.waves.push(waveDesc);
 				}
+				
 				HAODAO_GROUPS.push(groupDesc);
 			}
 			BodyConfig = null;
 			
 			xml = new XML(new SkillConfig);
-			for(i = 0; i < xml.skill.length(); i++)
+			for(i = 0; i < xml.sj.length(); i++)
 			{
-				var skillXml:XML = xml.skill[i];
-				var skillDesc:SkillDesc = new SkillDesc;
-				skillDesc.type = int(skillXml.@type);
-				skillDesc.level = int(skillXml.@level);
-				skillDesc.name = skillXml.@name;
-				skillDesc.desc = skillXml.@desc;
-				skillDesc.weight = Number(skillXml.@weight);
-				skillDesc.wait = Number(skillXml.@wait);
-				skillDesc.extra = Number(skillXml.@extra);
-				if(skillXml.hasOwnProperty("@extra2"))
+				var sjXml:XML = xml.sj[i];
+				var sjDesc:ShenJiangDesc = new ShenJiangDesc;
+				sjDesc.type = int(sjXml.@type);
+				sjDesc.level = int(sjXml.@level);
+				sjDesc.name = sjXml.@name;
+				sjDesc.desc = sjXml.@desc;
+				sjDesc.weight = Number(sjXml.@weight);
+				sjDesc.wait = Number(sjXml.@wait);
+				sjDesc.extra = Number(sjXml.@extra);
+				if(sjXml.hasOwnProperty("@extra2"))
 				{
-					skillDesc.extra2 = Number(skillXml.@extra2);
+					sjDesc.extra2 = Number(sjXml.@extra2);
 				}
-				if( skillXml.hasOwnProperty("@gold"))
+				if( sjXml.hasOwnProperty("@gold"))
 				{
-					skillDesc.gold = int(skillXml.@gold);
+					sjDesc.gold = int(sjXml.@gold);
 				}
 				else
 				{
-					SKILLTYPE2MAXLEVEL[skillDesc.type]=skillDesc.level;
+					SKILLTYPE2MAXLEVEL[sjDesc.type]=sjDesc.level;
 				}
-				SKILL_DESC.push(skillDesc);
+				SKILL_DESC.push(sjDesc);
+			}
+			
+			for(i = 0; i < xml.sf.length(); i++)
+			{
+				var sfXml:XML = xml.sf[i];
+				var sfDesc:ShenFuDesc = new ShenFuDesc;
+				sfDesc.type = int(sfXml.@type);
+				sfDesc.level = int(sfXml.@level);
+				sfDesc.name = sfXml.@name;
+				sfDesc.desc = sfXml.@desc;
+				sfDesc.extra = Number(sfXml.@extra);
+				sfDesc.time = Number(sfXml.@time);
+				if( sfXml.hasOwnProperty("@gold"))
+				{
+					sfDesc.gold = int(sfXml.@gold);
+				}
+				else
+				{
+					SKILLTYPE2MAXLEVEL[sfDesc.type]=sfDesc.level;
+				}
+				SHENFU_DESC.push(sfDesc);
 			}
 			SkillConfig = null;
 		}
 		
-		public static var SKILLTYPE2MAXLEVEL:Dictionary = new Dictionary;
-		public static var SKILL_DESC:Vector.<SkillDesc> = new Vector.<SkillDesc>;
-		public static function GetSkillDescByTypeLevel(type:int, level:int):SkillDesc
+		public static var SHENFU_DESC:Vector.<ShenFuDesc> = new Vector.<ShenFuDesc>;
+		public static function GetShenFuByTypeLevel(type:int, level:int):ShenFuDesc
 		{
-			for each(var sd:SkillDesc in SKILL_DESC)
+			for each(var sd:ShenFuDesc in SHENFU_DESC)
+			{
+				if(sd.type == type && sd.level == level)return sd;
+			}
+			return null;
+		}
+		
+		public static var SKILLTYPE2MAXLEVEL:Dictionary = new Dictionary;
+		public static var SKILL_DESC:Vector.<ShenJiangDesc> = new Vector.<ShenJiangDesc>;
+		public static function GetSkillDescByTypeLevel(type:int, level:int):ShenJiangDesc
+		{
+			for each(var sd:ShenJiangDesc in SKILL_DESC)
 			{
 				if(sd.type == type && sd.level == level)return sd;
 			}
@@ -360,11 +443,11 @@ package data
 		}
 		
 		public static var HAODAO_GROUPS:Vector.<HaiDaoGroupDesc> = new Vector.<HaiDaoGroupDesc>;
-		public static function GetHaoDaoGroup(gold:int):HaiDaoGroupDesc
+		public static function GetHaoDaoGroup(id:int):HaiDaoGroupDesc
 		{
 			for each(var sd:HaiDaoGroupDesc in HAODAO_GROUPS)
 			{
-				if(sd.start <= gold && sd.end >= gold)return sd;
+				if(sd.id == id)return sd;
 			}
 			return null;
 		}
@@ -379,11 +462,12 @@ package data
 			return null;
 		}
 		
-		public static function GetPaoDanMyBody(id:int):MyBody
+		public static function GetPaoDanBody(id:int):PaoDanBody
 		{
 			var pdDesc:PaoDanDesc = GetPaoDanDesc(id);
-			var mybody:MyBody = new MyBody(pdDesc);
-			mybody.animation = GetAniBmpByName(pdDesc.animation);
+			var mybody:PaoDanBody = new PaoDanBody(pdDesc);
+			mybody.paodan = GetAniBmpByName(pdDesc.animation);
+			mybody.effect = GetAniBmpByName(pdDesc.effect);
 			return mybody;
 		}
 		
@@ -424,7 +508,7 @@ package data
 		
 		public static function GetSeaMapGrid(mapId:int):Grid
 		{
-			var bd:BitmapData = new seaGrid1;
+			var bd:BitmapData = GetBmpData("seaGrid" + mapId);
 			var grid:Grid = new Grid(bd.width, bd.height);
 			for(var i:int = 0; i < bd.width; i++)
 			{
@@ -447,10 +531,35 @@ package data
 			return bmp;
 		}
 		
+		public static function GetShenFuPlayer(sf:ShenFuDesc):ShenFuPlayer
+		{
+			return new ShenFuPlayer(sf, GetBmpData2("skill" + sf.type));
+		}
+		public static function GetBmp2(name:String, cache:Boolean = true):Bitmap
+		{
+			var bmp:Bitmap = new Bitmap(GetBmpData2(name));
+			return bmp;
+		}
+		
+		public static const bmpClasses:Array = [skill1,skill2,skill3,skill4,skill5,skill6,skill7,skill8,skill9,skill10,skill11];
+		public static function GetBmpData2(name:String):BitmapData
+		{
+			var bd:BitmapData = BitmapDataPool.getBitmapData(getDefinitionByName("lsg.bmp." + name) as Class);
+			return bd;
+		}
+		
 		public static function GetBmpData(name:String, cache:Boolean = true):BitmapData
 		{
 			switch(name)
 			{
+				case "seaGrid1":
+					if(cache) bd = BitmapDataPool.getBitmapData(seaGrid1);
+					else bd = new seaGrid1;
+					break;
+				case "seaGrid2":
+					if(cache) bd = BitmapDataPool.getBitmapData(seaGrid2);
+					else bd = new seaGrid2;
+					break;
 				case "target":
 					if(cache) bd = BitmapDataPool.getBitmapData(target);
 					else bd = new target;
@@ -471,6 +580,10 @@ package data
 					if(cache) bd = BitmapDataPool.getBitmapData(sea1);
 					else bd = new sea1;
 					break;
+				case "island1":
+					if(cache) bd = BitmapDataPool.getBitmapData(island1);
+					else bd = new island1;
+					break;
 				case "city1":
 					if(cache) bd = BitmapDataPool.getBitmapData(city1);
 					else bd = new city1;
@@ -486,6 +599,10 @@ package data
 				case "bullet1":
 					if(cache) bd = BitmapDataPool.getBitmapData(bullet1);
 					else bd = new bullet1;
+					break;
+				case "bullet2":
+					if(cache) bd = BitmapDataPool.getBitmapData(bullet2);
+					else bd = new bullet2;
 					break;
 				case "ship3":
 					if(cache) bd = BitmapDataPool.getBitmapData(ship3);
@@ -525,22 +642,6 @@ package data
 					break;
 			}
 			return bd;
-		}
-		
-		public static function DestoryBmp(name:String):void
-		{
-			switch(name)
-			{
-				case "land1":
-					BitmapDataPool.destoryBitmapData(land1);
-					break;
-				case "sea1":
-					BitmapDataPool.destoryBitmapData(sea1);
-					break;
-				case "city1":
-					BitmapDataPool.destoryBitmapData(city1);
-					break;
-			}
 		}
 		
 		public static var ANIMATION_DESC:Vector.<AnimationDesc> = new Vector.<AnimationDesc>;
@@ -743,10 +844,10 @@ package data
 			return GetAniPlayerByName("role1");
 		}
 		
-		public static function GetShipBodyPlayer(id:int):BodyPlayer
+		public static function GetShipBodyPlayer(id:int):ShipPlayer
 		{
 			var sd:ShipDesc = GetShipDesc(id);
-			var bp:BodyPlayer = new BodyPlayer();
+			var bp:ShipPlayer = new ShipPlayer();
 			bp.bodyDesc = sd;
 			var animations:Vector.<Animation> = GetAnimationsByBmpName(sd.animation);
 			var aniDescs:Array = BMPNAME2ANIDESCS[sd.animation];

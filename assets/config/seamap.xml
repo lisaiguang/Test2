@@ -2,4 +2,44 @@
 	<map id="1" name="渤海" width="4480" height="3200" cols="14" rows="10" >
 		<city id="1" posX="4170" posY="2620" entryX="4130" entryY="2745" outX="4100" outY="2745"/>
 	</map>
+	<map id="2" name="东海" width="1280" height="11200" cols="4" rows="35">
+		<city id="1" posX="35" posY="10" entryX="330" entryY="135" outX="330" outY="135"/>
+		<city id="2" posX="35" posY="10940" entryX="330" entryY="11065" outX="330" outY="12665"/>
+		<block col="0" row="0" name="land1" />
+		<block col="0" row="1" name="land1" />
+		<block col="0" row="2" name="land1" />
+		<block col="0" row="3" name="land1" />
+		<block col="0" row="4" name="land1" />
+		<block col="0" row="5" name="land1" />
+		<block col="0" row="6" name="land1" />
+		<block col="0" row="7" name="land1" />
+		<block col="0" row="8" name="land1" />
+		<block col="0" row="9" name="land1" />
+		<block col="0" row="10" name="land1" />
+		<block col="0" row="11" name="land1" />
+		<block col="0" row="12" name="land1" />
+		<block col="0" row="13" name="land1" />
+		<block col="0" row="14" name="land1" />
+		<block col="0" row="15" name="land1" />
+		<block col="0" row="16" name="land1" />
+		<block col="0" row="17" name="land1" />
+		<block col="0" row="18" name="land1" />
+		<block col="0" row="19" name="land1" />
+		<block col="0" row="20" name="land1" />
+		<block col="0" row="21" name="land1" />
+		<block col="0" row="22" name="land1" />
+		<block col="0" row="23" name="land1" />
+		<block col="0" row="24" name="land1" />
+		<block col="0" row="25" name="land1" />
+		<block col="0" row="26" name="land1" />
+		<block col="0" row="27" name="land1" />
+		<block col="0" row="28" name="land1" />
+		<block col="0" row="29" name="land1" />
+		<block col="0" row="30" name="land1" />
+		<block col="0" row="31" name="land1" />
+		<block col="0" row="32" name="land1" />
+		<block col="0" row="33" name="land1" />
+		<block col="0" row="34" name="land1" />
+		<island x="500" y="400" name="island1" />
+	</map>
 </root>

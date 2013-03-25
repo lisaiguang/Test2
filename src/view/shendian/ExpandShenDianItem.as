@@ -1,5 +1,6 @@
 package view.shendian
 {
+	import flash.display.Bitmap;
 	import flash.events.MouseEvent;
 	
 	import data.Buffer;
@@ -25,13 +26,20 @@ package view.shendian
 		{
 			skillDesc = sd;
 			txtName.text = sd.name;
-			txtGold.text = sd.gold ? sd.gold + "":"MAX";
 			txtDesc.text = sd.desc;
+			if(sd.gold)
+			{
+				txtGold.text = sd.gold + "";
+			}
+			else
+			{
+				txtGold.visible = txtTag.visible = false;
+			}
 			btnUp.addEventListener(MouseEvent.CLICK, onUpClick);
 			
 			_jdt=new JinDuTiao(100,20,2, Color.YELLOW);
-			_jdt.x = 220;
-			_jdt.y = 25;
+			_jdt.x = 260;
+			_jdt.y = 32;
 			addChild(_jdt);
 			_jdt.setBlood(sd.level, StaticTable.SKILLTYPE2MAXLEVEL[sd.type]);
 			
@@ -39,6 +47,11 @@ package view.shendian
 			{
 				btnUp.visible =false;
 			}
+			
+			var bp:Bitmap = StaticTable.GetBmp2("skill"+sd.type);
+			bp.x = 8;
+			bp.y=8;
+			addChild(bp);
 		}
 		
 		protected function onUpClick(event:MouseEvent):void

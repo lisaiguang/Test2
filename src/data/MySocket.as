@@ -6,7 +6,7 @@ package data
 	
 	import data.staticObj.EnumBaoShi;
 	import data.staticObj.RoleBulletDesc;
-	import data.staticObj.SkillDesc;
+	import data.staticObj.ShenJiangDesc;
 	
 	import message.BattleBeginAck;
 	import message.BattleBeginReq;
@@ -61,7 +61,7 @@ package data
 		{
 			if(mes is MainPlayerUpSkillReq)
 			{
-				var skillDesc:SkillDesc = StaticTable.GetSkillDescByTypeLevel(mes.type, mes.level);
+				var skillDesc:ShenJiangDesc = StaticTable.GetSkillDescByTypeLevel(mes.type, mes.level);
 				mpgn = new MainPlayerGoldAck;
 				mpgn.gold = Buffer.mainPlayer.gold - skillDesc.gold;
 				MySignals.onMainPlayerGoldAck.dispatch(mpgn);

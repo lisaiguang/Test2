@@ -5,13 +5,13 @@ package view.shendian
 	import flash.display.Bitmap;
 	import flash.display.DisplayObject;
 	import flash.display.Sprite;
-	import flash.events.Event;
 	import flash.events.MouseEvent;
 	
 	import data.Buffer;
 	import data.MySignals;
 	import data.StaticTable;
-	import data.staticObj.SkillDesc;
+	import data.staticObj.ShenFuDesc;
+	import data.staticObj.ShenJiangDesc;
 	
 	import lsg.shendian.ShenDianUI;
 	
@@ -42,7 +42,7 @@ package view.shendian
 			_mc.mask = _mask;
 			addChild(_mc);
 			
-			printfShenJis();
+			printfSkills();
 			InitPos();
 			addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
 			listen(MySignals.onMainPlayerUpSkillAck, onMainPlayerUpSkillAck);
@@ -50,7 +50,7 @@ package view.shendian
 		
 		private function onMainPlayerUpSkillAck(mes:MainPlayerUpSkillAck):void
 		{
-			printfShenJis();
+			printfSkills();
 		}
 		
 		private var _sy:Number, _isClick:Boolean;
@@ -74,7 +74,15 @@ package view.shendian
 				{
 					_select = si.skillDesc.type;
 				}
-				printfShenJis();
+				else
+				{
+					var lsi:LockedItem = LHelp.FindParentByClass(event.target as DisplayObject, LockedItem);
+					if(lsi)
+					{
+						_select = lsi.skillDesc.type;
+					}
+				}
+				printfSkills();
 			}
 		}
 		
@@ -89,21 +97,21 @@ package view.shendian
 			{
 				_mc.y = mcOriginalY  + SCROLL_HEIGHT - _mc.height;
 			}
-			if(Math.abs(_mc.y - event.stageY - _sy) > 12)
+			if(Math.abs(_mc.y - event.stageY - _sy) > 8)
 			{
 				_isClick = false;
 			}
 		}
 		
 		private var maxY:Number;
-		private function printfShenJis():void
+		private function printfSkills():void
 		{
 			TweenLite.killTweensOf(_mc);
 			LHelp.Clear(_mc);
 			var addY:Number = 0;
-			for(var i:int = 0; i < Buffer.mainPlayer.skills.length; i++)
+			for(var i:int = 0; i < Buffer.mainPlayer.sjs.length; i++)
 			{
-				var sk:SkillDesc = Buffer.mainPlayer.skills[i];
+				var sk:ShenJiangDesc = Buffer.mainPlayer.sjs[i];
 				if(sk.type != _select)
 				{
 					var si:ShenDianItem = new ShenDianItem(sk);
@@ -118,6 +126,47 @@ package view.shendian
 					esi.y = 87 * i;
 					_mc.addChild(esi);
 					addY = 161 - 82;
+				}
+			}
+			
+			for(; i < Buffer.mainPlayer.sfs.length + 5; i++)
+			{
+				var sf:ShenFuDesc = Buffer.mainPlayer.sfs[i-5];
+				if(sf.type != _select)
+				{
+					if(sf.locked)
+					{
+						var lsi:LockedItem = new LockedItem(sf);
+						lsi.cacheAsBitmap = true;
+						lsi.y = 87 * i + addY;
+						_mc.addChild(lsi);
+					}
+					else
+					{
+						si = new ShenDianItem(sf);
+						si.cacheAsBitmap = true;
+						si.y = 87 * i + addY;
+						_mc.addChild(si);
+					}
+				}
+				else
+				{
+					if(sf.locked)
+					{
+						var elsi:ExpandLockedItem = new ExpandLockedItem(sf);
+						elsi.cacheAsBitmap = true;
+						elsi.y = 87 * i;
+						_mc.addChild(elsi);
+						addY = 161 - 82;
+					}
+					else
+					{
+						esi = new ExpandShenDianItem(sf);
+						esi.cacheAsBitmap = true;
+						esi.y = 87 * i;
+						_mc.addChild(esi);
+						addY = 161 - 82;
+					}
 				}
 			}
 		}

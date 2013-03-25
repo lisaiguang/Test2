@@ -9,6 +9,5 @@ package data.staticObj
 		public var entryY:Number;
 		public var outX:Number;
 		public var outY:Number;
-		public var mapDesc:MapDesc;
 	}
 }

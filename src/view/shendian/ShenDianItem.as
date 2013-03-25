@@ -1,5 +1,7 @@
 package view.shendian
 {
+	import flash.display.Bitmap;
+	
 	import data.StaticTable;
 	import data.staticObj.SkillDesc;
 	
@@ -18,13 +20,25 @@ package view.shendian
 		{
 			skillDesc = sd;
 			txtName.text = sd.name;
-			txtGold.text = sd.gold ? sd.gold + "":"MAX";
+			if(sd.gold)
+			{
+				txtGold.text = sd.gold + "";
+			}
+			else
+			{
+				txtGold.visible = txtTag.visible = false;
+			}
 			
 			_jdt=new JinDuTiao(100,20,2, Color.YELLOW);
-			_jdt.x = 220;
-			_jdt.y = 25;
+			_jdt.x = 260;
+			_jdt.y = 32;
 			addChild(_jdt);
 			_jdt.setBlood(sd.level, StaticTable.SKILLTYPE2MAXLEVEL[sd.type]);
+			
+			var bp:Bitmap = StaticTable.GetBmp2("skill"+sd.type);
+			bp.x = 8;
+			bp.y=8;
+			addChild(bp);
 		}
 	}
 }

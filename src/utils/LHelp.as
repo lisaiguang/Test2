@@ -95,16 +95,17 @@ package utils
 			return Math.abs(x - cx) <= halfWidth && Math.abs(y - cy) <= halfHeight;
 		}
 		
-		private static var _ts:int;
-		public static function RecordTime():void
+		private static var _ts:int, _tsShelf:int;
+		public static function RecordTime(shelf:int = 0):void
 		{
+			_tsShelf = shelf;
 			_ts = getTimer();
 		}
 		
 		public static function PrintTime(prex:String):void
 		{
 			var el:int = getTimer() - _ts;
-			if(el > 2)
+			if(el >= _tsShelf)
 			trace(prex, el, "ms");
 		}
 		

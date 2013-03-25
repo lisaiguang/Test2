@@ -1,7 +1,7 @@
 package data
 {
 	
-	import data.staticObj.SkillDesc;
+	import data.staticObj.ShenJiangDesc;
 	
 	import message.DaoJu;
 	import message.DaoJuDeleteNtf;
@@ -44,12 +44,12 @@ package data
 		
 		private function onMainPlayerUpSkillAck(mes:MainPlayerUpSkillAck):void
 		{
-			for(var i:int = 0; i < mainPlayer.skills.length; i++)
+			for(var i:int = 0; i < mainPlayer.sjs.length; i++)
 			{
-				var sd:SkillDesc = mainPlayer.skills[i];
+				var sd:ShenJiangDesc = mainPlayer.sjs[i];
 				if(sd.type == mes.type)
 				{
-					mainPlayer.skills[i] = StaticTable.GetSkillDescByTypeLevel(mes.type, mes.level);
+					mainPlayer.sjs[i] = StaticTable.GetSkillDescByTypeLevel(mes.type, mes.level);
 				}
 			}
 		}

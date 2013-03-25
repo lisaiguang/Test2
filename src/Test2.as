@@ -102,16 +102,20 @@ package
 			player.name = "lsg";
 			player.gold = 100;
 			player.curCityId = 1;
-			player.curMapId = 1;
+			player.curMapId = 2;
 			player.curShip = 1;
 			player.curPaoDan = 1;
-			for(i=1; i<=5; i++)
+			for(var i:int=1; i<=5; i++)
 			{
-				player.skills.push(StaticTable.GetSkillDescByTypeLevel(i,0));
+				player.sjs.push(StaticTable.GetSkillDescByTypeLevel(i,0));
+			}
+			for(; i<=11; i++)
+			{
+				player.sfs.push(StaticTable.GetShenFuByTypeLevel(i,0));
 			}
 			MySignals.onMainPlayer.dispatch(player);
 			
-			for(var i:int = 1; i <= 100; i ++)
+			/*for(i = 1; i <= 100; i ++)
 			{
 				var dj:DaoJu = new DaoJu;
 				dj.id = i;
@@ -128,7 +132,7 @@ package
 				pd.count = 1;
 				pd.isEquiped = true;
 				MySignals.onPaoDan.dispatch(pd);
-			}
+			}*/
 		}
 		
 		private var _socket:MySocket = new MySocket;
