@@ -62,7 +62,6 @@ package view.gangkou
 		private var _ship:ShipPlayer;
 		private var _arranges:Vector.<DisplayObject> = new Vector.<DisplayObject>;
 		private var _groupDesc:HaiDaoGroupDesc;
-		
 		public function GangKouView()
 		{
 			_mapDesc = StaticTable.GetSeaMapDesc(Buffer.mainPlayer.curMapId);
@@ -98,7 +97,6 @@ package view.gangkou
 			_greenBar = new JinDuTiao(98,6,1,Color.GREEN);
 			_greenBar.x = -_greenBar.width*.5;
 			_greenBar.y = -_ship.height * .78;
-			
 			_greenText = new TextField();
 			_greenText.defaultTextFormat = GREEN_FORMAT;
 			_greenText.text = "";
@@ -493,10 +491,11 @@ package view.gangkou
 					elapsed -= _startTimeOffset;
 					_startTimeOffset = 0;
 				}
+				var xs:Number = getSfXs(EnumSkillType.SF_JIASHU);
 				if(_times[0] > elapsed)
 				{
 					_times[0] -= elapsed;
-					var motion:Vec2 = _directions[0].mul(_ship.shipDesc.speed * elapsed);
+					var motion:Vec2 = _directions[0].mul(_ship.shipDesc.speed * xs * elapsed);
 					_ship.x += motion.x;
 					_ship.y += motion.y;
 					motion.dispose();
@@ -504,8 +503,7 @@ package view.gangkou
 				else
 				{
 					elapsed -= _times[0];
-					var xs:Number = getSfXs(EnumSkillType.SF_JIASHU);
-					motion = _directions[0].mul((_ship.shipDesc.speed * xs) * _times[0]);
+					motion = _directions[0].mul(_ship.shipDesc.speed * xs * _times[0]);
 					_ship.x += motion.x;
 					_ship.y += motion.y;
 					motion.dispose();
@@ -514,7 +512,7 @@ package view.gangkou
 					if(elapsed && _directions.length > 0)
 					{
 						_times[0] -= elapsed;
-						motion = _directions[0].mul(_ship.shipDesc.speed * elapsed);
+						motion = _directions[0].mul(_ship.shipDesc.speed * xs * elapsed);
 						_ship.x += motion.x;
 						_ship.y += motion.y;
 						motion.dispose();
@@ -628,7 +626,7 @@ package view.gangkou
 			for(var i:int=0;i<_hds.length;i++)
 			{
 				var hd:ShipPlayer = _hds[i];
-				if(!hd.visible || shipDropping(hd))
+				if(!hd.parent || !hd.visible || shipDropping(hd))
 				{
 					continue;
 				}
@@ -669,7 +667,6 @@ package view.gangkou
 					hd.update(Test2.ELAPSED);
 				}
 			}
-			
 			for(i = 0; i < minDises.length; i++)
 			{
 				for(var j:int = i + 1; j < minDises.length; j++)
@@ -685,7 +682,6 @@ package view.gangkou
 					}
 				}
 			}
-			
 			fire(nearstHds, nearstHd);
 		}
 		
@@ -1087,7 +1083,8 @@ package view.gangkou
 		
 		override protected function destoryed():void
 		{
-			stage.removeChild(_sfSprite);
+			if(_sfSprite && _sfSprite.parent)
+				stage.removeChild(_sfSprite);
 		}
 		
 		private function shipDropping(hd:ShipPlayer):Boolean
