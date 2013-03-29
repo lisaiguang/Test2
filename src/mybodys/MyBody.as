@@ -2,17 +2,17 @@ package mybodys
 {
 	import flash.display.DisplayObject;
 	
-	import data.staticObj.BodyDesc;
+	import data.staticObj.OldBodyDesc;
 	import data.staticObj.EnumBodyType;
 	
 	import utils.LHelp;
 
 	public class MyBody
 	{
-		protected var bodyDesc:BodyDesc;
+		protected var bodyDesc:OldBodyDesc;
 		protected var animation:DisplayObject;
 		
-		public function MyBody(bd:BodyDesc)
+		public function MyBody(bd:OldBodyDesc)
 		{
 			bodyDesc = bd;
 		}

@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<actionScriptProperties analytics="false" mainApplicationPath="Test2.as" projectUUID="a1369e0c-7535-4a51-99cd-6e7b922b14ee" version="11">
+<actionScriptProperties analytics="false" mainApplicationPath="CaiShenDao.as" projectUUID="a1369e0c-7535-4a51-99cd-6e7b922b14ee" version="11">
   <compiler additionalCompilerArguments="-locale en_US" advancedTelemetry="false" autoRSLOrdering="true" copyDependentFiles="true" fteInMXComponents="false" generateAccessible="false" htmlExpressInstall="true" htmlGenerate="false" htmlHistoryManagement="false" htmlPlayerVersionCheck="true" includeNetmonSwc="false" outputFolderPath="bin-debug" removeUnusedRSL="true" sourceFolderPath="src" strict="true" targetPlayerVersion="0.0.0" useApolloConfig="true" useDebugRSLSwfs="true" useFlashSDK="true" verifyDigests="true" warn="true">
     <compilerSourcePath>
       <compilerSourcePathEntry kind="1" linkType="1" path="/Users/saiguangli/Documents/tools/as3-signals/src"/>
       <compilerSourcePathEntry kind="1" linkType="1" path="/Users/saiguangli/Documents/tools/hires.as3-master/src"/>
       <compilerSourcePathEntry kind="1" linkType="1" path="/Users/saiguangli/Documents/tools/Starling-Framework/starling/src"/>
       <compilerSourcePathEntry kind="1" linkType="1" path="/Users/saiguangli/Documents/tools/GingerDemo/src"/>
-      <compilerSourcePathEntry kind="1" linkType="1" path="/Users/saiguangli/Documents/tools/greensock-v11-as3"/>
       <compilerSourcePathEntry kind="1" linkType="1" path="/Users/saiguangli/Documents/tools/As3IsoLib/src"/>
       <compilerSourcePathEntry kind="1" linkType="1" path="/Users/saiguangli/Documents/tools/bit101"/>
+      <compilerSourcePathEntry kind="1" linkType="1" path="/Users/saiguangli/Documents/tools/greensock-v11-as3"/>
     </compilerSourcePath>
     <libraryPath defaultLinkType="0">
       <libraryPathEntry kind="4" path="">
@@ -48,6 +48,9 @@
     <sourceAttachmentPath/>
   </compiler>
   <applications>
+    <application path="CaiShenDao.as">
+      <airExcludes/>
+    </application>
     <application path="Test2.as">
       <airExcludes/>
     </application>

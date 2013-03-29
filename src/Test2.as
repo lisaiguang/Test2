@@ -15,13 +15,9 @@ package
 	import data.MySocket;
 	import data.StaticTable;
 	
-	import message.DaoJu;
 	import message.MainPlayer;
-	import message.PaoDan;
-	
 	import net.hires.debug.Stats;
-	
-	import view.WelcomeView;
+	import view.welcome.WelcomeView;
 	
 	import warn.WarnView;
 	[SWF(frameRate="24")]
@@ -38,8 +34,8 @@ package
 			//var stageWidth:int   = StaticTable.STAGE_WIDTH
 			//var stageHeight:int  = StaticTable.STAGE_HEIGHT;
 			//var iOS:Boolean = Capabilities.manufacturer.indexOf("iOS") != -1;
-			this.addChild(_midLayer);
-			this.addChild(new Stats);
+			addChild(_midLayer);
+			addChild(new Stats);
 			/*Starling.multitouchEnabled = true;
 			Starling.handleLostContext = !iOS; 
 			

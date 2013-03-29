@@ -14,6 +14,7 @@ package data
 	import bit101.Grid;
 	
 	import data.staticObj.AnimationDesc;
+	import data.staticObj.BodyBoxDesc;
 	import data.staticObj.DaoJuDesc;
 	import data.staticObj.EnumBodyType;
 	import data.staticObj.HaiDaoGroupDesc;
@@ -37,10 +38,16 @@ package data
 	import lsg.bmp.anchor;
 	import lsg.bmp.bullet1;
 	import lsg.bmp.bullet2;
+	import lsg.bmp.caishen;
 	import lsg.bmp.city1;
 	import lsg.bmp.entry;
 	import lsg.bmp.island1;
 	import lsg.bmp.land1;
+	import lsg.bmp.miniBest;
+	import lsg.bmp.miniGo;
+	import lsg.bmp.miniGold;
+	import lsg.bmp.miniOver;
+	import lsg.bmp.miniReady;
 	import lsg.bmp.role1;
 	import lsg.bmp.sea1;
 	import lsg.bmp.seaGrid1;
@@ -60,6 +67,10 @@ package data
 	import lsg.bmp.skill8;
 	import lsg.bmp.skill9;
 	import lsg.bmp.target;
+	import lsg.bmp.yuanbao;
+	import lsg.bmp.zadan;
+	import lsg.bmp.zhuanshi;
+	import lsg.bmp.zhujia;
 	import lsg.bullet.Icon1;
 	import lsg.bullet.Icon2;
 	import lsg.bullet.Icon3;
@@ -84,8 +95,8 @@ package data
 	
 	public class StaticTable
 	{
-		public static var STAGE_WIDTH:int  = 960;
-		public static var STAGE_HEIGHT:int = 640;
+		public static var STAGE_WIDTH:int  = 640;
+		public static var STAGE_HEIGHT:int = 960;
 		
 		[Embed(source = "../../assets/config/bullet.xml", mimeType="application/octet-stream")]
 		private static var bulletConfig:Class;
@@ -110,6 +121,9 @@ package data
 		
 		[Embed(source = "../../assets/config/skill.xml", mimeType="application/octet-stream")]
 		private static var SkillConfig:Class;
+		
+		[Embed(source = "../../assets/config/newBody.xml", mimeType="application/octet-stream")]
+		private static var NewBodyConfig:Class;
 		
 		public static function Init():void
 		{
@@ -419,6 +433,30 @@ package data
 				SHENFU_DESC.push(sfDesc);
 			}
 			SkillConfig = null;
+			
+			xml = new XML(new NewBodyConfig);
+			for(i = 0; i < xml.box.length(); i++)
+			{
+				var boxXml:XML = xml.box[i];
+				var boxDesc:BodyBoxDesc = new BodyBoxDesc;
+				boxDesc.id = int(boxXml.@id);
+				boxDesc.name = String(boxXml.@name);
+				boxDesc.width = Number(boxXml.@width);
+				boxDesc.height = Number(boxXml.@height);
+				BodyBox_DESC.push(boxDesc);
+			}
+			NewBodyConfig = null;
+		}
+		
+		public static var BodyBox_DESC:Vector.<BodyBoxDesc> = new Vector.<BodyBoxDesc>;
+		public static function GetBodyBoxDescById(id:int):BodyBoxDesc
+		{
+			for(var i:int = 0; i < BodyBox_DESC.length; i++)
+			{
+				var bd:BodyBoxDesc = BodyBox_DESC[i];
+				if(bd.id == id)return bd;
+			}
+			return null;
 		}
 		
 		public static var SHENFU_DESC:Vector.<ShenFuDesc> = new Vector.<ShenFuDesc>;
@@ -552,6 +590,48 @@ package data
 		{
 			switch(name)
 			{
+				//mini
+				case "miniBest":
+					if(cache) bd = BitmapDataPool.getBitmapData(miniBest);
+					else bd = new miniBest;
+					break;
+				case "miniOver":
+					if(cache) bd = BitmapDataPool.getBitmapData(miniOver);
+					else bd = new miniOver;
+					break;
+				case "miniGold":
+					if(cache) bd = BitmapDataPool.getBitmapData(miniGold);
+					else bd = new miniGold;
+					break;
+				case "zhuanshi":
+					if(cache) bd = BitmapDataPool.getBitmapData(zhuanshi);
+					else bd = new zhuanshi;
+					break;
+				case "zadan":
+					if(cache) bd = BitmapDataPool.getBitmapData(zadan);
+					else bd = new zadan;
+					break;
+				case "yuanbao":
+					if(cache) bd = BitmapDataPool.getBitmapData(yuanbao);
+					else bd = new yuanbao;
+					break;
+				case "ready":
+					if(cache) bd = BitmapDataPool.getBitmapData(miniReady);
+					else bd = new miniReady;
+					break;
+				case "go":
+					if(cache) bd = BitmapDataPool.getBitmapData(miniGo);
+					else bd = new miniGo;
+					break;
+				case "caishen":
+					if(cache) bd = BitmapDataPool.getBitmapData(caishen);
+					else bd = new caishen;
+					break;
+				case "zhujia":
+					if(cache) bd = BitmapDataPool.getBitmapData(zhujia);
+					else bd = new zhujia;
+					break;
+				//
 				case "seaGrid1":
 					if(cache) bd = BitmapDataPool.getBitmapData(seaGrid1);
 					else bd = new seaGrid1;

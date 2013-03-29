@@ -8,7 +8,7 @@ package utils
 	import flash.filters.GlowFilter;
 	import flash.utils.getTimer;
 	
-	import data.staticObj.BodyDesc;
+	import data.staticObj.OldBodyDesc;
 	import data.staticObj.EnumBodyType;
 	
 	import nape.shape.Circle;
@@ -109,7 +109,7 @@ package utils
 			trace(prex, el, "ms");
 		}
 		
-		public static function GetShape(bs:BodyDesc):Shape
+		public static function GetShape(bs:OldBodyDesc):Shape
 		{
 			var shape:Shape = null;
 			if(bs.type == EnumBodyType.CIRCLE)

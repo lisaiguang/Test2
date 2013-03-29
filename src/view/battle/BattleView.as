@@ -168,7 +168,6 @@ package view.battle
 		private var _myRole:Body;
 		private static const GROUP_ROLE:int = 2;
 		private var ROLES:CbType = new CbType;
-		
 		private function createRole(player:BattlePlayer):void
 		{	
 			var rs:RoleDesc = StaticTable.GetRoleDesc(player.role);

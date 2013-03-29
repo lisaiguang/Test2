@@ -6,7 +6,7 @@ package mybodys
 	import flash.display.BitmapData;
 	import flash.display.Shape;
 	
-	import data.staticObj.BodyDesc;
+	import data.staticObj.OldBodyDesc;
 	import data.staticObj.EnumAction;
 	import data.staticObj.EnumBodyType;
 	import data.staticObj.ShipDesc;
@@ -15,7 +15,7 @@ package mybodys
 	
 	public class ShipPlayer extends AnimationPlayer
 	{
-		public var bodyDesc:BodyDesc;
+		public var bodyDesc:OldBodyDesc;
 		public var shootItev:int;
 		
 		override public function update(a_ms:Number):void

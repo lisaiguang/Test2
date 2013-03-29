@@ -2,7 +2,7 @@ package mybodys
 {
 	import com.urbansquall.ginger.AnimationBmp;
 	
-	import data.staticObj.BodyDesc;
+	import data.staticObj.OldBodyDesc;
 	import data.staticObj.PaoDanDesc;
 	
 	
@@ -12,7 +12,7 @@ package mybodys
 		public var target:ShipPlayer;
 		public var effect:AnimationBmp;
 		
-		public function PaoDanBody(bd:BodyDesc)
+		public function PaoDanBody(bd:OldBodyDesc)
 		{
 			super(bd);
 		}

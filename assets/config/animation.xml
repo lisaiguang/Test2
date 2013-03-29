@@ -1,4 +1,33 @@
 <root>
+	<bmp name="zhuanshi">
+		<a name="effect" fps="12" width="47" height="43" count="1" startX="0"
+			startY="0" />
+	</bmp>
+	<bmp name="zadan">
+		<a name="effect" fps="12" width="54" height="58" count="1" startX="0"
+			startY="0" />
+	</bmp>
+	<bmp name="yuanbao">
+		<a name="effect" fps="12" width="82" height="47" count="1" startX="0"
+			startY="0" />
+	</bmp>
+	<bmp name="caishen">
+		<a name="ready" fps="12" width="107" height="151" count="1" startX="0"
+			startY="0" />
+		<a name="yuanbao" fps="12" width="107" height="151" count="1"
+			startX="0" startY="0" />
+		<a name="zhadan" fps="12" width="107" height="151" count="1" startX="0"
+			startY="0" />
+		<a name="zhuanshi" fps="12" width="107" height="151" count="1"
+			startX="0" startY="0" />
+	</bmp>
+	<bmp name="zhujia">
+		<a name="ready" fps="12" width="84" height="99" count="1" startX="0"
+			startY="0" />
+		<a name="move" fps="12" width="84" height="99" count="1" startX="0"
+			startY="0" />
+	</bmp>
+
 	<bmp name="anchor">
 		<a name="effect" fps="12" width="34" height="34" count="1" startX="0"
 			startY="0" />
@@ -9,7 +38,7 @@
 	</bmp>
 	<bmp name="target">
 		<a name="effect" fps="12" width="96" height="96" count="7" startX="0"
-			startY="0" offsetY="-106"/>
+			startY="0" offsetY="-106" />
 	</bmp>
 	<bmp name="land1">
 		<a name="effect" fps="12" width="320" height="320" count="1" startX="0"
@@ -71,7 +100,7 @@
 
 	<bmp name="bosaidong">
 		<a name="effect" fps="24" width="192" height="343" count="4" startX="0"
-			startY="0" loop="0"/>
+			startY="0" loop="0" />
 	</bmp>
 	<bmp name="xuanwofengbao">
 		<a name="effect" fps="1" width="362" height="362" count="1" startX="0"
