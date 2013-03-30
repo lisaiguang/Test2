@@ -6,16 +6,24 @@ package view.caishen
 	
 	import flash.display.Bitmap;
 	import flash.display.DisplayObject;
+	import flash.display.MovieClip;
 	import flash.events.Event;
 	import flash.events.MouseEvent;
 	import flash.text.TextField;
 	import flash.text.TextFieldAutoSize;
 	import flash.text.TextFormat;
 	
+	import data.MiniBuffer;
 	import data.StaticTable;
 	import data.staticObj.BodyBoxDesc;
 	import data.staticObj.EnumAction;
 	import data.staticObj.EnumBody;
+	
+	import lsg.BtnPause;
+	import lsg.BtnPlay;
+	import lsg.BtnShake;
+	import lsg.MiniBar;
+	import lsg.bmp.MiniBack;
 	
 	import nape.callbacks.CbEvent;
 	import nape.callbacks.CbType;
@@ -30,37 +38,34 @@ package view.caishen
 	import nape.util.BitmapDebug;
 	import nape.util.Debug;
 	
+	import utils.LHelp;
 	import utils.LazySprite;
 	import utils.MyMath;
 	
 	public class CaiShenView extends LazySprite
 	{
 		public var _isPaused:Boolean = false;
+		public const _isDebug:Boolean = false;
+		
 		public function CaiShenView()
 		{
 		}
 		
 		override protected function init():void
 		{
+			InitScence();
 			InitSpace();
-			addHeadUp();
-			stage.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
-			stage.addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
-			stage.addEventListener(MouseEvent.MOUSE_UP, onMouseUp);
+			InitHeadUp();
+			addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
 			addEventListener(Event.ENTER_FRAME, onFrameIn);
-		}
-		
-		override protected function destoryed():void
-		{
-			stage.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
-			stage.removeEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
-			stage.removeEventListener(MouseEvent.MOUSE_UP, onMouseUp);
 		}
 		
 		protected function onMouseUp(event:MouseEvent):void
 		{
 			_isMove = false;
 			_target.x = event.stageX;
+			removeEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
+			removeEventListener(MouseEvent.MOUSE_UP, onMouseUp);
 		}
 		
 		protected function onMouseMove(event:MouseEvent):void
@@ -72,14 +77,21 @@ package view.caishen
 		private var _isMove:Boolean = false;
 		protected function onMouseDown(event:MouseEvent):void
 		{
-			_isMove= true;
-			_target.x = event.stageX;
+			var target:DisplayObject = LHelp.FindParentByClass(event.target as DisplayObject, MovieClip);
+			if(!target)
+			{
+				_isMove= true;
+				_target.x = event.stageX;
+				addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
+				addEventListener(MouseEvent.MOUSE_UP, onMouseUp);
+			}
 		}
 		
 		private function GoComplete(goBmp:DisplayObject):void
 		{
 			goBmp.parent.removeChild(goBmp);
 			_ybSeed = 500;
+			_canMove = true;
 		}
 		
 		private function GoStart(beginBmp:DisplayObject):void
@@ -92,16 +104,23 @@ package view.caishen
 			TweenLite.delayedCall(0.5, GoComplete, [goBmp]);
 		}
 		
+		private function InitScence():void
+		{
+			var bg:Bitmap = new Bitmap(new MiniBack);
+			addChild(bg);
+		}
+		
 		private var _cs:AnimationBmp;
 		private var _goldTxt:TextField;
 		private var _bestTxt:TextField;
-		private function addHeadUp():void
+		private var _miniBar:MiniBar, _btnShake:BtnShake;
+		private var _btnPause:BtnPause, _btnPlay:BtnPlay;
+		private function InitHeadUp():void
 		{
 			_cs = StaticTable.GetAniBmpByName("caishen");
 			_cs.play(EnumAction.CS_READY);
 			_cs.x = StaticTable.STAGE_WIDTH * .5;
 			_cs.y = 10 + _cs.height * .5;
-			addChild(_cs);
 			
 			var beginBmp:Bitmap = StaticTable.GetBmp("ready", false);
 			beginBmp.x = (StaticTable.STAGE_WIDTH - beginBmp.width) * .5;
@@ -134,25 +153,74 @@ package view.caishen
 			format = new TextFormat("impact", 26, 0xffcc00, true);
 			_bestTxt = new TextField;
 			_bestTxt.defaultTextFormat = format;
-			_bestTxt.text = "0两";
+			_bestTxt.text = MiniBuffer.scores.data.best + "两";
 			_bestTxt.selectable = false;
 			_bestTxt.autoSize = TextFieldAutoSize.LEFT;
 			_bestTxt.x = bestBmp.x + bestBmp.width + 10;
 			_bestTxt.y = bestBmp.y;
 			_bestTxt.cacheAsBitmap = true;
 			addChild(_bestTxt);
+			
+			_miniBar = new MiniBar;
+			_miniBar.gotoAndStop(1);
+			_miniBar.x = 10;
+			_miniBar.y = _bestTxt.y + _bestTxt.height + 10;
+			addChild(_miniBar);
+			
+			_btnShake = new BtnShake;
+			_btnShake.x = 10;
+			_btnShake.y = _miniBar.y + _miniBar.height;
+			_btnShake.addEventListener(MouseEvent.CLICK, onBtnShake);
+			addChild(_btnShake);
+			
+			_btnPause = new BtnPause;
+			_btnPause.x= 540;
+			_btnPause.addEventListener(MouseEvent.CLICK, onBtnPause);
+			addChild(_btnPause);
+			
+			_btnPlay = new BtnPlay;
+			_btnPlay.x = (StaticTable.STAGE_WIDTH - _btnPlay.width)*.5;
+			_btnPlay.y = (StaticTable.STAGE_HEIGHT - _btnPlay.height)*.5;
+			_btnPlay.addEventListener(MouseEvent.CLICK, onBtnPlay);
+		}
+		
+		protected function onBtnPlay(event:MouseEvent = null):void
+		{
+			_isPaused = false;
+			_btnPause.visible = true;
+			removeChild(_btnPlay);
+		}
+		
+		protected function onBtnPause(event:MouseEvent = null):void
+		{
+			_isPaused = true;
+			_btnPause.visible = false;
+			addChild(_btnPlay);
+		}
+		
+		protected function onBtnShake(event:MouseEvent):void
+		{
+			_ybSeed = int.MAX_VALUE;
+			for(var i:int = 0; i < _ybs.length; i++)
+			{
+				var yb:Body = _ybs[i];
+				yb.userData.isDel = true;
+			}
 		}
 		
 		private var _space:Space;
 		private var _debug:Debug;
 		private function InitSpace():void
 		{
-			var gravity:Vec2 = Vec2.weak(0, 700);
+			var gravity:Vec2 = Vec2.weak(0, 850);
 			_space = new Space(gravity);
 			
-			_debug = new BitmapDebug(StaticTable.STAGE_WIDTH, StaticTable.STAGE_HEIGHT, stage.color);
-			_debug.drawBodyDetail = true;
-			addChild(_debug.display);
+			if(_isDebug)
+			{
+				_debug = new BitmapDebug(StaticTable.STAGE_WIDTH, StaticTable.STAGE_HEIGHT, stage.color);
+				_debug.drawBodyDetail = true;
+				addChild(_debug.display);
+			}
 			
 			createBorder();
 			addRoleBox();
@@ -210,7 +278,7 @@ package view.caishen
 		}
 		
 		private var BORDER:CbType = new CbType;
-		public static const BORDER_PADDING:int = 0;
+		public static const BORDER_PADDING:int = 20;
 		private function createBorder():void
 		{
 			var border:Body = new Body(BodyType.STATIC);
@@ -236,9 +304,40 @@ package view.caishen
 		private var YUANBAOS:CbType = new CbType;
 		private var _ybs:Vector.<Body> = new Vector.<Body>;
 		private var _ybSeed:int = int.MAX_VALUE, _ybTimer:int, _ybMaxCount:int = 3, _ybCurCount:int, _ybThrowIntev:int = 1000/10, _ybThrowTimer:int;
-		private var _zdRate:Number = 0.2, _zsRate:Number = 0.1;
+		private var _ybRates:Array = [0.2,0.0,0.25,0.25,0.1];
+		private var _ybIds:Array = [EnumBody.ZHADAN, EnumBody.ZHUANSHI, EnumBody.TONGQIAN, EnumBody.YINZI, EnumBody.JUBAOPEN];
+		private var _jubaopengTimer:int, _jubaopengMaxTime:int=10000, _jubaopengIntev:int = 100, _jubaopengIntevTimer:int;
+		private var _baowuIds:Array = [EnumBody.TONGQIAN, EnumBody.YINZI, EnumBody.YUANBAO];
 		private function ybAction():void
 		{
+			if(_jubaopengTimer > 0)
+			{
+				_jubaopengTimer -= CaiShenDao.ELAPSED;
+				
+				if(_jubaopengTimer<0)
+				{
+					_jubaopengTimer=0;
+				}
+				else
+				{
+					_jubaopengIntevTimer += CaiShenDao.ELAPSED;
+					if(_jubaopengIntevTimer > _jubaopengIntev)
+					{
+						id = _baowuIds[int(Math.random() * 3)];
+						ybDesc = StaticTable.GetBodyBoxDescById(id);
+						
+						ybAni = StaticTable.GetAniBmpByName(ybDesc.name);
+						ybAni.play(EnumAction.EFFECT);
+						addChild(ybAni);
+						
+						yb = createYuanBao(id, ybDesc, _cs.x + Math.random() * StaticTable.STAGE_WIDTH * (Math.random()<.5?-.4:.4), 200);
+						yb.userData.animation = ybAni;
+						yb.userData.desc = ybDesc;
+					}
+				}
+			}
+			
+			
 			_ybThrowTimer += CaiShenDao.ELAPSED;
 			if(_ybThrowTimer >= _ybThrowIntev)
 			{
@@ -246,42 +345,30 @@ package view.caishen
 				if(_ybCurCount > 0)
 				{
 					_ybCurCount--;
+					
 					var id:int = EnumBody.YUANBAO;
 					var rand:Number = Math.random();
-					if(rand < _zdRate)
+					for(i = 0; i < _ybRates.length; i++)
 					{
-						id = EnumBody.ZHADAN;
-					}
-					else
-					{
-						rand -= _zdRate;
-						if(rand < _zsRate)
+						if(_ybIds[i] == EnumBody.JUBAOPEN && _jubaopengTimer) continue;
+						
+						rand -= _ybRates[i];
+						if(rand < 0)
 						{
-							id = EnumBody.ZHUANSHI;
+							id = _ybIds[i];
+							break;
 						}
 					}
-					rand -= _zsRate;
+					
 					var ybDesc:BodyBoxDesc = StaticTable.GetBodyBoxDescById(id);
 					
 					var ybAni:AnimationBmp = StaticTable.GetAniBmpByName(ybDesc.name);
 					ybAni.play(EnumAction.EFFECT);
 					addChild(ybAni);
 					
-					var poly:Polygon = new Polygon(Polygon.box(ybDesc.width, ybDesc.height, true));
-					poly.filter.collisionGroup = GROUP_YUANBAO;
-					poly.filter.collisionMask = ~(GROUP_YUANBAO);
-					
-					var yb:Body = new Body(BodyType.DYNAMIC);
-					yb.allowRotation = false;
-					yb.shapes.add(poly);
-					yb.cbTypes.add(YUANBAOS);
-					yb.position.setxy(_cs.x, _cs.y);
-					yb.space = _space;
+					var yb:Body = createYuanBao(id, ybDesc, _cs.x, _cs.y);
 					yb.userData.animation = ybAni;
-					yb.userData.isDel = false;
-					yb.userData.occur = false;
 					yb.userData.desc = ybDesc;
-					_ybs.push(yb);
 					
 					var direction:Vec2 = Vec2.get(1,0);
 					direction.angle = (.35 + Math.random() * .301)*-Math.PI;
@@ -305,7 +392,7 @@ package view.caishen
 				
 				if(yb.userData.occur)
 				{
-					if(ybDesc.id == EnumBody.YUANBAO)
+					if(ybDesc.id == EnumBody.YUANBAO || ybDesc.id == EnumBody.TONGQIAN || ybDesc.id == EnumBody.YINZI)
 					{
 						_curScore += 1;
 					}
@@ -313,7 +400,17 @@ package view.caishen
 					{
 						_myRole.space = null;
 						_ybSeed = int.MAX_VALUE;
+						_jubaopengTimer = 0;
+						MiniBuffer.scores.flush();
 						MidLayer.ShowWindowObj(CaiShenFinishView, {});
+					}
+					else if(ybDesc.id == EnumBody.ZHUANSHI)
+					{
+						_miniBar.gotoAndStop(_miniBar.currentFrame + 1);
+					}
+					else if(ybDesc.id == EnumBody.JUBAOPEN)
+					{
+						_jubaopengTimer = _jubaopengMaxTime;
 					}
 				}
 				
@@ -326,44 +423,94 @@ package view.caishen
 				}
 				else
 				{
+					if(_jubaopengTimer)
+					{
+						if(ybDesc.id == EnumBody.YUANBAO || ybDesc.id == EnumBody.TONGQIAN || ybDesc.id == EnumBody.YINZI)
+						{
+							var motion:Vec2 = Vec2.get(_myRole.position.x - yb.position.x, _myRole.position.y - yb.position.y).normalise();
+							yb.applyImpulse(motion.muleq(500));
+							motion.dispose();
+						}
+					}
 					ybAni.x = yb.position.x;
 					ybAni.y = yb.position.y;
+					ybAni.update(CaiShenDao.ELAPSED);
 				}
 			}
 		}
 		
+		private function createYuanBao(id:int, ybDesc:BodyBoxDesc, px:Number, py:Number):Body
+		{
+			var poly:Polygon = new Polygon(Polygon.box(ybDesc.width, ybDesc.height, true));
+			poly.filter.collisionGroup = GROUP_YUANBAO;
+			poly.filter.collisionMask = ~(GROUP_YUANBAO);
+			
+			var yb:Body = new Body(BodyType.DYNAMIC);
+			yb.allowRotation = false;
+			yb.shapes.add(poly);
+			yb.cbTypes.add(YUANBAOS);
+			yb.position.setxy(px,py);
+			yb.space = _space;
+			yb.userData.isDel = false;
+			yb.userData.occur = false;
+			_ybs.push(yb);
+			
+			return yb;
+		}
+		
+		public var _canMove:Boolean = false;
 		private function myRoleAciton():void
 		{
-			var motion:Vec2 = Vec2.get(_target.x - _myRole.position.x, _target.y - _myRole.position.y);
-			if(motion.length > 0)
+			if(_canMove)
 			{
-				motion.normalise().muleq(SPEED * CaiShenDao.ELAPSED);
-				if(motion.angle < MyMath.HALF_PI && motion.angle > -MyMath.HALF_PI)
+				var motion:Vec2 = Vec2.get(_target.x - _myRole.position.x, _target.y - _myRole.position.y);
+				if(motion.length > 0)
 				{
-					_myRole.position.x +=  Math.min(motion.x, _target.x - _myRole.position.x);
+					motion.normalise().muleq(SPEED * CaiShenDao.ELAPSED);
+					if(motion.angle < MyMath.HALF_PI && motion.angle > -MyMath.HALF_PI)
+					{
+						_myRole.position.x +=  Math.min(motion.x, _target.x - _myRole.position.x);
+					}
+					else
+					{
+						_myRole.position.x += Math.max(motion.x, _target.x - _myRole.position.x);
+					}
 				}
-				else
-				{
-					_myRole.position.x += Math.max(motion.x, _target.x - _myRole.position.x);
-				}
+				motion.dispose();
 			}
-			motion.dispose();
-			
 			_myRoleAni.x = _myRole.position.x;
-			_myRoleAni.y = _myRole.position.y;
+			_myRoleAni.y = _myRole.position.y + (_myRoleDesc.height - _myRoleAni.height) * .5 - BORDER_PADDING;
 			_myRoleAni.update(Test2.ELAPSED);
 		}
 		
 		private var _curScore:int;
+		private var _bestScore:int;
 		private function renderUI():void
 		{
 			_cs.update(Test2.ELAPSED);
-			_debug.clear();
-			_debug.draw(_space);
-			_debug.flush();
+			
+			if(_isDebug)
+			{
+				_debug.clear();
+				_debug.draw(_space);
+				_debug.flush();
+			}
 			
 			_goldTxt.text = _curScore + "两";
-			_bestTxt.text = _curScore + "两";
+			if(_curScore >  MiniBuffer.scores.data.best) 
+			{
+				MiniBuffer.scores.data.best = _curScore;
+			}
+			_bestTxt.text =  MiniBuffer.scores.data.best + "两";
+			
+			if(_miniBar.currentFrame == 6)
+			{
+				_btnShake.visible = true;
+			}
+			else
+			{
+				_btnShake.visible = false;
+			}
 		}
 		
 		private function onOverBmpFinish(overBmp:Bitmap):void

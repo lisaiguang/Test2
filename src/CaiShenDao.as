@@ -9,6 +9,7 @@ package
 	import flash.events.Event;
 	import flash.utils.getTimer;
 	
+	import data.MiniBuffer;
 	import data.StaticTable;
 	
 	import net.hires.debug.Stats;
@@ -26,7 +27,7 @@ package
 			stage.align = StageAlign.TOP_LEFT;
 			stage.scaleMode = StageScaleMode.NO_SCALE;
 			addChild(_midLayer);
-			//addChild(new Stats);
+			addChild(new Stats);
 			addEventListener(Event.ADDED_TO_STAGE, onAddToStage);
 			addEventListener(Event.ENTER_FRAME, onFrameIn);
 		}
@@ -44,6 +45,7 @@ package
 		{
 			removeEventListener(flash.events.Event.ADDED_TO_STAGE, onAddToStage);
 			StaticTable.Init();
+			MiniBuffer.Init();
 			MidLayer.ShowWindow(CaiShenView);
 		}
 	}

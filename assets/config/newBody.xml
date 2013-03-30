@@ -1,6 +1,9 @@
 <root>
-	<box id="1" width="84" height="99" name="zhujia"/>
+	<box id="1" width="84" height="149" name="zhujia"/>
 	<box id="2" width="82" height="47" name="yuanbao"/>
-	<box id="3" width="54" height="58" name="zadan"/>
-	<box id="4" width="47" height="43" name="zhuanshi"/>
+	<box id="3" width="62" height="62" name="zadan"/>
+	<box id="4" width="62" height="62" name="zhuanshi"/>
+	<box id="5" width="62" height="62" name="tongqian"/>
+	<box id="6" width="82" height="47" name="yinzi"/>
+	<box id="7" width="82" height="60" name="jubaopen"/>
 </root>

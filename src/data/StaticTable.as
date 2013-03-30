@@ -35,26 +35,12 @@ package data
 	import lsg.DaojuIcon2;
 	import lsg.DaojuIcon3;
 	import lsg.DaojuIcon4;
-	import lsg.bmp.anchor;
-	import lsg.bmp.bullet1;
-	import lsg.bmp.bullet2;
 	import lsg.bmp.caishen;
-	import lsg.bmp.city1;
-	import lsg.bmp.entry;
-	import lsg.bmp.island1;
-	import lsg.bmp.land1;
+	import lsg.bmp.jubaopen;
 	import lsg.bmp.miniBest;
 	import lsg.bmp.miniGo;
 	import lsg.bmp.miniGold;
-	import lsg.bmp.miniOver;
 	import lsg.bmp.miniReady;
-	import lsg.bmp.role1;
-	import lsg.bmp.sea1;
-	import lsg.bmp.seaGrid1;
-	import lsg.bmp.seaGrid2;
-	import lsg.bmp.ship1;
-	import lsg.bmp.ship2;
-	import lsg.bmp.ship3;
 	import lsg.bmp.skill1;
 	import lsg.bmp.skill10;
 	import lsg.bmp.skill11;
@@ -66,7 +52,8 @@ package data
 	import lsg.bmp.skill7;
 	import lsg.bmp.skill8;
 	import lsg.bmp.skill9;
-	import lsg.bmp.target;
+	import lsg.bmp.tongqian;
+	import lsg.bmp.yinzi;
 	import lsg.bmp.yuanbao;
 	import lsg.bmp.zadan;
 	import lsg.bmp.zhuanshi;
@@ -79,11 +66,6 @@ package data
 	import lsg.bullet.b2;
 	import lsg.map.bg1;
 	import lsg.map.preview1;
-	import lsg.paodan.effect1;
-	import lsg.paodan.effect2;
-	import lsg.shenji.bingheshiji;
-	import lsg.shenji.bosaidong;
-	import lsg.shenji.xuanwofengbao;
 	
 	import message.EnumDaoJuType;
 	
@@ -591,13 +573,21 @@ package data
 			switch(name)
 			{
 				//mini
-				case "miniBest":
-					if(cache) bd = BitmapDataPool.getBitmapData(miniBest);
-					else bd = new miniBest;
+				case "jubaopen":
+					if(cache) bd = BitmapDataPool.getBitmapData(jubaopen);
+					else bd = new jubaopen;
 					break;
-				case "miniOver":
-					if(cache) bd = BitmapDataPool.getBitmapData(miniOver);
-					else bd = new miniOver;
+				case "yinzi":
+					if(cache) bd = BitmapDataPool.getBitmapData(yinzi);
+					else bd = new yinzi;
+					break;
+				case "tongqian":
+					if(cache) bd = BitmapDataPool.getBitmapData(tongqian);
+					else bd = new tongqian;
+					break;
+				case "miniBest":
+					if(cache) var bd:BitmapData = BitmapDataPool.getBitmapData(miniBest);
+					else bd = new miniBest;
 					break;
 				case "miniGold":
 					if(cache) bd = BitmapDataPool.getBitmapData(miniGold);
@@ -632,94 +622,6 @@ package data
 					else bd = new zhujia;
 					break;
 				//
-				case "seaGrid1":
-					if(cache) bd = BitmapDataPool.getBitmapData(seaGrid1);
-					else bd = new seaGrid1;
-					break;
-				case "seaGrid2":
-					if(cache) bd = BitmapDataPool.getBitmapData(seaGrid2);
-					else bd = new seaGrid2;
-					break;
-				case "target":
-					if(cache) bd = BitmapDataPool.getBitmapData(target);
-					else bd = new target;
-					break;
-				case "anchor":
-					if(cache) bd = BitmapDataPool.getBitmapData(anchor);
-					else bd = new anchor;
-					break;
-				case "entry":
-					if(cache) bd = BitmapDataPool.getBitmapData(entry);
-					else bd = new entry;
-					break;
-				case "land1":
-					if(cache) var bd:BitmapData = BitmapDataPool.getBitmapData(land1);
-					else bd = new land1;
-					break;
-				case "sea1":
-					if(cache) bd = BitmapDataPool.getBitmapData(sea1);
-					else bd = new sea1;
-					break;
-				case "island1":
-					if(cache) bd = BitmapDataPool.getBitmapData(island1);
-					else bd = new island1;
-					break;
-				case "city1":
-					if(cache) bd = BitmapDataPool.getBitmapData(city1);
-					else bd = new city1;
-					break;
-				case "ship1":
-					if(cache) bd = BitmapDataPool.getBitmapData(ship1);
-					else bd = new ship1;
-					break;
-				case "ship2":
-					if(cache) bd = BitmapDataPool.getBitmapData(ship2);
-					else bd = new ship2;
-					break;
-				case "bullet1":
-					if(cache) bd = BitmapDataPool.getBitmapData(bullet1);
-					else bd = new bullet1;
-					break;
-				case "bullet2":
-					if(cache) bd = BitmapDataPool.getBitmapData(bullet2);
-					else bd = new bullet2;
-					break;
-				case "ship3":
-					if(cache) bd = BitmapDataPool.getBitmapData(ship3);
-					else bd = new ship3;
-					break;
-				case "role1":
-					if(cache) bd = BitmapDataPool.getBitmapData(role1);
-					else bd = new role1;
-					break;
-				case "b1":
-					if(cache) bd = BitmapDataPool.getBitmapData(b1);
-					else bd = new b1;
-					break;
-				case "b2":
-					if(cache) bd = BitmapDataPool.getBitmapData(b2);
-					else bd = new b2;
-					break;
-				case "effect1":
-					if(cache) bd = BitmapDataPool.getBitmapData(effect1);
-					else bd = new effect1;
-					break;
-				case "effect2":
-					if(cache) bd = BitmapDataPool.getBitmapData(effect2);
-					else bd = new effect2;
-					break;
-				case "bosaidong":
-					if(cache) bd = BitmapDataPool.getBitmapData(bosaidong);
-					else bd = new bosaidong;
-					break;
-				case "xuanwofengbao":
-					if(cache) bd = BitmapDataPool.getBitmapData(xuanwofengbao);
-					else bd = new xuanwofengbao;
-					break;
-				case "bingheshiji":
-					if(cache) bd = BitmapDataPool.getBitmapData(bingheshiji);
-					else bd = new bingheshiji;
-					break;
 			}
 			return bd;
 		}
