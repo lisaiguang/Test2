@@ -14,7 +14,7 @@ package
 	
 	import net.hires.debug.Stats;
 	
-	import view.caishen.CaiShenView;
+	import view.mini.welcome.MiniWelcomeView;
 
 	[SWF(frameRate="30")]
 	public class CaiShenDao extends Sprite
@@ -46,7 +46,7 @@ package
 			removeEventListener(flash.events.Event.ADDED_TO_STAGE, onAddToStage);
 			StaticTable.Init();
 			MiniBuffer.Init();
-			MidLayer.ShowWindow(CaiShenView);
+			MidLayer.ShowWindow(MiniWelcomeView);
 		}
 	}
 }

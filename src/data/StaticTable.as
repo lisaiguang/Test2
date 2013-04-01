@@ -35,7 +35,8 @@ package data
 	import lsg.DaojuIcon2;
 	import lsg.DaojuIcon3;
 	import lsg.DaojuIcon4;
-	import lsg.bmp.caishen;
+	import lsg.bmp.MiniCs;
+	import lsg.bmp.MiniTk;
 	import lsg.bmp.jubaopen;
 	import lsg.bmp.miniBest;
 	import lsg.bmp.miniGo;
@@ -573,6 +574,14 @@ package data
 			switch(name)
 			{
 				//mini
+				case "MiniCs":
+					if(cache) bd = BitmapDataPool.getBitmapData(MiniCs);
+					else bd = new MiniCs;
+					break;
+				case "MiniTk":
+					if(cache) bd = BitmapDataPool.getBitmapData(MiniTk);
+					else bd = new MiniTk;
+					break;
 				case "jubaopen":
 					if(cache) bd = BitmapDataPool.getBitmapData(jubaopen);
 					else bd = new jubaopen;
@@ -612,10 +621,6 @@ package data
 				case "go":
 					if(cache) bd = BitmapDataPool.getBitmapData(miniGo);
 					else bd = new miniGo;
-					break;
-				case "caishen":
-					if(cache) bd = BitmapDataPool.getBitmapData(caishen);
-					else bd = new caishen;
 					break;
 				case "zhujia":
 					if(cache) bd = BitmapDataPool.getBitmapData(zhujia);

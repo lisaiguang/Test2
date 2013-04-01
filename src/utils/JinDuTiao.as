@@ -8,9 +8,10 @@ package utils
 	public class JinDuTiao extends Sprite
 	{
 		private var maxShape:Bitmap, curShape:Bitmap;
-		private var _cur:int,_max:int=int.MAX_VALUE, _cw:Number;
+		private var _cw:Number, _model:int;
+		public var cur:int,max:int=int.MAX_VALUE;
 		
-		public function JinDuTiao(w:Number, h:Number, bolder:Number = 1, color=0xff0000)
+		public function JinDuTiao(w:Number, h:Number, bolder:Number = 1, color=0xff0000, model:int = 1)
 		{
 			_cw = w - bolder*2;
 			var shape:Shape = new Shape;
@@ -33,11 +34,12 @@ package utils
 			curShape.y = maxShape.y + bolder;
 			addChild(curShape);
 		}
+		
 		public function setBlood(curBlood:Number, maxBlood:Number):void
 		{
-			_cur = curBlood < 0?0:curBlood;
-			_max = maxBlood;
-			curShape.width = _cw * (_cur / _max);
+			cur = curBlood < 0?0:curBlood > maxBlood?maxBlood:curBlood;
+			max = maxBlood;
+			curShape.width = _cw * (cur / max);
 		}
 	}
 }

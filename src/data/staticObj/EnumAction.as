@@ -14,7 +14,5 @@ package data.staticObj
 		
 		public static const CS_READY:String = "ready";
 		public static const CS_YB:String = "yuanbao";
-		public static const CS_ZD:String = "zhadan";
-		public static const CS_ZS:String = "zhuanshi";
 	}
 }
