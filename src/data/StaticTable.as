@@ -7,205 +7,45 @@ package data
 	
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
-	import flash.display.Shape;
 	import flash.utils.Dictionary;
-	import flash.utils.getDefinitionByName;
-	
-	import bit101.Grid;
 	
 	import data.staticObj.AnimationDesc;
 	import data.staticObj.BodyBoxDesc;
-	import data.staticObj.DaoJuDesc;
-	import data.staticObj.EnumBodyType;
-	import data.staticObj.HaiDaoGroupDesc;
-	import data.staticObj.HaiDaoWaveDesc;
-	import data.staticObj.HaiDaoWaveMemDesc;
-	import data.staticObj.MapCityDesc;
-	import data.staticObj.MapDesc;
-	import data.staticObj.MapIslandDesc;
-	import data.staticObj.PaoDanDesc;
-	import data.staticObj.RoleBulletDesc;
-	import data.staticObj.RoleDesc;
-	import data.staticObj.ShenFuDesc;
-	import data.staticObj.ShenJiangDesc;
-	import data.staticObj.ShipDesc;
-	import data.staticObj.TuZhiDesc;
 	
-	import lsg.DaojuIcon1;
-	import lsg.DaojuIcon2;
-	import lsg.DaojuIcon3;
-	import lsg.DaojuIcon4;
+	import lsg.bmp.MiniBoom;
 	import lsg.bmp.MiniCs;
 	import lsg.bmp.MiniTk;
+	import lsg.bmp.MiniTk3;
 	import lsg.bmp.jubaopen;
-	import lsg.bmp.miniBest;
-	import lsg.bmp.miniGo;
-	import lsg.bmp.miniGold;
-	import lsg.bmp.miniReady;
-	import lsg.bmp.skill1;
-	import lsg.bmp.skill10;
-	import lsg.bmp.skill11;
-	import lsg.bmp.skill2;
-	import lsg.bmp.skill3;
-	import lsg.bmp.skill4;
-	import lsg.bmp.skill5;
-	import lsg.bmp.skill6;
-	import lsg.bmp.skill7;
-	import lsg.bmp.skill8;
-	import lsg.bmp.skill9;
+	import lsg.bmp.shalou;
 	import lsg.bmp.tongqian;
 	import lsg.bmp.yinzi;
 	import lsg.bmp.yuanbao;
 	import lsg.bmp.zadan;
-	import lsg.bmp.zhuanshi;
 	import lsg.bmp.zhujia;
-	import lsg.bullet.Icon1;
-	import lsg.bullet.Icon2;
-	import lsg.bullet.Icon3;
-	import lsg.bullet.Icon4;
-	import lsg.bullet.b1;
-	import lsg.bullet.b2;
-	import lsg.map.bg1;
-	import lsg.map.preview1;
+	import lsg.music.BgMusic;
+	import lsg.music.BoomMusic;
 	
-	import message.EnumDaoJuType;
-	
-	import mybodys.PaoDanBody;
-	import mybodys.ShenFuPlayer;
-	import mybodys.ShipPlayer;
-	
-	import utils.McSprite;
+	import music.SoundPlayer;
 	
 	public class StaticTable
 	{
 		public static var STAGE_WIDTH:int  = 640;
 		public static var STAGE_HEIGHT:int = 960;
-		
-		[Embed(source = "../../assets/config/bullet.xml", mimeType="application/octet-stream")]
-		private static var bulletConfig:Class;
-		
-		[Embed(source = "../../assets/config/role.xml", mimeType="application/octet-stream")]
-		private static var RoleConfig:Class;
-		
-		[Embed(source = "../../assets/config/daoju.xml", mimeType="application/octet-stream")]
-		private static var DaoJuConfig:Class;
-		
+
 		[Embed(source = "../../assets/config/error.xml", mimeType="application/octet-stream")]
 		private static var ErrorConfig:Class;
 		
 		[Embed(source = "../../assets/config/animation.xml", mimeType="application/octet-stream")]
 		private static var AnimationConfig:Class;
-		
-		[Embed(source = "../../assets/config/seamap.xml", mimeType="application/octet-stream")]
-		private static var SeamapConfig:Class;
-		
-		[Embed(source = "../../assets/config/body.xml", mimeType="application/octet-stream")]
-		private static var BodyConfig:Class;
-		
-		[Embed(source = "../../assets/config/skill.xml", mimeType="application/octet-stream")]
-		private static var SkillConfig:Class;
-		
+
 		[Embed(source = "../../assets/config/newBody.xml", mimeType="application/octet-stream")]
 		private static var NewBodyConfig:Class;
 		
 		public static function Init():void
 		{
-			var bulletsXml:XML = new XML(new bulletConfig);
-			for(i = 0; i < bulletsXml.sb.length(); i++)
-			{
-				tzDes = new TuZhiDesc;
-				tzDes.id 
-			}
-			for(var i:int = 0; i < bulletsXml.tz.length(); i++)
-			{
-				var tzXml:XML = bulletsXml.tz[i];
-				var tzDes:TuZhiDesc = new TuZhiDesc;
-				tzDes.id = int(tzXml.@id);
-				tzDes.width = int(tzXml.@width);
-				tzDes.height = int(tzXml.@height);
-				tzDes.mass = int(tzXml.@mass);
-				tzDes.name = tzXml.@name;
-				TUZHI_DESC.push(tzDes);
-				for(var j:int = 0; j < tzXml.b.length(); j++)
-				{
-					var bulletXML:XML = tzXml.b[j];
-					var bs:RoleBulletDesc = new RoleBulletDesc;
-					bs.id = int(bulletXML.@id);
-					bs.tuzhi = tzDes;
-					bs.baoshi = bulletXML.@bs?int(bulletXML.@bs):0;
-					bs.hurt = int(bulletXML.@hurt);
-					bs.sold = int(bulletXML.@sold);
-					var clearParams:Array = String(bulletXML.@clear).split(",");					
-					var bomb:Shape = new Shape;
-					bomb.graphics.beginFill(0xffffff, 1);
-					if(clearParams[0] == RoleBulletDesc.CLEAR_CIRCLE)
-					{
-						bs.range = clearParams[1] * clearParams[1] * Math.PI;
-						bomb.graphics.drawCircle(0, 0, clearParams[1]);
-					}
-					else if(clearParams[0] == RoleBulletDesc.CLEAR_RECT)
-					{
-						bs.range = clearParams[1]  * clearParams[2];
-						bomb.graphics.drawRect(0,0,clearParams[1],clearParams[2]);
-					}
-					bomb.graphics.endFill();
-					bs.clearShape = bomb;
-					StaticTable.BULLET_DESC.push(bs);
-				}
-				for(j = 0; j < tzXml.sb.length(); j++)
-				{
-					bulletXML = tzXml.sb[j];
-					bs = new RoleBulletDesc;
-					bs.tuzhi = tzDes;
-					bs.baoshi = bulletXML.hasOwnProperty("@bs")?int(bulletXML.@bs):0;
-					bs.id = int(bulletXML.@id);
-					bs.desc = bulletXML.@desc;
-					StaticTable.BULLET_DESC.push(bs);
-				}
-			}
-			bulletConfig = null;
-			
-			var rolesXml:XML = new XML(new RoleConfig);
-			for(i = 0; i < rolesXml.r.length(); i++)
-			{
-				var roleXML:XML = rolesXml.r[i];
-				var rs:RoleDesc = new RoleDesc;
-				rs.id = int(roleXML.@id);
-				rs.boundWidth = int(roleXML.@boundWidth);
-				rs.boundHeight = int(roleXML.@boundHeight);
-				rs.IQ = int(roleXML.@IQ);
-				StaticTable.ROLE_DESC.push(rs);
-			}
-			RoleConfig = null;
-			
-			var xml:XML = new XML(new DaoJuConfig);
-			for(i = 0; i < xml.d.length(); i++)
-			{
-				var dx:XML = xml.d[i];
-				var ds:DaoJuDesc = new DaoJuDesc;
-				ds.itemId = int(dx.@id);
-				ds.type = int(dx.@type);
-				if(ds.type == 1 || ds.type == 2)
-				{
-					ds.extra = int(dx.@level);
-				}
-				else if(ds.type == 3)
-				{
-					ds.extra = int(dx.@tz);
-				}
-				else
-				{
-					ds.extra = int(dx.@bs);
-				}
-				ds.name = dx.@name;
-				ds.desc = dx.@desc;
-				ds.sold = int(dx.@sold);
-				StaticTable.DAOJU_DESC.push(ds);
-			}
-			DaoJuConfig = null;
-			
-			xml = new XML(new ErrorConfig);
-			for(i = 0; i < xml.e.length(); i++)
+			var xml:XML = new XML(new ErrorConfig);
+			for(var i:int = 0; i < xml.e.length(); i++)
 			{
 				var ex:XML = xml.e[i];
 				ERROR_DIC[int(ex.@id)] = ex.@str;
@@ -218,7 +58,7 @@ package data
 				var bmpXml:XML = xml.bmp[i];
 				var animations:Array = [];
 				BMPNAME2ANIDESCS[String(bmpXml.@name)] = animations;
-				for(j=0;j<bmpXml.a.length();j++)
+				for(var j:int=0;j<bmpXml.a.length();j++)
 				{
 					var aniXml:XML = bmpXml.a[j];
 					var aniDesc:AnimationDesc = new AnimationDesc;
@@ -238,185 +78,7 @@ package data
 				}
 			}
 			AnimationConfig = null;
-			
-			xml = new XML(new SeamapConfig);
-			for(i = 0; i < xml.map.length(); i++)
-			{
-				var mapXml:XML = xml.map[i];
-				var mapDesc:MapDesc = new MapDesc;
-				mapDesc.id = int(mapXml.@id);
-				mapDesc.name = mapXml.@name;
-				mapDesc.width = Number(mapXml.@width);
-				mapDesc.height = Number(mapXml.@height);
-				mapDesc.rows = Number(mapXml.@rows);
-				mapDesc.cols = Number(mapXml.@cols);
-				mapDesc.blockWidth = mapDesc.height / mapDesc.rows;
-				mapDesc.blockHeight = mapDesc.width / mapDesc.cols;
-				for(j=0;j<mapXml.city.length();j++)
-				{
-					var cityXml:XML = mapXml.city[j];
-					var mcDesc:MapCityDesc = new MapCityDesc;
-					mcDesc.id = int(cityXml.@id);
-					mcDesc.posX = Number(cityXml.@posX);
-					mcDesc.posY = Number(cityXml.@posY);
-					mcDesc.entryX = Number(cityXml.@entryX);
-					mcDesc.entryY = Number(cityXml.@entryY);
-					mcDesc.outX = Number(cityXml.@outX);
-					mcDesc.outY = Number(cityXml.@outY);
-					mapDesc.citys.push(mcDesc);
-				}
-				for(j=0;j<mapXml.block.length();j++)
-				{
-					var blockXml:XML = mapXml.block[j];
-					mapDesc.blockDic[int(blockXml.@col)*1000 + int(blockXml.@row)] = String(blockXml.@name);
-				}
-				for(j=0;j<mapXml.island.length();j++)
-				{
-					var islandXml:XML = mapXml.island[j];
-					var miDesc:MapIslandDesc = new MapIslandDesc;
-					miDesc.x = int(islandXml.@x);
-					miDesc.y = int(islandXml.@y);
-					miDesc.name = String(islandXml.@name);
-					mapDesc.islands.push(miDesc);
-				}
-				SEAMAP_DESC.push(mapDesc);
-			}
-			SeamapConfig = null;
-			
-			xml = new XML(new BodyConfig);
-			for(i = 0; i < xml.ship.length(); i++)
-			{
-				var shipXml:XML = xml.ship[i];
-				var shipDesc:ShipDesc = new ShipDesc;
-				shipDesc.id = int(shipXml.@id);
-				shipDesc.type = int(shipXml.@type);
-				shipDesc.animation = "ship" + shipDesc.id;
-				shipDesc.name = String(shipXml.@name);
-				shipDesc.speed = Number(shipXml.@speed);
-				shipDesc.blood = int(shipXml.@blood);
-				shipDesc.range = int(shipXml.@range);
-				shipDesc.cost = int(shipXml.@cost);
-				shipDesc.hurt = int(shipXml.@hurt);
-				if(shipXml.hasOwnProperty("@shootSpeed"))
-				{
-					shipDesc.shootSpeed = Number(shipXml.@shootSpeed);
-				}
-				if(shipXml.hasOwnProperty("@bulletId"))
-				{
-					shipDesc.bulletId = int(shipXml.@bulletId);
-				}
-				if(shipDesc.type == EnumBodyType.CIRCLE)
-				{
-					shipDesc.raidus = Number(shipXml.@radius);
-				}
-				else if(shipDesc.type == EnumBodyType.RECT)
-				{
-					shipDesc.width = Number(shipXml.@width);
-					shipDesc.height = Number(shipXml.@height);
-				}
-				SHIP_DESC.push(shipDesc);
-			}
-			for(i = 0; i < xml.bullet.length(); i++)
-			{
-				var pdXml:XML = xml.bullet[i];
-				var pdDesc:PaoDanDesc = new PaoDanDesc;
-				pdDesc.id = int(pdXml.@id);
-				pdDesc.type = int(pdXml.@type);
-				pdDesc.effect = pdXml.@effect;
-				pdDesc.animation = "bullet" + pdDesc.id;
-				pdDesc.name = String(pdXml.@name);
-				if(pdDesc.type == EnumBodyType.CIRCLE)
-				{
-					pdDesc.raidus = Number(pdXml.@radius);
-				}
-				else if(pdDesc.type == EnumBodyType.RECT)
-				{
-					pdDesc.width = Number(pdXml.@width);
-					pdDesc.height = Number(pdXml.@height);
-				}
-				pdDesc.hurt = int(pdXml.@hurt);
-				PAODAN_DESC.push(pdDesc);
-			}
-			for(i = 0; i < xml.hdGroup.length();i++)
-			{
-				var groupXml:XML = xml.hdGroup[i];
-				var groupDesc:HaiDaoGroupDesc=new HaiDaoGroupDesc;
-				groupDesc.id = int(groupXml.@id);
-				
-				for(j = 0; j < groupXml.wave.length(); j++)
-				{
-					var waveXml:XML = groupXml.wave[j];
-					var waveDesc:HaiDaoWaveDesc = new HaiDaoWaveDesc;
-					waveDesc.remains = Number(waveXml.@time) * 1000;
-					var poses:Array = String(waveXml.@npcPos).split(",");
-					for(k=0;k<poses.length;k++)
-					{
-						waveDesc.npcPoses.push(int(poses[k]));
-					}
-					for(var k:int = 0; k < waveXml.member.length(); k++)
-					{
-						var memXml:XML = waveXml.member[k];
-						var memDesc:HaiDaoWaveMemDesc = new HaiDaoWaveMemDesc;
-						memDesc.id = int(memXml.@id);
-						memDesc.count = int(memXml.@count);
-						waveDesc.members.push(memDesc);
-					}
-					groupDesc.waves.push(waveDesc);
-				}
-				
-				HAODAO_GROUPS.push(groupDesc);
-			}
-			BodyConfig = null;
-			
-			xml = new XML(new SkillConfig);
-			for(i = 0; i < xml.sj.length(); i++)
-			{
-				var sjXml:XML = xml.sj[i];
-				var sjDesc:ShenJiangDesc = new ShenJiangDesc;
-				sjDesc.type = int(sjXml.@type);
-				sjDesc.level = int(sjXml.@level);
-				sjDesc.name = sjXml.@name;
-				sjDesc.desc = sjXml.@desc;
-				sjDesc.weight = Number(sjXml.@weight);
-				sjDesc.wait = Number(sjXml.@wait);
-				sjDesc.extra = Number(sjXml.@extra);
-				if(sjXml.hasOwnProperty("@extra2"))
-				{
-					sjDesc.extra2 = Number(sjXml.@extra2);
-				}
-				if( sjXml.hasOwnProperty("@gold"))
-				{
-					sjDesc.gold = int(sjXml.@gold);
-				}
-				else
-				{
-					SKILLTYPE2MAXLEVEL[sjDesc.type]=sjDesc.level;
-				}
-				SKILL_DESC.push(sjDesc);
-			}
-			
-			for(i = 0; i < xml.sf.length(); i++)
-			{
-				var sfXml:XML = xml.sf[i];
-				var sfDesc:ShenFuDesc = new ShenFuDesc;
-				sfDesc.type = int(sfXml.@type);
-				sfDesc.level = int(sfXml.@level);
-				sfDesc.name = sfXml.@name;
-				sfDesc.desc = sfXml.@desc;
-				sfDesc.extra = Number(sfXml.@extra);
-				sfDesc.time = Number(sfXml.@time);
-				if( sfXml.hasOwnProperty("@gold"))
-				{
-					sfDesc.gold = int(sfXml.@gold);
-				}
-				else
-				{
-					SKILLTYPE2MAXLEVEL[sfDesc.type]=sfDesc.level;
-				}
-				SHENFU_DESC.push(sfDesc);
-			}
-			SkillConfig = null;
-			
+
 			xml = new XML(new NewBodyConfig);
 			for(i = 0; i < xml.box.length(); i++)
 			{
@@ -429,6 +91,19 @@ package data
 				BodyBox_DESC.push(boxDesc);
 			}
 			NewBodyConfig = null;
+			
+			var musiclist:Array = [BgMusic, BoomMusic];
+			for(i = 0; i < musiclist.length; i++)
+			{
+				var sp:SoundPlayer = new SoundPlayer(musiclist[i]);
+				_sounds.push(sp);
+			}
+		}
+		
+		private static var _sounds:Array = new Array;
+		public static function GetSoundPlayer(id:int):SoundPlayer
+		{
+			return  _sounds[id];
 		}
 		
 		public static var BodyBox_DESC:Vector.<BodyBoxDesc> = new Vector.<BodyBoxDesc>;
@@ -442,138 +117,20 @@ package data
 			return null;
 		}
 		
-		public static var SHENFU_DESC:Vector.<ShenFuDesc> = new Vector.<ShenFuDesc>;
-		public static function GetShenFuByTypeLevel(type:int, level:int):ShenFuDesc
-		{
-			for each(var sd:ShenFuDesc in SHENFU_DESC)
-			{
-				if(sd.type == type && sd.level == level)return sd;
-			}
-			return null;
-		}
-		
-		public static var SKILLTYPE2MAXLEVEL:Dictionary = new Dictionary;
-		public static var SKILL_DESC:Vector.<ShenJiangDesc> = new Vector.<ShenJiangDesc>;
-		public static function GetSkillDescByTypeLevel(type:int, level:int):ShenJiangDesc
-		{
-			for each(var sd:ShenJiangDesc in SKILL_DESC)
-			{
-				if(sd.type == type && sd.level == level)return sd;
-			}
-			return null;
-		}
-		
-		public static var HAODAO_GROUPS:Vector.<HaiDaoGroupDesc> = new Vector.<HaiDaoGroupDesc>;
-		public static function GetHaoDaoGroup(id:int):HaiDaoGroupDesc
-		{
-			for each(var sd:HaiDaoGroupDesc in HAODAO_GROUPS)
-			{
-				if(sd.id == id)return sd;
-			}
-			return null;
-		}
-		
-		public static var PAODAN_DESC:Vector.<PaoDanDesc> = new Vector.<PaoDanDesc>;
-		public static function GetPaoDanDesc(id:int):PaoDanDesc
-		{
-			for each(var sd:PaoDanDesc in PAODAN_DESC)
-			{
-				if(sd.id == id)return sd;
-			}
-			return null;
-		}
-		
-		public static function GetPaoDanBody(id:int):PaoDanBody
-		{
-			var pdDesc:PaoDanDesc = GetPaoDanDesc(id);
-			var mybody:PaoDanBody = new PaoDanBody(pdDesc);
-			mybody.paodan = GetAniBmpByName(pdDesc.animation);
-			mybody.effect = GetAniBmpByName(pdDesc.effect);
-			return mybody;
-		}
-		
-		public static var SHIP_DESC:Vector.<ShipDesc> = new Vector.<ShipDesc>;
-		public static function GetShipDesc(id:int):ShipDesc
-		{
-			for each(var sd:ShipDesc in SHIP_DESC)
-			{
-				if(sd.id == id)return sd;
-			}
-			return null;
-		}
-		
-		public static var SEAMAP_DESC:Vector.<MapDesc> = new Vector.<MapDesc>;
-		public static function GetSeaMapDesc(id:int):MapDesc
-		{
-			for each(var md:MapDesc in SEAMAP_DESC)
-			{
-				if(md.id == id)return md;
-			}
-			return null;
-		}
-		
-		public static function GetMapCityDesc(mapId:int, cityId:int):MapCityDesc
-		{
-			for each(var md:MapDesc in SEAMAP_DESC)
-			{
-				if(md.id == mapId)
-				{
-					for each(var mc:MapCityDesc in md.citys)
-					{
-						if(mc.id == cityId)return mc;
-					}
-				}
-			}
-			return null;
-		}
-		
-		public static function GetSeaMapGrid(mapId:int):Grid
-		{
-			var bd:BitmapData = GetBmpData("seaGrid" + mapId);
-			var grid:Grid = new Grid(bd.width, bd.height);
-			for(var i:int = 0; i < bd.width; i++)
-			{
-				for(var j:int = 0; j < bd.height; j++)
-				{
-					grid.setWalkable(i,j, bd.getPixel32(i,j)>>>24 == 0);
-				}
-			}
-			return grid;
-		}
-		
-		public static function GetBmpByCityId(cityId:int):Bitmap
-		{
-			return GetBmp("city1", false);
-		}
-		
 		public static function GetBmp(name:String, cache:Boolean = true):Bitmap
 		{
 			var bmp:Bitmap = new Bitmap(GetBmpData(name, cache));
 			return bmp;
 		}
 		
-		public static function GetShenFuPlayer(sf:ShenFuDesc):ShenFuPlayer
-		{
-			return new ShenFuPlayer(sf, GetBmpData2("skill" + sf.type));
-		}
-		public static function GetBmp2(name:String, cache:Boolean = true):Bitmap
-		{
-			var bmp:Bitmap = new Bitmap(GetBmpData2(name));
-			return bmp;
-		}
-		
-		public static const bmpClasses:Array = [skill1,skill2,skill3,skill4,skill5,skill6,skill7,skill8,skill9,skill10,skill11];
-		public static function GetBmpData2(name:String):BitmapData
-		{
-			var bd:BitmapData = BitmapDataPool.getBitmapData(getDefinitionByName("lsg.bmp." + name) as Class);
-			return bd;
-		}
-		
 		public static function GetBmpData(name:String, cache:Boolean = true):BitmapData
 		{
 			switch(name)
 			{
-				//mini
+				case "MiniBoom":
+					if(cache) bd = BitmapDataPool.getBitmapData(MiniBoom);
+					else bd = new MiniBoom;
+					break;
 				case "MiniCs":
 					if(cache) bd = BitmapDataPool.getBitmapData(MiniCs);
 					else bd = new MiniCs;
@@ -581,6 +138,10 @@ package data
 				case "MiniTk":
 					if(cache) bd = BitmapDataPool.getBitmapData(MiniTk);
 					else bd = new MiniTk;
+					break;
+				case "MiniTk3":
+					if(cache) bd = BitmapDataPool.getBitmapData(MiniTk);
+					else bd = new MiniTk3;
 					break;
 				case "jubaopen":
 					if(cache) bd = BitmapDataPool.getBitmapData(jubaopen);
@@ -594,18 +155,6 @@ package data
 					if(cache) bd = BitmapDataPool.getBitmapData(tongqian);
 					else bd = new tongqian;
 					break;
-				case "miniBest":
-					if(cache) var bd:BitmapData = BitmapDataPool.getBitmapData(miniBest);
-					else bd = new miniBest;
-					break;
-				case "miniGold":
-					if(cache) bd = BitmapDataPool.getBitmapData(miniGold);
-					else bd = new miniGold;
-					break;
-				case "zhuanshi":
-					if(cache) bd = BitmapDataPool.getBitmapData(zhuanshi);
-					else bd = new zhuanshi;
-					break;
 				case "zadan":
 					if(cache) bd = BitmapDataPool.getBitmapData(zadan);
 					else bd = new zadan;
@@ -614,17 +163,13 @@ package data
 					if(cache) bd = BitmapDataPool.getBitmapData(yuanbao);
 					else bd = new yuanbao;
 					break;
-				case "ready":
-					if(cache) bd = BitmapDataPool.getBitmapData(miniReady);
-					else bd = new miniReady;
-					break;
-				case "go":
-					if(cache) bd = BitmapDataPool.getBitmapData(miniGo);
-					else bd = new miniGo;
-					break;
 				case "zhujia":
 					if(cache) bd = BitmapDataPool.getBitmapData(zhujia);
 					else bd = new zhujia;
+					break;
+				case "shalou":
+					if(cache) var bd:BitmapData = BitmapDataPool.getBitmapData(shalou);
+					else bd = new shalou;
 					break;
 				//
 			}
@@ -689,161 +234,5 @@ package data
 		}
 		
 		public static var ERROR_DIC:Dictionary = new Dictionary;
-		public static var DAOJU_DESC:Vector.<DaoJuDesc> = new Vector.<DaoJuDesc>;
-		public static function GetBaoShiName(baoshi:int):String
-		{
-			for each(var bs:DaoJuDesc in DAOJU_DESC)
-			{
-				if(bs.type == EnumDaoJuType.BaoShi && bs.bs == baoshi)return bs.name;
-			}
-			return "无镶嵌";
-		}
-		
-		public static function GetDaoJuDesc(itemId:int):DaoJuDesc
-		{
-			for each(var bs:DaoJuDesc in DAOJU_DESC)
-			{
-				if(bs.itemId == itemId)return bs;
-			}
-			return null;
-		}
-		
-		public static function GetDaoJuIcon(itemId:int):Bitmap
-		{
-			switch(itemId)
-			{
-				case 1:
-					var bd:BitmapData = BitmapDataPool.getBitmapData(DaojuIcon1);
-					break;
-				case 2:
-					bd = BitmapDataPool.getBitmapData(DaojuIcon2);
-					break;
-				case 3:
-					bd = BitmapDataPool.getBitmapData(DaojuIcon3);
-					break;
-				case 4:
-					bd = BitmapDataPool.getBitmapData(DaojuIcon4);
-					break;
-				
-			}
-			var bmp:Bitmap = new Bitmap(bd);
-			return bmp;
-		}
-		
-		public static var ROLE_DESC:Vector.<RoleDesc> = new Vector.<RoleDesc>;
-		public static function GetRoleDesc(id:int):RoleDesc
-		{
-			for each(var bs:RoleDesc in ROLE_DESC)
-			{
-				if(bs.id == id)return bs;
-			}
-			return null;
-		}
-		
-		public static var BULLET_DESC:Vector.<RoleBulletDesc> = new Vector.<RoleBulletDesc>;
-		public static var TUZHI_DESC:Vector.<TuZhiDesc> = new Vector.<TuZhiDesc>;
-		public static function GetTuZhiDescById(id:int):TuZhiDesc
-		{
-			for each(var bs:TuZhiDesc in TUZHI_DESC)
-			{
-				if(bs.id == id)return bs;
-			}
-			return null;
-		}
-		
-		public static function GetBulletDesc(id:int):RoleBulletDesc
-		{
-			for each(var bs:RoleBulletDesc in BULLET_DESC)
-			{
-				if(bs.id == id)return bs;
-			}
-			return null;
-		}
-		
-		public static function GetNormalBulletByTuzhiBaoShi(tzId:int, baoshi:int):RoleBulletDesc
-		{
-			for each(var bs:RoleBulletDesc in BULLET_DESC)
-			{
-				if(bs.isNormal && bs.tuzhi.id == tzId && bs.baoshi == baoshi)return bs;
-			}
-			return null;
-		}
-		
-		public static function GetMapBmd(id:int):BitmapData
-		{
-			var bd:BitmapData = new bg1;
-			return bd;
-		}
-		
-		public static function GetMapPreview(id:int):BitmapData
-		{
-			var bd:BitmapData = new preview1;
-			return bd;
-		}
-		
-		public static function GetBulletIcon(bid:int):Bitmap
-		{
-			switch(bid)
-			{
-				case 1:
-					var bd:BitmapData = BitmapDataPool.getBitmapData(Icon1);
-					break;
-				case 2:
-					bd = BitmapDataPool.getBitmapData(Icon2);
-					break;
-				case 3:
-					bd = BitmapDataPool.getBitmapData(Icon3);
-					break;
-				case 4:
-					bd = BitmapDataPool.getBitmapData(Icon4);
-					break;
-				
-			}
-			var bmp:Bitmap = new Bitmap(bd);
-			return bmp;
-		}
-		
-		public static function GetBulletMcSprite(id:int):McSprite
-		{
-			switch(id)
-			{
-				case 1:
-				{
-					var bd:BitmapData = new b1;
-					break;
-				}
-				case 2:
-				{
-					bd = new b2;
-					break;
-				}
-			}
-			var bmp:Bitmap = new Bitmap(bd);
-			bmp.x = -bmp.width*0.5;
-			bmp.y = -bmp.height*0.5;
-			var mcBmp:McSprite = new McSprite;
-			mcBmp.addChild(bmp);
-			return mcBmp;
-		}
-		
-		public static function GetRoleAniPlayer(role:int):AnimationPlayer
-		{			
-			return GetAniPlayerByName("role1");
-		}
-		
-		public static function GetShipBodyPlayer(id:int):ShipPlayer
-		{
-			var sd:ShipDesc = GetShipDesc(id);
-			var bp:ShipPlayer = new ShipPlayer();
-			bp.bodyDesc = sd;
-			var animations:Vector.<Animation> = GetAnimationsByBmpName(sd.animation);
-			var aniDescs:Array = BMPNAME2ANIDESCS[sd.animation];
-			for(var i:int = 0; i<animations.length; i++)
-			{
-				bp.addAnimation(aniDescs[i].name, animations[i]);
-			}
-			return bp;
-		}
-		
 	}
 }

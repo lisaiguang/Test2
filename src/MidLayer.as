@@ -73,26 +73,26 @@ package
 			_dicObj[cls] = obj;
 			MidLayer.DisableMouse(obj.zhezhao);
 			
-			var view:DisplayObject;
+			var v:DisplayObject;
 			if(obj.params)
 			{
 				var params:Array = obj.params;
 				switch(params.length)
 				{
 					case 0:
-						view = new cls();
+						v = new cls();
 						break;
 					case 1:
-						view = new cls(params[0]);
+						v = new cls(params[0]);
 						break;
 					case 2:
-						view = new cls(params[0],params[1]);
+						v = new cls(params[0],params[1]);
 						break;
 					case 3:
-						view = new cls(params[0],params[1],params[2]);
+						v = new cls(params[0],params[1],params[2]);
 						break;
 					case 4:
-						view = new cls(params[0],params[1],params[2],params[3]);
+						v = new cls(params[0],params[1],params[2],params[3]);
 						break;
 					default:
 						throw new Error("params: can't support more than 4 params");
@@ -100,15 +100,15 @@ package
 			}
 			else
 			{
-				view = new cls();
+				v = new cls();
 			}
 			
-			_layer.addChild(view);
-			_dic[cls] = view;
+			_layer.addChild(v);
+			_dic[cls] = v;
 			
-			if("autoInit" in view)
+			if("autoInit" in v)
 			{
-				view["autoInit"]();
+				v["autoInit"]();
 			}
 		}
 		
@@ -116,8 +116,8 @@ package
 		{
 			if(HasWindow(cls))
 			{
-				var view:DisplayObject = _dic[cls];
-				_layer.removeChild(view);
+				var v:DisplayObject = _dic[cls];
+				_layer.removeChild(v);
 				delete _dic[cls];
 				
 				var obj:Object = _dicObj[cls];

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>Test2</name>
+	<name>CaiShenDao</name>
 	<comment></comment>
 	<projects>
 	</projects>
@@ -52,11 +52,6 @@
 			<name>[source path] hires.as3-master-src</name>
 			<type>2</type>
 			<location>/Users/saiguangli/Documents/tools/hires.as3-master/src</location>
-		</link>
-		<link>
-			<name>[source path] starling-src</name>
-			<type>2</type>
-			<location>/Users/saiguangli/Documents/tools/Starling-Framework/starling/src</location>
 		</link>
 	</linkedResources>
 </projectDescription>

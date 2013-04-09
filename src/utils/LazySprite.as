@@ -26,7 +26,7 @@ package utils
 		
 		private function onRemoveFromStage(event:Event):void
 		{
-			removeEventListener(Event.REMOVED_FROM_STAGE, onAdd2Stage);
+			removeEventListener(Event.REMOVED_FROM_STAGE, onRemoveFromStage);
 			if(sigs)
 			{
 				for(var i:int = 0; i < sigs.length; i++)

@@ -1,132 +1,53 @@
 <root>
+	<bmp name="MiniBoom">
+		<a name="effect" fps="24" width="200" height="200" count="14"
+			startX="0" startY="0" loop="0" offsetX="0" offsetY="0" />
+	</bmp>
 	<bmp name="MiniCs">
-		<a name="yuanbao" fps="8" width="279" height="270" count="3" startX="0"
+		<a name="yuanbao" fps="8" width="279" height="270" count="3" startX="558"
 			startY="0" />
-		<a name="ready" fps="8" width="279" height="270" count="3" startX="0"
+		<a name="ready" fps="8" width="279" height="270" count="2" startX="0"
 			startY="0" />
 	</bmp>
 	<bmp name="MiniTk">
-		<a name="effect" fps="6" width="640" height="260" count="2" startX="0"
-			startY="0" offsetX="0" offsetY="0"/>
+		<a name="effect" fps="8" width="640" height="260" count="3" startX="0"
+			startY="0" offsetX="0" offsetY="0" />
 	</bmp>
-	<bmp name="zhuanshi">
-		<a name="effect" fps="24" width="120" height="100" count="12" startX="0"
-			startY="0" />
+	<bmp name="MiniTk3">
+		<a name="effect" fps="8" width="640" height="260" count="3" startX="0"
+			startY="0" offsetX="0" offsetY="0" />
 	</bmp>
 	<bmp name="zadan">
-		<a name="effect" fps="24" width="180" height="160" count="11" startX="0"
-			startY="0" />
+		<a name="effect" fps="24" width="180" height="160" count="11"
+			startX="0" startY="0" />
 	</bmp>
 	<bmp name="yuanbao">
-		<a name="effect" fps="24" width="120" height="100" count="12" startX="0"
-			startY="0" />
+		<a name="effect" fps="24" width="120" height="100" count="12"
+			startX="0" startY="0" />
 	</bmp>
 	<bmp name="tongqian">
-		<a name="effect" fps="24" width="120" height="100" count="12" startX="0"
-			startY="0" />
+		<a name="effect" fps="24" width="120" height="100" count="12"
+			startX="0" startY="0" />
 	</bmp>
 	<bmp name="yinzi">
-		<a name="effect" fps="24" width="120" height="100" count="12" startX="0"
-			startY="0" />
+		<a name="effect" fps="24" width="120" height="100" count="12"
+			startX="0" startY="0" />
 	</bmp>
 	<bmp name="jubaopen">
-		<a name="effect" fps="24" width="84" height="60" count="1" startX="0"
-			startY="0" />
+		<a name="effect" fps="24" width="180" height="180" count="12"
+			startX="0" startY="0" />
 	</bmp>
-	
+	<bmp name="shalou">
+		<a name="effect" fps="24" width="130" height="118" count="12"
+			startX="0" startY="0" />
+	</bmp>
+
 	<bmp name="zhujia">
-		<a name="ready" fps="12" width="221" height="224" count="1" startX="0"
+		<a name="move" fps="1" width="238" height="224" count="1" startX="0"
 			startY="0" />
-		<a name="move" fps="12" width="221" height="224" count="1" startX="0"
+		<a name="ready" fps="1" width="238" height="224" count="1" startX="0"
 			startY="0" />
-	</bmp>
-	<bmp name="anchor">
-		<a name="effect" fps="12" width="34" height="34" count="1" startX="0"
+		<a name="zha" fps="1" width="238" height="224" count="1" startX="476"
 			startY="0" />
-	</bmp>
-	<bmp name="entry">
-		<a name="effect" fps="12" width="42" height="42" count="1" startX="0"
-			startY="0" />
-	</bmp>
-	<bmp name="target">
-		<a name="effect" fps="12" width="96" height="96" count="7" startX="0"
-			startY="0" offsetY="-106" />
-	</bmp>
-	<bmp name="land1">
-		<a name="effect" fps="12" width="320" height="320" count="1" startX="0"
-			startY="0" offsetX="0" offsetY="0" />
-	</bmp>
-	<bmp name="sea1">
-		<a name="effect" fps="6" width="320" height="320" count="3" startX="0"
-			startY="0" offsetX="0" offsetY="0" />
-	</bmp>
-
-	<bmp name="ship1">
-		<a name="up" width="165" height="160" count="4" startX="0" startY="480"
-			offsetY="-100" />
-		<a name="down" width="165" height="160" count="4" startX="0" startY="0"
-			offsetY="-120" />
-		<a name="left" width="165" height="160" count="4" startX="0" startY="320"
-			offsetY="-120" />
-		<a name="right" width="165" height="160" count="4" startX="0"
-			startY="160" offsetY="-120" />
-	</bmp>
-	<bmp name="ship2">
-		<a name="up" width="127" height="135" count="4" startX="0" startY="405"
-			offsetY="-85" />
-		<a name="down" width="127" height="135" count="4" startX="0" startY="0"
-			offsetY="-100" />
-		<a name="left" width="127" height="135" count="4" startX="0" startY="270"
-			offsetY="-100" />
-		<a name="right" width="127" height="135" count="4" startX="0"
-			startY="135" offsetY="-100" />
-	</bmp>
-	<bmp name="ship3">
-		<a name="up" width="123" height="104" count="4" startX="0" startY="312"
-			offsetY="-60" />
-		<a name="down" width="123" height="104" count="4" startX="0" startY="0"
-			offsetY="-75" />
-		<a name="left" width="123" height="104" count="4" startX="0" startY="208"
-			offsetY="-75" />
-		<a name="right" width="123" height="104" count="4" startX="0"
-			startY="104" offsetY="-75" />
-	</bmp>
-
-	<bmp name="bullet1">
-		<a name="effect" fps="12" width="20" height="10" count="1" startX="0"
-			startY="0" rotation="360" />
-	</bmp>
-	<bmp name="bullet2">
-		<a name="effect" fps="12" width="20" height="10" count="1" startX="0"
-			startY="0" rotation="360" />
-	</bmp>
-
-	<bmp name="effect1">
-		<a name="effect" fps="24" width="72" height="72" count="5" startX="0"
-			startY="0" loop="0" />
-	</bmp>
-	<bmp name="effect2">
-		<a name="effect" fps="24" width="72" height="72" count="5" startX="0"
-			startY="0" loop="0" />
-	</bmp>
-
-	<bmp name="bosaidong">
-		<a name="effect" fps="24" width="192" height="343" count="4" startX="0"
-			startY="0" loop="0" />
-	</bmp>
-	<bmp name="xuanwofengbao">
-		<a name="effect" fps="1" width="362" height="362" count="1" startX="0"
-			startY="0" />
-	</bmp>
-	<bmp name="bingheshiji">
-		<a name="effect" fps="3" width="362" height="362" count="1" startX="0"
-			startY="0" loop="0" />
-	</bmp>
-
-	<bmp name="role1">
-		<a name="role_moving" width="32" height="64" count="4" startX="0"
-			startY="0" />
-		<a name="role_waiting" width="32" height="64" count="4" startX="0"
-			startY="64" />
 	</bmp>
 </root>

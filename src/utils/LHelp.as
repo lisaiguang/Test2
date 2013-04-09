@@ -7,15 +7,6 @@ package utils
 	import flash.filters.ColorMatrixFilter;
 	import flash.filters.GlowFilter;
 	import flash.utils.getTimer;
-	
-	import data.staticObj.OldBodyDesc;
-	import data.staticObj.EnumBodyType;
-	
-	import nape.shape.Circle;
-	import nape.shape.Polygon;
-	import nape.shape.Shape;
-	
-	import starling.utils.Color;
 
 	public class LHelp
 	{
@@ -26,7 +17,7 @@ package utils
 		
 		public static function AddGlow(dis:DisplayObject):void
 		{
-			var gf:GlowFilter = new GlowFilter(Color.BLUE);
+			var gf:GlowFilter = new GlowFilter(0x0000ff);
 			dis.filters = [gf];
 		}
 		
@@ -107,20 +98,6 @@ package utils
 			var el:int = getTimer() - _ts;
 			if(el >= _tsShelf)
 			trace(prex, el, "ms");
-		}
-		
-		public static function GetShape(bs:OldBodyDesc):Shape
-		{
-			var shape:Shape = null;
-			if(bs.type == EnumBodyType.CIRCLE)
-			{
-				shape = new Circle(bs.raidus);
-			}
-			else if(bs.type == EnumBodyType.RECT)
-			{
-				shape = new Polygon(Polygon.box(bs.width, bs.height, true));
-			}
-			return shape;
 		}
 		
 		public static function GetRectBmp(w:Number, h:Number, color=0x0):Bitmap

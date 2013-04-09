@@ -5,5 +5,7 @@
 	<box id="4" width="62" height="62" name="zhuanshi"/>
 	<box id="5" width="62" height="62" name="tongqian"/>
 	<box id="6" width="82" height="47" name="yinzi"/>
-	<box id="7" width="82" height="60" name="jubaopen"/>
+	<box id="7" width="82" height="82" name="jubaopen"/>
+	<box id="8" width="72" height="72" name="shalou"/>
+	<box id="9" width="72" height="72" name="huangdi"/>
 </root>

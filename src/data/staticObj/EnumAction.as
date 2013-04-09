@@ -11,8 +11,11 @@ package data.staticObj
 		public static const SHIP_RIGHT:String = "right";
 		
 		public static const EFFECT:String = "effect";
+		public static const STOP:String = "stop";
 		
-		public static const CS_READY:String = "ready";
-		public static const CS_YB:String = "yuanbao";
+		public static const READY:String = "ready";
+		public static const REN_YUAN_BAO:String = "yuanbao";
+		public static const ZHA:String = "zha";
+		public static const MOVE:String = "move";
 	}
 }
