@@ -30,8 +30,10 @@ package data
 	
 	public class StaticTable
 	{
-		public static var STAGE_WIDTH:int  = 640;
-		public static var STAGE_HEIGHT:int = 960;
+		public static var STAGE_WIDTH:uint  = 640;
+		public static var STAGE_HEIGHT:uint = 960;
+		public static var SCALE_X:Number  = 1;
+		public static var SCALE_Y:Number = 1;
 
 		[Embed(source = "../../assets/config/error.xml", mimeType="application/octet-stream")]
 		private static var ErrorConfig:Class;

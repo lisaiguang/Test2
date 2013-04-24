@@ -1,7 +1,6 @@
 package view.caishen
 {
 	import com.greensock.TweenLite;
-	import com.greensock.easing.Back;
 	import com.urbansquall.ginger.AnimationBmp;
 	
 	import flash.display.Bitmap;
@@ -18,10 +17,11 @@ package view.caishen
 	import data.MiniBuffer;
 	import data.MiniSingals;
 	import data.StaticTable;
+	import data.message.ActiveReq;
+	import data.message.PauseReq;
 	import data.staticObj.BodyBoxDesc;
 	import data.staticObj.EnumAction;
 	import data.staticObj.EnumBody;
-	import data.staticObj.EnumMusic;
 	
 	import lsg.BtnBack;
 	import lsg.BtnPause;
@@ -36,8 +36,6 @@ package view.caishen
 	import lsg.bmp.miniGold;
 	import lsg.bmp.miniGoldBg;
 	import lsg.bmp.miniReady;
-	
-	import message.PauseReq;
 	
 	import nape.callbacks.CbEvent;
 	import nape.callbacks.CbType;
@@ -134,22 +132,37 @@ package view.caishen
 		}
 		
 		public const _isDebug:Boolean = false;
-		
 		private var _ybWaitBodys:Vector.<Body> = new Vector.<Body>;
 		private var _baowuIds:Array = [EnumBody.TONGQIAN, EnumBody.YINZI, EnumBody.YUANBAO];
-		private var _zdWaitBodys:Vector.<Body> = new Vector.<Body>;
+		private var _zdWaitBodys:Vector.<Body> = new Vector.<Body>, _jbBody:Body, _slBody:Body;
 		private var _djRates:Array;
 		private var _djIds:Array = [EnumBody.ZHADAN, EnumBody.JUBAOPEN, EnumBody.SHALOU];
-		private var _jubaopengIntevBegin:Number, _jubaopengImpulseBegin:Number; 
 		public function CaiShenView()
 		{
-			_djRates = [0.0,0.1,0.35];
-			_jubaopengIntev = _jubaopengIntevBegin = 80;
-			_jubaopengImpluse = _jubaopengImpulseBegin = 350;
+			_djRates = [0.0,0.09,0.35];
+			_jubaopengIntev = 0;
+			_jubaopengImpluse = 700;
 			
 			for(var i:int = 0; i < 28; i++)
 			{
 				var id:int = _baowuIds[i % _baowuIds.length];
+				var yb:Body = createBody(id);
+				_ybWaitBodys.push(yb);
+			}
+			
+			for(i = 0; i < 12; i++)
+			{
+				yb = createBody(EnumBody.ZHADAN);
+				_zdWaitBodys.push(yb);
+			}
+			
+			_jbBody=createBody(EnumBody.JUBAOPEN);
+			_jbBody.userData.isUniq=true;
+			_slBody=createBody(EnumBody.SHALOU);
+			_slBody.userData.isUniq=true;
+			
+			function createBody(id:int):Body
+			{
 				var ybDesc:BodyBoxDesc = StaticTable.GetBodyBoxDescById(id);
 				var ybAni:AnimationBmp = StaticTable.GetAniBmpByName(ybDesc.name);
 				
@@ -165,28 +178,8 @@ package view.caishen
 				yb.userData.occur = false;
 				yb.userData.animation = ybAni;
 				yb.userData.desc = ybDesc;
-				_ybWaitBodys.push(yb);
-			}
-			
-			for(i = 0; i < 12; i++)
-			{
-				id = EnumBody.ZHADAN;
-				ybDesc = StaticTable.GetBodyBoxDescById(id);
-				ybAni = StaticTable.GetAniBmpByName(ybDesc.name);
 				
-				poly = new Polygon(Polygon.box(ybDesc.width, ybDesc.height, true));
-				poly.filter.collisionGroup = GROUP_YUANBAO;
-				poly.filter.collisionMask = ~(GROUP_YUANBAO);
-				
-				yb = new Body(BodyType.DYNAMIC);
-				yb.allowRotation = false;
-				yb.shapes.add(poly);
-				yb.cbTypes.add(YUANBAOS);
-				yb.userData.isDel = false;
-				yb.userData.occur = false;
-				yb.userData.animation = ybAni;
-				yb.userData.desc = ybDesc;
-				_zdWaitBodys.push(yb);
+				return yb;
 			}
 		}
 		
@@ -204,6 +197,16 @@ package view.caishen
 				addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
 			}
 			listen(MiniSingals.OnPauseReq, OnPauseReq);
+			listen(MiniSingals.OnActiveReq, OnActiveReq);
+		}
+		
+		private function OnActiveReq(ar:ActiveReq):void
+		{
+			if(!_btnPlay.parent)
+			{
+				MidLayer.CloseWindow(CaiShenView);
+				MidLayer.ShowWindow(MiniMainMenuView);
+			}
 		}
 		
 		override protected function destoryed():void
@@ -227,28 +230,25 @@ package view.caishen
 		private function InitAcc():void
 		{
 			acc = new Accelerometer();
-			acc.setRequestedUpdateInterval(50);
+			acc.setRequestedUpdateInterval(45);
 			acc.addEventListener(AccelerometerEvent.UPDATE, onAccUpdate);
 		}
 		
 		private var _lastAccX:Number = 0;
-		private const FACTOR:Number = 0.3;
+		private const FACTOR:Number = 0.27;
 		private function onAccUpdate(e:AccelerometerEvent):void
 		{
 			var ax:Number = (e.accelerationX * FACTOR) + (_lastAccX * (1 - FACTOR)); 
-			if(Math.abs(ax - _lastAccX) > .004 && !_isMove)
-			{
-				_target.x = StaticTable.STAGE_WIDTH * .5 - ax * StaticTable.STAGE_WIDTH * .5 * 4;
-				if(_target.x < 0)_target.x = 0;
-				if(_target.x > StaticTable.STAGE_WIDTH)_target.x = StaticTable.STAGE_WIDTH;
-				_lastAccX = ax;
-			}
+			_target.x = StaticTable.STAGE_WIDTH * .5 - ax * StaticTable.STAGE_WIDTH * .5 * 4;
+			if(_target.x < 0)_target.x = 0;
+			if(_target.x > StaticTable.STAGE_WIDTH)_target.x = StaticTable.STAGE_WIDTH;
+			_lastAccX = ax;
 		}
 		
 		protected function onMouseUp(event:MouseEvent):void
 		{
 			_isMove = false;
-			_target.x = event.stageX;
+			_target.x = event.stageX / StaticTable.SCALE_X;
 			removeEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
 			removeEventListener(MouseEvent.MOUSE_UP, onMouseUp);
 		}
@@ -256,7 +256,7 @@ package view.caishen
 		protected function onMouseMove(event:MouseEvent):void
 		{
 			if(_isMove)
-				_target.x = event.stageX;
+				_target.x = event.stageX / StaticTable.SCALE_X;
 		}
 		
 		private var _isMove:Boolean = false;
@@ -266,7 +266,7 @@ package view.caishen
 			if(!target)
 			{
 				_isMove= true;
-				_target.x = event.stageX;
+				_target.x = event.stageX / StaticTable.SCALE_X;
 				addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
 				addEventListener(MouseEvent.MOUSE_UP, onMouseUp);
 			}
@@ -404,7 +404,7 @@ package view.caishen
 			_boomAni.play(EnumAction.EFFECT);
 		}
 		
-		protected function onBtnBack(event:MouseEvent):void
+		protected function onBtnBack(event:MouseEvent = null):void
 		{
 			MidLayer.CloseWindow(CaiShenView);
 			MidLayer.ShowWindow(MiniMainMenuView);
@@ -498,7 +498,7 @@ package view.caishen
 		private function createBorder():void
 		{
 			var border:Body = new Body(BodyType.STATIC);
-			border.shapes.add(new Polygon(Polygon.rect(-2500, StaticTable.STAGE_HEIGHT + BORDER_PADDING, StaticTable.STAGE_WIDTH + 5000, 1)));
+			border.shapes.add(new Polygon(Polygon.rect(-5500, StaticTable.STAGE_HEIGHT + BORDER_PADDING, StaticTable.STAGE_WIDTH + 11000, 1)));
 			border.space = _space;
 			border.cbTypes.add(BORDER);
 		}
@@ -521,7 +521,7 @@ package view.caishen
 			renderUI();
 		}
 		
-		private var _logicLevelIntev:int = 7000, _logicLevelTimer:int = 0, _logicMaxLevel:int = 48, _logicCurLevel:int;
+		private var _logicLevelIntev:int = 7000, _logicLevelTimer:int = 0, _logicMaxLevel:int = 50, _logicCurLevel:int;
 		private function logicAction():void
 		{
 			_logicLevelTimer += CaiShenDao.ELAPSED;
@@ -530,8 +530,7 @@ package view.caishen
 				_logicLevelTimer = 0;
 				_logicCurLevel++;
 				_djRates[0] += 0.01;
-				_csUpdateXsBegin += 0.01;
-				if(_csUpdateXs < _csUpdateXsBegin)_csUpdateXs=_csUpdateXsBegin;
+				_csUpdateXs += 0.01;
 			}
 		}
 		
@@ -539,8 +538,8 @@ package view.caishen
 		private var YUANBAOS:CbType = new CbType;
 		private var _ybs:Vector.<Body> = new Vector.<Body>, _lastCsFrameIndex:int=0;
 		private var _ybMaxCount:Number = 5, _ybCurCount:int, _ybThrowMax:int = 1;
-		private var _jubaopengTimer:int, _jubaopengMaxTime:int=10000, _jubaopengIntev:int, _jubaopengIntevTimer:int, _jubaopengImpluse:Number = 500;
-		private var _jubaopengCurCount:int, _jubaopengCurMaxCount:int = 1, _slCurCount:int, _slCurMaxCount:int = 0;
+		private var _jubaopengTimer:int, _jubaopengMaxTime:int=int.MAX_VALUE, _jubaopengIntev:int, _jubaopengIntevTimer:int, _jubaopengImpluse:Number = 500;
+		private var _jubaopengCurCount:int, _jubaopengCurMaxCount:int = 1, _slCurCount:int, _slCurMaxCount:int = 1;
 		private var _djAngs:Number = 0; 
 		private const MIN_ANG:Number = .04 * Math.PI;
 		private function ybAction():void
@@ -551,9 +550,7 @@ package view.caishen
 				if(_jubaopengTimer<=0)
 				{
 					_jubaopengTimer=0;
-					_csUpdateXs =_csUpdateXsBegin;
-					_jubaopengIntev = _jubaopengIntevBegin;
-					_jubaopengImpluse = _jubaopengImpulseBegin;
+					_csUpdateXsMulti=1;
 				}
 				else
 				{
@@ -597,9 +594,9 @@ package view.caishen
 						}
 						else if(_djIds[i] == EnumBody.ZHADAN)
 						{
-							if(_csUpdateXs > _csUpdateXsBegin)
+							if(_jubaopengTimer>0)
 							{
-								rand += _djRates[i] * .9;
+								rand += _djRates[i]*.85;
 							}
 						}
 						
@@ -710,7 +707,7 @@ package view.caishen
 						
 						_myRole.space = null;
 						_jubaopengTimer = 0;
-						_csUpdateXs = 1;
+						_csUpdateXsMulti=_csUpdateXs = 1;
 						_canMove = false;
 						
 						_myRoleAni.play(EnumAction.ZHA);
@@ -725,14 +722,7 @@ package view.caishen
 					else if(ybDesc.id == EnumBody.JUBAOPEN)
 					{
 						_jubaopengTimer = _jubaopengMaxTime;
-						_slCurMaxCount = 1;
-					}
-					else if(ybDesc.id == EnumBody.SHALOU)
-					{
-						_csUpdateXs = _csUpdateXsBegin * 1.67;
-						_jubaopengIntev = _jubaopengIntevBegin / 2;
-						_jubaopengImpluse = _jubaopengImpulseBegin * 2;
-						_slCurMaxCount = 0;
+						_csUpdateXsMulti = 1.56;
 					}
 				}
 				
@@ -749,14 +739,19 @@ package view.caishen
 					}
 					else if(ybDesc.id == EnumBody.SHALOU)
 					{
-						_slCurCount --;
+						_slCurCount--;
+						if(!yb.userData.occur)
+						{
+							_jubaopengTimer=1;
+						}
 					}
 					
-					if(!yb.userData.isDaoJu)
+					yb.userData.isDel = false;
+					yb.userData.occur = false;
+					yb.velocity.setxy(0,0);
+					
+					if(!yb.userData.isUniq)
 					{
-						yb.userData.isDel = false;
-						yb.userData.occur = false;
-						yb.velocity.setxy(0,0);
 						if(ybDesc.id == EnumBody.ZHADAN)
 						{
 							_zdWaitBodys.unshift(yb);
@@ -790,15 +785,25 @@ package view.caishen
 			if(MiniBuffer.model == 0) 
 			{
 				MiniBuffer.cookies.data.bestFinger = _bestScore;
+				CONFIG::ios
+				{
 				CaiShenDao.GcController.submitScore(_bestScore, "3");
+				}
 			}
 			else if(MiniBuffer.model == 1) 
 			{
 				MiniBuffer.cookies.data.bestTiGan = _bestScore;
+				CONFIG::ios
+					{
 				CaiShenDao.GcController.submitScore(_bestScore, "2");
+					}
 			}
+			
 			MiniBuffer.cookies.data.fuhao += _curScore;
+			CONFIG::ios
+				{
 			CaiShenDao.GcController.submitScore(MiniBuffer.cookies.data.fuhao, "1");
+				}
 			MiniBuffer.cookies.flush();
 		}
 		
@@ -806,28 +811,19 @@ package view.caishen
 		{
 			if(id == EnumBody.ZHADAN)
 			{
-				yb = _zdWaitBodys.pop();
+				var yb:Body = _zdWaitBodys.pop();
 				yb.position.setxy(px,py);
 				yb.space = _space;
 			}
-			else
+			else if(id==EnumBody.JUBAOPEN)
 			{
-				var ybDesc:BodyBoxDesc = StaticTable.GetBodyBoxDescById(id);
-				var ybAni:AnimationBmp = StaticTable.GetAniBmpByName(ybDesc.name);
-				
-				var poly:Polygon = new Polygon(Polygon.box(ybDesc.width, ybDesc.height, true));
-				poly.filter.collisionGroup = GROUP_YUANBAO;
-				poly.filter.collisionMask = ~(GROUP_YUANBAO);
-				
-				var yb:Body = new Body(BodyType.DYNAMIC);
-				yb.allowRotation = false;
-				yb.shapes.add(poly);
-				yb.cbTypes.add(YUANBAOS);
-				yb.userData.isDel = false;
-				yb.userData.occur = false;
-				yb.userData.isDaoJu = true;
-				yb.userData.animation = ybAni;
-				yb.userData.desc = ybDesc;
+				yb=_jbBody;
+				yb.space = _space;
+				yb.position.setxy(px, py);
+			}
+			else if(id==EnumBody.SHALOU)
+			{
+				yb=_slBody;
 				yb.space = _space;
 				yb.position.setxy(px, py);
 			}
@@ -867,11 +863,11 @@ package view.caishen
 		
 		private var _curScore:int, _curChanged:Boolean;
 		private var _bestScore:int;
-		private var _csUpdateXs:Number = 1, _csUpdateXsBegin:Number = 1;
+		private var _csUpdateXs:Number = 1, _csUpdateXsMulti:Number = 1;
 		private function renderUI():void
 		{
-			_cs.update(CaiShenDao.ELAPSED * _csUpdateXs);
-			_tk.update(CaiShenDao.ELAPSED * _csUpdateXs);
+			_cs.update(CaiShenDao.ELAPSED * _csUpdateXs * _csUpdateXsMulti);
+			_tk.update(CaiShenDao.ELAPSED * _csUpdateXs * _csUpdateXsMulti);
 			
 			if(_isDebug)
 			{
@@ -885,7 +881,7 @@ package view.caishen
 				if(!_boomAni.isPlaying())
 				{
 					_boomAni.parent.removeChild(_boomAni);
-					MidLayer.ShowWindow(CaiShenFinishView);
+					MidLayer.ShowWindowObj(CaiShenFinishView, {params:[_curScore]});
 				}
 				_boomAni.update(CaiShenDao.ELAPSED);
 			}

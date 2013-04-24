@@ -5,6 +5,7 @@ package
 	import flash.display.Sprite;
 	import flash.events.Event;
 	import flash.utils.Dictionary;
+	import flash.utils.getTimer;
 	
 	public class MidLayer extends Sprite
 	{
@@ -13,12 +14,12 @@ package
 		public function MidLayer()
 		{
 			super();
-			this.addEventListener(Event.ADDED_TO_STAGE, onAddToStage);
+			addEventListener(Event.ADDED_TO_STAGE, onAddToStage);
 		}
 		
 		protected function onAddToStage(event:Event):void
 		{
-			this.removeEventListener(Event.ADDED_TO_STAGE, onAddToStage);
+			removeEventListener(Event.ADDED_TO_STAGE, onAddToStage);
 			_layer = this;
 		}
 		

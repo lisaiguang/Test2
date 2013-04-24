@@ -14,7 +14,7 @@ package data
 			if(!cookies.data.bestTiGan)cookies.data.bestTiGan=0;
 			if(!cookies.data.fuhao)cookies.data.fuhao=0;
 			if(!cookies.data.yaoba)cookies.data.yaoba=0;
-			if(!cookies.data.purchased)cookies.data.purchased=true;
+			if(cookies.data.purchased)cookies.data.purchased=false;
 		}
 	}
 }

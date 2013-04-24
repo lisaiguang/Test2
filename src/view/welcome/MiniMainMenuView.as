@@ -21,19 +21,22 @@ package view.welcome
 	
 	import music.SoundPlayer;
 	
+	import view.caishen.CaiShenShakeView;
 	import view.caishen.CaiShenView;
-	import view.more.GouMaiVeiw;
 	import view.more.GuanYuView;
 	import view.paihang.PaiHangView;
 	
 	public class MiniMainMenuView extends MiniMainMenuUI
 	{
-		private var _mainbtns:Array;
-		private var _newgamebtns:Array, _morebtns:Array;
+		private var _mainbtns:Array, _newgamebtns:Array;
 		private var _lightAni:AnimationBmp, _anis:Vector.<AnimationBmp>;
 		private var _sp:SoundPlayer, _btnoff:BtnMusicOff, _btnon:BtnMusicOn;
+		private var _isInit:Boolean;
 		public function MiniMainMenuView(isInit:Boolean = false)
 		{
+			_isInit = isInit;
+			if(_isInit)_waitSeconds = 2500;
+			
 			var bg:Bitmap = new Bitmap(new MainMenuBg);
 			addChildAt(bg, 0);
 			
@@ -48,8 +51,7 @@ package view.welcome
 			addChildAt(title, 3);
 			
 			_mainbtns = [btnNewGame, btnPaiHang, btnMore];
-			_newgamebtns = [btnFinger, btnTiGan];
-			_morebtns = [btnGY, btnYao];
+			_newgamebtns = [btnFinger, btnTiGan, btnYao];
 			for(var i:int = 0; i < _mainbtns.length; i++)
 			{
 				var d:DisplayObject = _mainbtns[i];
@@ -62,25 +64,9 @@ package view.welcome
 			btnFinger.addEventListener(MouseEvent.CLICK, onFingerClick);
 			btnTiGan.addEventListener(MouseEvent.CLICK, onTiGanClick);
 			btnPaiHang.addEventListener(MouseEvent.CLICK, onPaiHang);
-			btnMore.addEventListener(MouseEvent.CLICK, onMore);
+			btnMore.addEventListener(MouseEvent.CLICK, onGY);
 			btnYao.addEventListener(MouseEvent.CLICK, onYao);
-			btnGY.addEventListener(MouseEvent.CLICK, onGY);
-			
-			addEventListener(Event.ENTER_FRAME, onFrameIn);
-			addEventListener(Event.REMOVED_FROM_STAGE, onRemoveFromStage);
-			
-			if(isInit)
-			{
-				_anis=new Vector.<AnimationBmp>;
-				var aniNames:Array = ["MiniBoom", "jubaopen", "shalou"];
-				for(i = 0; i < aniNames.length; i++)
-				{
-					var ani:AnimationBmp = StaticTable.GetAniBmpByName(aniNames[i]);
-					addChildAt(ani, 0);
-					_anis.push(ani);
-				}
-			}
-			
+
 			_btnoff=new BtnMusicOff;
 			_btnoff.x=StaticTable.STAGE_WIDTH - _btnoff.width;
 			_btnoff.addEventListener(MouseEvent.CLICK, onMusicOff);
@@ -98,6 +84,9 @@ package view.welcome
 				addChild(_btnoff);
 				if(_sp.isPlaying)_sp.stop();
 			}
+			
+			addEventListener(Event.REMOVED_FROM_STAGE, onRemoveFromStage);
+			addEventListener(Event.ENTER_FRAME, onFrameIn);
 		}
 		
 		protected function onMusicOn(event:MouseEvent):void
@@ -123,22 +112,12 @@ package view.welcome
 			MidLayer.ShowWindow(GuanYuView);
 		}
 		
-		protected function onYao(event:MouseEvent):void
-		{
-			MidLayer.ShowWindow(GouMaiVeiw);
-		}
-		
 		protected function onMore(event:MouseEvent):void
 		{
 			for(var i:int = 0; i < _mainbtns.length; i++)
 			{
 				var d:DisplayObject = _mainbtns[i];
 				TweenLite.to(d, 0.5, {delay:i*Delay, x:-d.width, y:d.y});
-			}
-			for(i = 0; i < _morebtns.length; i++)
-			{
-				d = _morebtns[i];
-				TweenLite.to(d, 0.5, {delay:i*Delay, x:(StaticTable.STAGE_WIDTH-d.width)*.5, y:d.y});
 			}
 			TweenLite.delayedCall(.5 + i*Delay, returnVisible);
 		}
@@ -155,17 +134,31 @@ package view.welcome
 			removeEventListener(Event.ENTER_FRAME, onFrameIn);
 		}
 		
-		
+		private var _waitSeconds:int;
 		protected function onFrameIn(event:Event):void
 		{
-			_lightAni.update(CaiShenDao.ELAPSED);
-			if(_anis)
+			if(_waitSeconds<=0)
 			{
-				for(var i:int = 0;i < _anis.length; i++)
+				_lightAni.update(CaiShenDao.ELAPSED);
+				if(_anis)
 				{
-					_anis[i].update(CaiShenDao.ELAPSED);
+					for(var i:int = 0;i < _anis.length; i++)
+					{
+						_anis[i].update(CaiShenDao.ELAPSED);
+					}
 				}
 			}
+			else
+			{
+				_waitSeconds -= CaiShenDao.ELAPSED;
+			}
+		}
+		
+		protected function onYao(event:MouseEvent):void
+		{
+			MiniBuffer.model = 2;
+			MidLayer.CloseWindow(MiniMainMenuView);
+			MidLayer.ShowWindow(CaiShenShakeView);
 		}
 		
 		protected function onTiGanClick(event:MouseEvent):void
@@ -191,13 +184,6 @@ package view.welcome
 				var d:DisplayObject = _newgamebtns[i];
 				TweenLite.to(d, 0.5, {delay:i*Delay, x:StaticTable.STAGE_WIDTH});
 			}
-			
-			for(i = 0; i < _morebtns.length; i++)
-			{
-				d = _morebtns[i];
-				TweenLite.to(d, 0.5, {delay:i*Delay, x:StaticTable.STAGE_WIDTH});
-			}
-			
 			for(i = 0; i < _mainbtns.length; i++)
 			{
 				d = _mainbtns[i];
@@ -213,12 +199,6 @@ package view.welcome
 			for(var i:int = 0; i < _newgamebtns.length; i++)
 			{
 				var d:DisplayObject = _newgamebtns[i];
-				d.x = StaticTable.STAGE_WIDTH;
-			}
-			
-			for(i = 0; i < _morebtns.length; i++)
-			{
-				d = _morebtns[i];
 				d.x = StaticTable.STAGE_WIDTH;
 			}
 			
